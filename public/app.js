@@ -262,11 +262,12 @@ function setupPixelGridBackground() {
     }
     
     function getRandomColor() {
+        const isDark = document.body.classList.contains('dark-theme');
         const colors = [
             'rgba(128, 82, 255, ', // Electric Iris
             'rgba(255, 184, 41, ', // Saffron Spark
             'rgba(21, 132, 110, ', // Deep Emerald
-            'rgba(255, 255, 255, ' // Pure White
+            isDark ? 'rgba(255, 255, 255, ' : 'rgba(29, 28, 22, ' // White or Charcoal
         ];
         return colors[Math.floor(Math.random() * colors.length)];
     }
@@ -295,7 +296,8 @@ function setupPixelGridBackground() {
                 
                 if (dist < maxDist) {
                     const alpha = (1.0 - (dist / maxDist)) * 0.12;
-                    ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
+                    const isDark = document.body.classList.contains('dark-theme');
+                    ctx.strokeStyle = isDark ? `rgba(255, 255, 255, ${alpha})` : `rgba(29, 28, 22, ${alpha * 0.45})`;
                     ctx.beginPath();
                     ctx.moveTo(p1.x, p1.y);
                     ctx.lineTo(p2.x, p2.y);
@@ -2728,7 +2730,8 @@ function setup3DGlobe() {
     }
 
     function getRandomBrandColor() {
-        const colors = ['#8052ff', '#ffb829', '#15846e', '#ffffff'];
+        const isDark = document.body.classList.contains('dark-theme');
+        const colors = ['#8052ff', '#ffb829', '#15846e', isDark ? '#ffffff' : '#1d1c16'];
         return colors[Math.floor(Math.random() * colors.length)];
     }
 

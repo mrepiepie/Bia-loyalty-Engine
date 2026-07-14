@@ -6332,3 +6332,132 @@ body:not(.dark-theme) .hero-subtitle {
     color: #ffffff !important;
 }
 
+/* ==========================================================================
+   ADDITIONAL LIGHT THEME CONTRAST & VISIBILITY OVERRIDES
+   ========================================================================== */
+
+/* 1. Header Navigation Tabs in Light Mode */
+body:not(.dark-theme) .nav-links .nav-tab {
+    color: var(--text-muted) !important;
+}
+body:not(.dark-theme) .nav-links .nav-tab:hover {
+    color: var(--text-main) !important;
+    background: rgba(0, 0, 0, 0.04) !important;
+}
+body:not(.dark-theme) .nav-links .nav-tab.active {
+    background: #ffffff !important;
+    color: var(--primary) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06) !important;
+    border: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+/* 2. All tables (leads, ledger, users) font colors & cells */
+body:not(.dark-theme) .ledger-table td {
+    color: var(--text-muted) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+body:not(.dark-theme) .ledger-table td strong {
+    color: var(--text-main) !important;
+}
+body:not(.dark-theme) .ledger-table td span {
+    color: var(--text-muted) !important;
+}
+body:not(.dark-theme) .ledger-table td .no-data {
+    color: var(--text-tertiary) !important;
+}
+
+/* 3. Sliding announcements drawer & public cards in light mode */
+body:not(.dark-theme) .public-ann-card {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.03) !important;
+}
+body:not(.dark-theme) .public-ann-content h5 {
+    color: var(--text-main) !important;
+}
+body:not(.dark-theme) .public-ann-content p {
+    color: var(--text-muted) !important;
+}
+body:not(.dark-theme) .public-ann-date {
+    color: var(--text-tertiary) !important;
+}
+
+/* 4. Voucher cards (coupon vouchers) styling */
+body:not(.dark-theme) .db-voucher-card {
+    background: #ffffff !important;
+    border: 1px dashed rgba(0, 0, 0, 0.12) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03) !important;
+}
+body:not(.dark-theme) .db-voucher-card:hover {
+    background: #fcfbfa !important;
+    border-color: var(--primary) !important;
+}
+body:not(.dark-theme) .db-voucher-amount {
+    color: var(--text-main) !important;
+}
+body:not(.dark-theme) .db-voucher-points {
+    color: var(--text-muted) !important;
+}
+body:not(.dark-theme) .db-voucher-date {
+    color: var(--text-tertiary) !important;
+}
+body:not(.dark-theme) .db-voucher-code-row {
+    background: rgba(0, 0, 0, 0.03) !important;
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+}
+body:not(.dark-theme) .db-voucher-code-row span {
+    color: var(--text-main) !important;
+}
+
+/* 5. Reward catalog cards & titles */
+body:not(.dark-theme) .reward-catalog-card {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03) !important;
+}
+body:not(.dark-theme) .reward-card-title {
+    color: var(--text-main) !important;
+}
+body:not(.dark-theme) .reward-card-cash {
+    color: var(--text-muted) !important;
+}
+body:not(.dark-theme) .reward-card-btn {
+    border: 1px solid var(--primary) !important;
+    background: rgba(var(--primary-rgb), 0.05) !important;
+    color: var(--primary) !important;
+}
+body:not(.dark-theme) .reward-card-btn:hover {
+    background: var(--primary) !important;
+    color: #ffffff !important;
+}
+
+/* 6. Student Dashboard Points circle & quick stat pills */
+body:not(.dark-theme) .points-medal-outer {
+    background: radial-gradient(circle, rgba(var(--primary-rgb), 0.25) 0%, transparent 80%) !important;
+    border-color: rgba(var(--primary-rgb), 0.35) !important;
+}
+body:not(.dark-theme) .points-medal-inner {
+    background: #ffffff !important;
+    border-color: var(--primary) !important;
+    box-shadow: 0 4px 15px rgba(var(--primary-rgb), 0.15) !important;
+}
+body:not(.dark-theme) .points-count {
+    color: var(--text-main) !important;
+}
+body:not(.dark-theme) .points-lbl {
+    color: var(--text-muted) !important;
+}
+body:not(.dark-theme) .quick-stat-pill {
+    background: rgba(0, 0, 0, 0.03) !important;
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+    color: var(--text-muted) !important;
+}
+body:not(.dark-theme) .quick-stat-pill strong {
+    color: var(--text-main) !important;
+}
+body:not(.dark-theme) .clickable-pill:hover {
+    background: rgba(0, 0, 0, 0.05) !important;
+    border-color: rgba(0, 0, 0, 0.12) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03) !important;
+}
+
