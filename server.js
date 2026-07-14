@@ -36,11 +36,18 @@ app.use(async (req, res, next) => {
     next();
 });
 
-// Initialize SQLite database
-const db = new sqlite3.Database(':memory:', (err) => {
+// Ensure data directory exists
+const dbDir = path.join(__dirname, 'data');
+if (!fs.existsSync(dbDir)) {
+    fs.mkdirSync(dbDir, { recursive: true });
+}
+
+// Initialize SQLite database (persisted to file-based database)
+const dbPath = path.join(dbDir, 'loyalty.db');
+const db = new sqlite3.Database(dbPath, (err) => {
     if (err) console.error('Error opening DB:', err.message);
     else {
-        console.log('Connected to the in-memory SQLite database.');
+        console.log(`Connected to the persisted SQLite database at ${dbPath}`);
         initializeDatabase();
     }
 });
