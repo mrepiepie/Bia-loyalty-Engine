@@ -6271,8 +6271,9 @@ body:not(.dark-theme) .bia-footer-container span,
 body:not(.dark-theme) .bia-footer-container a {
     color: #efece3 !important;
 }
-body:not(.dark-theme) .bia-footer-container .footer-col-title {
-    color: rgba(255, 255, 255, 0.45) !important;
+body:not(.dark-theme) .bia-footer-container .footer-col h4 {
+    color: #ffffff !important;
+    opacity: 0.95 !important;
 }
 body:not(.dark-theme) .bia-footer-container .app-promo-text {
     color: rgba(255, 255, 255, 0.85) !important;

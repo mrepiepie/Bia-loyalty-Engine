@@ -1846,7 +1846,7 @@ async function loadAdminVoucherReport() {
         tbody.innerHTML = allVouchers.map(v => `
             <tr>
                 <td style="font-family:'Outfit'; font-size:0.8rem; color:#dfb15b; font-weight:700;">${v.voucher_code || '—'}</td>
-                <td><strong style="color:#fff;">${v.studentName}</strong></td>
+                <td><strong class="clickable-student-name" onclick="showStudentDetailModal(${v.user_id})" style="color: var(--text-main); cursor: pointer; text-decoration: underline;">${v.studentName}</strong></td>
                 <td style="color:#4ade80; font-weight:700;">${v.discount_aed || 0} AED</td>
                 <td style="font-family:'Outfit';">${formatNumber(v.points_deducted || 0)} pts</td>
                 <td><span style="font-size:0.7rem; padding:0.2rem 0.5rem; border-radius:4px; background:${v.status === 'Used' ? 'rgba(74,222,128,0.1)' : 'rgba(255,255,255,0.05)'}; border:1px solid ${v.status === 'Used' ? 'rgba(74,222,128,0.2)' : 'rgba(255,255,255,0.1)'}; color:${v.status === 'Used' ? '#4ade80' : 'rgba(255,255,255,0.5)'}; font-weight:700;">${v.status || 'Unused'}</span></td>
@@ -2037,7 +2037,7 @@ async function loadAdminLedger() {
 
             tr.innerHTML = `
                 <td>${cleanDate(entry.created_at)}</td>
-                <td><strong>${entry.user_name}</strong></td>
+                <td><strong class="clickable-student-name" onclick="showStudentDetailModal(${entry.user_id})" style="color: var(--text-main); cursor: pointer; text-decoration: underline;">${entry.user_name}</strong></td>
                 <td>${entry.description}</td>
                 <td class="${ptsClass}">${ptsSign}</td>
                 <td>${cleanDate(entry.expires_at)}</td>
@@ -4063,7 +4063,7 @@ window.loadAdminLeads = async function() {
             return `
                 <tr>
                     <td style="font-size: 0.72rem; color: rgba(255,255,255,0.6);">${dateStr}</td>
-                    <td><strong style="color: #fff;">${l.student_name}</strong></td>
+                    <td><strong class="clickable-student-name" onclick="showStudentDetailModal(${l.user_id})" style="color: var(--text-main); cursor: pointer; text-decoration: underline;">${l.student_name}</strong></td>
                     <td style="font-size: 0.72rem; color: rgba(255,255,255,0.6);">${l.student_id}<br><span style="color: rgba(255, 255, 255, 0.4);">${l.student_email}</span></td>
                     <td style="font-size: 0.76rem; color: #dfb15b; font-weight: 600;">${l.details}</td>
                     <td><span class="badge ${statusClass}">${l.status.toUpperCase()}</span></td>

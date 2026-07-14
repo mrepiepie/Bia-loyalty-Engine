@@ -234,6 +234,13 @@ async function logTraffic(userId, ip, activity, ua) {
         const timestamp = new Date().toISOString();
         await runQuery(`INSERT INTO traffic_logs (user_id, ip_address, activity, user_agent, created_at) VALUES (?, ?, ?, ?, ?)`,
             [userId || null, ip || '127.0.0.1', activity, ua || 'Unknown', timestamp]);
+        
+        // Log separately to a file on disk
+        const logFilePath = path.join(dbDir, 'activity.log');
+        const logLine = `[${timestamp}] UserID: ${userId || 'Anonymous'} | IP: ${ip || '127.0.0.1'} | Activity: ${activity} | UA: ${ua || 'Unknown'}\n`;
+        fs.appendFile(logFilePath, logLine, (err) => {
+            if (err) console.error('Failed to write to activity.log:', err);
+        });
     } catch (err) {
         console.error('Failed to log traffic:', err);
     }
