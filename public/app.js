@@ -237,7 +237,7 @@ function setupPixelGridBackground() {
     const ctx = canvas.getContext('2d');
     
     const particles = [];
-    const numParticles = 240; // Increased particle density to fill up empty space
+    const numParticles = 80; // Optimized density to prevent CPU stutter
     
     function resize() {
         canvas.width = window.innerWidth;
@@ -291,10 +291,14 @@ function setupPixelGridBackground() {
             for (let j = i + 1; j < particles.length; j++) {
                 const p1 = particles[i];
                 const p2 = particles[j];
-                const dist = Math.hypot(p1.x - p2.x, p1.y - p2.y);
+                const dx = p1.x - p2.x;
+                const dy = p1.y - p2.y;
+                const distSq = dx * dx + dy * dy;
                 const maxDist = 95; // Connection threshold
+                const maxDistSq = maxDist * maxDist;
                 
-                if (dist < maxDist) {
+                if (distSq < maxDistSq) {
+                    const dist = Math.sqrt(distSq);
                     const alpha = (1.0 - (dist / maxDist)) * 0.12;
                     const isDark = document.body.classList.contains('dark-theme');
                     ctx.strokeStyle = isDark ? `rgba(255, 255, 255, ${alpha})` : `rgba(29, 28, 22, ${alpha * 0.45})`;
@@ -449,107 +453,25 @@ function setupMagneticButtons() {
 // ----------------------------------------------------
 function playIntroPreloader() {
     const loader = document.getElementById('loader-screen');
-    const percentEl = document.getElementById('loader-percent');
     const loginOverlay = document.getElementById('login-overlay');
     
-    if (!loader) {
-        if (loginOverlay) {
-            loginOverlay.style.display = 'block';
-            loginOverlay.style.opacity = '1';
-            document.body.classList.add('landing-active');
-            if (typeof animateLandingText === 'function') {
-                animateLandingText();
-            }
-        }
-        return;
+    if (loader) {
+        loader.remove();
     }
     
-    let count = 0;
-    const duration = 1200; // 1.2s count up
-    const stepTime = Math.floor(duration / 100);
-    
-    const timer = setInterval(() => {
-        count++;
-        if (count >= 100) {
-            count = 100;
-            clearInterval(timer);
-            
-            // Exit animation
-            if (window.gsap) {
-                const tl = gsap.timeline({
-                    onComplete: () => {
-                        loader.remove();
-                        // Crucial: Recalculate GSAP ScrollTrigger bounds once container is visible
-                        if (typeof ScrollTrigger !== 'undefined') {
-                            ScrollTrigger.refresh();
-                        }
-                    }
-                });
-                
-                // Fade out loader content
-                tl.to(".loader-content", {
-                    opacity: 0,
-                    scale: 0.95,
-                    duration: 0.35,
-                    ease: "power2.in"
-                });
-                
-                // Fade out loader screen
-                tl.to(loader, {
-                    opacity: 0,
-                    duration: 0.5,
-                    ease: "power2.inOut"
-                }, "-=0.15");
-                
-                // Fade in main page
-                if (loginOverlay) {
-                    loginOverlay.style.display = 'block';
-                    document.body.classList.add('landing-active');
-                    tl.fromTo(loginOverlay, 
-                        { opacity: 0 }, 
-                        { 
-                            opacity: 1, 
-                            duration: 0.6, 
-                            ease: "power2.out",
-                            onComplete: () => {
-                                if (typeof animateLandingText === 'function') {
-                                    animateLandingText();
-                                }
-                            }
-                        }, 
-                        "-=0.3"
-                    );
-                }
-            } else {
-                // Vanilla fallback
-                const content = loader.querySelector('.loader-content');
-                if (content) content.style.opacity = '0';
-                setTimeout(() => {
-                    loader.style.transition = 'opacity 0.5s ease';
-                    loader.style.opacity = '0';
-                    setTimeout(() => {
-                        loader.remove();
-                        if (loginOverlay) {
-                            loginOverlay.style.display = 'flex';
-                            loginOverlay.style.opacity = '1';
-                            document.body.classList.add('landing-active');
-                            if (typeof ScrollTrigger !== 'undefined') {
-                                ScrollTrigger.refresh();
-                            }
-                            if (typeof animateLandingText === 'function') {
-                                animateLandingText();
-                            }
-                        }
-                    }, 500);
-                }, 200);
-            }
+    if (loginOverlay) {
+        loginOverlay.style.display = 'block';
+        loginOverlay.style.opacity = '1';
+        document.body.classList.add('landing-active');
+        if (typeof animateLandingText === 'function') {
+            animateLandingText();
         }
-        
-        if (percentEl) {
-            percentEl.textContent = count.toString().padStart(2, '0');
+        if (typeof ScrollTrigger !== 'undefined') {
+            ScrollTrigger.refresh();
         }
-    }, stepTime);
+    }
 }
+
 
 // ----------------------------------------------------
 // REAL-TIME LOYALTY ENGINE LIVE FEED SIMULATOR
@@ -6289,4 +6211,17 @@ window.loadAdminMetrics = async function() {
 };
 
 bootApplication();
+
+// Lazy load video backdrop after window finishes loading to prevent browser spinner hang
+window.addEventListener('load', () => {
+    const video = document.getElementById('bg-video');
+    if (video) {
+        const source = video.querySelector('source');
+        if (source && source.getAttribute('data-src')) {
+            source.setAttribute('src', source.getAttribute('data-src'));
+            video.load();
+            video.play().catch(err => console.log('Autoplay deferred:', err));
+        }
+    }
+});
 
