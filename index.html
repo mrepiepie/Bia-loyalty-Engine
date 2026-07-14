@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BIA Loyalty Engine Simulator</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Background elements -->
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header animate-fade-in">
+            <div class="header-logo">
+                <span class="logo-accent">BIA</span>
+                <span class="logo-text">Loyalty Engine</span>
+                <span class="badge-subdomain">loyalty.bradfordia.com</span>
+            </div>
+            <div class="header-tag">
+                <i class="fa-solid fa-bolt"></i> Shukran-Style Tier System Mockup
+            </div>
+        </header>
+
+        <!-- Main Content Grid -->
+        <main class="dashboard-grid">
+            
+            <!-- LEFT COLUMN: User Card, Tier Info & Milestone Rewards -->
+            <div class="column left-col animate-slide-up" style="animation-delay: 0.1s;">
+                <!-- Wallet & Profile Card -->
+                <div class="card profile-card glassmorphic">
+                    <div class="profile-header">
+                        <div class="avatar">
+                            <i class="fa-solid fa-graduation-cap"></i>
+                        </div>
+                        <div class="profile-info">
+                            <h3>Sarah Al-Mansoori</h3>
+                            <span class="student-id">BIA-2024-9042</span>
+                        </div>
+                        <div id="user-tier-badge" class="tier-badge bronze">
+                            <i class="fa-solid fa-award"></i> <span id="tier-name">Bronze</span>
+                        </div>
+                    </div>
+
+                    <div class="wallet-stats">
+                        <div class="stat-box">
+                            <span class="stat-label">Points Balance</span>
+                            <span class="stat-val" id="points-balance">1,000</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-label">Cash Value (AED)</span>
+                            <span class="stat-val cash-val" id="cash-value">AED 250</span>
+                        </div>
+                    </div>
+
+                    <div class="tier-progress-section">
+                        <div class="progress-info">
+                            <span>Tier Progress: <strong id="referral-count">1</strong> / 15 Referrals</span>
+                            <span id="next-tier-target">Next: Silver</span>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="tier-progress-bar" style="width: 6.6%;"></div>
+                        </div>
+                        <p class="progress-help-text" id="progress-help">Refer 2 more friends to unlock Silver Tier!</p>
+                    </div>
+                </div>
+
+                <!-- Tiers Showcase Card -->
+                <div class="card tiers-card glassmorphic">
+                    <h3><i class="fa-solid fa-layer-group"></i> Shukran-Style Loyalty Tiers</h3>
+                    <div class="tiers-list">
+                        <div class="tier-item active" id="tier-bronze-card">
+                            <div class="tier-item-header">
+                                <span class="badge bronze"><i class="fa-solid fa-medal"></i> Bronze (Classic)</span>
+                                <span class="multiplier">1.0x Rate</span>
+                            </div>
+                            <p>Default level. 30% Course Fee redemption cap.</p>
+                        </div>
+                        <div class="tier-item" id="tier-silver-card">
+                            <div class="tier-item-header">
+                                <span class="badge silver"><i class="fa-solid fa-medal"></i> Silver</span>
+                                <span class="multiplier">1.1x Rate</span>
+                            </div>
+                            <p>Unlocked at 3 Referrals. 35% Course Fee redemption cap.</p>
+                        </div>
+                        <div class="tier-item" id="tier-gold-card">
+                            <div class="tier-item-header">
+                                <span class="badge gold"><i class="fa-solid fa-medal"></i> Gold</span>
+                                <span class="multiplier">1.2x Rate</span>
+                            </div>
+                            <p>Unlocked at 5 Referrals. 40% Course Fee redemption cap. AED 250 Voucher.</p>
+                        </div>
+                        <div class="tier-item" id="tier-platinum-card">
+                            <div class="tier-item-header">
+                                <span class="badge platinum"><i class="fa-solid fa-gem"></i> Platinum (Elite)</span>
+                                <span class="multiplier">1.3x Rate</span>
+                            </div>
+                            <p>Unlocked at 15 Referrals in a year. 40% Cap. VIP Gala Invite.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Milestone Rewards Card -->
+                <div class="card milestones-card glassmorphic">
+                    <h3><i class="fa-solid fa-gift"></i> Milestone Rewards Status</h3>
+                    <div class="milestones-grid">
+                        <div class="milestone-box" id="milestone-5">
+                            <div class="milestone-icon">
+                                <i class="fa-solid fa-ticket-simple"></i>
+                            </div>
+                            <h4>5 Referrals</h4>
+                            <p>AED 250 Voucher</p>
+                            <span class="status-tag locked" id="m5-status">Locked</span>
+                        </div>
+                        <div class="milestone-box" id="milestone-10">
+                            <div class="milestone-icon">
+                                <i class="fa-solid fa-book-open"></i>
+                            </div>
+                            <h4>10 Referrals</h4>
+                            <p>Free Short Course</p>
+                            <span class="status-tag locked" id="m10-status">Locked</span>
+                        </div>
+                        <div class="milestone-box" id="milestone-15">
+                            <div class="milestone-icon">
+                                <i class="fa-solid fa-crown"></i>
+                            </div>
+                            <h4>15 Referrals</h4>
+                            <p>Elite VIP status</p>
+                            <span class="status-tag locked" id="m15-status">Locked</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN: Action Simulators & Points Ledger -->
+            <div class="column right-col animate-slide-up" style="animation-delay: 0.2s;">
+                
+                <!-- Referral Simulator Form -->
+                <div class="card form-card glassmorphic">
+                    <h3><i class="fa-solid fa-user-plus"></i> Simulate a Successful Referral</h3>
+                    <p class="section-desc">Add a referred student's details. Points are awarded once enrollment and first payment are verified.</p>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="ref-name">Referred Student Name</label>
+                            <input type="text" id="ref-name" placeholder="e.g. John Doe">
+                        </div>
+                        <div class="form-group">
+                            <label for="ref-program">Enrolled Program</label>
+                            <select id="ref-program">
+                                <option value="bachelor" data-bonus="0">Bachelor's Degree Program (Base)</option>
+                                <option value="mba" data-bonus="100">MBA Program (+100 Bonus)</option>
+                                <option value="dba" data-bonus="100">DBA Program (+100 Bonus)</option>
+                                <option value="doctorate" data-bonus="100">Professional Doctorate (+100 Bonus)</option>
+                                <option value="short" data-bonus="0">Short Professional Course (Base)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="ref-activity">Or Log Activity</label>
+                            <select id="ref-activity">
+                                <option value="">-- Or Select SkillShare/Other Activity --</option>
+                                <option value="skillshare_easy" data-points="100">Complete SkillShare Beginner Course (+100 pts)</option>
+                                <option value="skillshare_med" data-points="200">Complete SkillShare Advanced Course (+200 pts)</option>
+                                <option value="workshop" data-points="150">Attend BIA Seminar/Workshop (+150 pts)</option>
+                            </select>
+                        </div>
+                        <div class="form-group flex-bottom">
+                            <button class="btn btn-primary" id="btn-submit-referral">
+                                <i class="fa-solid fa-circle-check"></i> Process Earn Event
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Course Redemption Simulator -->
+                <div class="card form-card glassmorphic">
+                    <h3><i class="fa-solid fa-cash-register"></i> Course Fee Redemption Calculator</h3>
+                    <p class="section-desc">Apply points to see how much AED discount can be claimed based on the maximum redemption cap.</p>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="course-fee">Course Fee (AED)</label>
+                            <input type="number" id="course-fee" value="10000" min="500">
+                        </div>
+                        <div class="form-group">
+                            <label for="points-to-redeem">Points to Redeem</label>
+                            <input type="number" id="points-to-redeem" value="1000" min="0" step="100">
+                        </div>
+                        <div class="form-group flex-bottom-double">
+                            <button class="btn btn-secondary" id="btn-calculate-discount">
+                                <i class="fa-solid fa-calculator"></i> Calculate Redemption
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="redemption-results-box" id="redemption-results" style="display: none;">
+                        <div class="result-row">
+                            <span>Maximum Allowed Discount Cap (<span id="cap-percent-label">30%</span>):</span>
+                            <strong id="max-discount-val">AED 3,000</strong>
+                        </div>
+                        <div class="result-row">
+                            <span>Points applied:</span>
+                            <strong id="points-applied-val">1,000 pts</strong>
+                        </div>
+                        <div class="result-row accent-row">
+                            <span>Net discount achieved:</span>
+                            <strong class="text-emerald" id="net-discount-val">AED 250</strong>
+                        </div>
+                        <div class="result-row final-row">
+                            <span>Final Payable Course Fee:</span>
+                            <strong class="text-gold" id="final-payable-val">AED 9,750</strong>
+                        </div>
+                        <div class="result-action">
+                            <button class="btn btn-success btn-sm" id="btn-confirm-redemption">
+                                <i class="fa-solid fa-credit-card"></i> Confirm & Deduct Points
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Points Ledger (Logs) -->
+                <div class="card ledger-card glassmorphic">
+                    <div class="ledger-header">
+                        <h3><i class="fa-solid fa-clock-rotate-left"></i> Points Transaction Ledger</h3>
+                        <button class="btn-text" id="btn-clear-ledger"><i class="fa-solid fa-trash-can"></i> Reset Sim</button>
+                    </div>
+                    <div class="ledger-table-wrapper">
+                        <table class="ledger-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Event / Description</th>
+                                    <th>Ref</th>
+                                    <th>Points</th>
+                                    <th>Expires At</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ledger-body">
+                                <!-- Dynamic Content -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>
