@@ -37,8 +37,9 @@ app.use(async (req, res, next) => {
 });
 
 // Ensure data directory exists
-const dbDir = path.join(__dirname, 'data');
-if (!fs.existsSync(dbDir)) {
+const isVercel = process.env.VERCEL || process.env.NOW_BUILDER;
+const dbDir = isVercel ? '/tmp' : path.join(__dirname, 'data');
+if (!isVercel && !fs.existsSync(dbDir)) {
     fs.mkdirSync(dbDir, { recursive: true });
 }
 
