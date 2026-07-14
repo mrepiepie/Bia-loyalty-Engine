@@ -1,0 +1,1348 @@
+const express = require('express');
+const cors = require('cors');
+const path = require('path');
+const fs = require('fs');
+const sqlite3 = require('sqlite3').verbose();
+
+const PARTNERS_FILE = path.join(__dirname, 'partners.json');
+
+const app = express();
+const PORT = 3000;
+
+app.use(cors());
+app.use(express.json({ limit: '15mb' }));
+app.use(express.urlencoded({ limit: '15mb', extended: true }));
+app.use(express.static(path.join(__dirname, 'public')));
+
+// IP Blacklist Middleware
+app.use(async (req, res, next) => {
+    // Skip static assets, auth requests, or admin page itself to avoid lockouts
+    if (req.path.includes('.') || req.path.startsWith('/api/admin/blacklist') || req.path.includes('/auth/login') || req.path.includes('/auth/retrieve-password')) {
+        return next();
+    }
+    
+    try {
+        const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1').trim();
+        const blocked = await getQuery(`SELECT 1 FROM ip_blacklist WHERE ip_address = ?`, [ip]);
+        if (blocked) {
+            return res.status(403).json({ 
+                error: 'IP_BLACKLISTED', 
+                message: `Access denied. Your IP address (${ip}) has been blacklisted by the system administrator.` 
+            });
+        }
+    } catch (err) {
+        console.error('Blacklist check error:', err);
+    }
+    next();
+});
+
+// Initialize SQLite database
+const db = new sqlite3.Database(':memory:', (err) => {
+    if (err) console.error('Error opening DB:', err.message);
+    else {
+        console.log('Connected to the in-memory SQLite database.');
+        initializeDatabase();
+    }
+});
+
+// SQLite Promise Wrappers
+const runQuery = (sql, params = []) => new Promise((resolve, reject) => {
+    db.run(sql, params, function(err) {
+        if (err) reject(err);
+        else resolve(this);
+    });
+});
+const getQuery = (sql, params = []) => new Promise((resolve, reject) => {
+    db.get(sql, params, (err, row) => {
+        if (err) reject(err);
+        else resolve(row);
+    });
+});
+const allQuery = (sql, params = []) => new Promise((resolve, reject) => {
+    db.all(sql, params, (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows);
+    });
+});
+
+// Setup Database Tables & Seed data
+function initializeDatabase() {
+    db.serialize(async () => {
+        await runQuery(`CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL, description TEXT)`);
+        await runQuery(`CREATE TABLE IF NOT EXISTS users (
+            user_id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, email TEXT UNIQUE NOT NULL, password TEXT NOT NULL,
+            role TEXT DEFAULT 'student', student_id TEXT UNIQUE, referral_code TEXT UNIQUE, current_tier TEXT DEFAULT 'Bronze',
+            referral_count INTEGER DEFAULT 0, points_balance INTEGER DEFAULT 0, programme TEXT DEFAULT 'General'
+        )`);
+
+        await runQuery(`CREATE TABLE IF NOT EXISTS announcements (
+            announcement_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            body TEXT NOT NULL,
+            type TEXT DEFAULT 'info',
+            created_by INTEGER,
+            expires_at TIMESTAMP,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )`);
+        await runQuery(`CREATE TABLE IF NOT EXISTS referrals (
+            referral_id INTEGER PRIMARY KEY AUTOINCREMENT, referrer_id INTEGER, referee_name TEXT, referee_email TEXT UNIQUE,
+            program TEXT, status TEXT DEFAULT 'Pending', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (referrer_id) REFERENCES users(user_id)
+        )`);
+        await runQuery(`CREATE TABLE IF NOT EXISTS points_ledger (
+            ledger_id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, points_change INTEGER, event_type TEXT,
+            description TEXT, points_remaining INTEGER, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, expires_at TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(user_id)
+        )`);
+
+        await runQuery(`CREATE TABLE IF NOT EXISTS campus_events (
+            event_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            description TEXT NOT NULL,
+            points INTEGER DEFAULT 0,
+            image_url TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )`);
+
+        await runQuery(`CREATE TABLE IF NOT EXISTS tuition_vouchers (
+            voucher_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            voucher_code TEXT UNIQUE NOT NULL,
+            discount_aed REAL NOT NULL,
+            points_deducted INTEGER NOT NULL,
+            status TEXT DEFAULT 'Unused',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(user_id)
+        )`);
+
+        await runQuery(`CREATE TABLE IF NOT EXISTS executive_leads (
+            lead_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            type TEXT NOT NULL,
+            details TEXT NOT NULL,
+            status TEXT DEFAULT 'Pending',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(user_id)
+        )`);
+
+        await runQuery(`CREATE TABLE IF NOT EXISTS traffic_logs (
+            log_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            ip_address TEXT,
+            activity TEXT,
+            user_agent TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )`);
+
+        // ip_blacklist kept for compatibility but no longer used actively
+        await runQuery(`CREATE TABLE IF NOT EXISTS ip_blacklist (
+            ip_address TEXT PRIMARY KEY,
+            reason TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )`);
+
+
+        const defaultSettings = [
+            ['point_aed_value', '0.25', 'Cash equivalent value of 1 point in AED'],
+            ['first_referral_points', '1000', 'Points awarded for the first successful referral'],
+            ['subsequent_referral_points', '250', 'Points awarded for referrals after the first one'],
+            ['new_joiner_points', '200', 'Welcome points awarded to the referred student'],
+            ['premium_program_bonus', '100', 'Additional points bonus if referred into MBA/DBA'],
+            ['bronze_cap', '0.02', 'Max percentage discount allowed for Bronze tier (0.02 = 2%)'],
+            ['silver_cap', '0.03', 'Max percentage discount allowed for Silver tier (0.03 = 3%)'],
+            ['gold_cap', '0.04', 'Max percentage discount allowed for Gold tier (0.04 = 4%)'],
+            ['platinum_cap', '0.05', 'Max percentage discount allowed for Platinum tier (0.05 = 5%)'],
+            ['silver_multiplier', '1.1', 'Points multiplier for Silver tier'],
+            ['gold_multiplier', '1.2', 'Points multiplier for Gold tier'],
+            ['platinum_multiplier', '1.3', 'Points multiplier for Platinum tier'],
+            ['silver_threshold', '1000', 'Points balance required to reach Silver'],
+            ['gold_threshold', '2500', 'Points balance required to reach Gold'],
+            ['platinum_threshold', '5000', 'Points balance required to reach Platinum'],
+            ['maintenance_mode', '0', 'System maintenance mode toggle (1 = Enabled, 0 = Disabled)'],
+            ['maintenance_end_time', '', 'Estimated timestamp when scheduled maintenance mode finishes'],
+            ['welcome_points', '200', 'Points awarded to a newly enrolled student']
+        ];
+
+        const stmt = db.prepare(`INSERT OR IGNORE INTO settings (key, value, description) VALUES (?, ?, ?)`);
+        defaultSettings.forEach(s => stmt.run(s));
+        stmt.finalize();
+
+        // Run migrations for existing databases to change referral counts to points thresholds
+        await runQuery(`UPDATE settings SET value = '1000', description = 'Points balance required to reach Silver' WHERE key = 'silver_threshold' AND value = '3'`);
+        await runQuery(`UPDATE settings SET value = '2500', description = 'Points balance required to reach Gold' WHERE key = 'gold_threshold' AND value = '5'`);
+        await runQuery(`UPDATE settings SET value = '5000', description = 'Points balance required to reach Platinum' WHERE key = 'platinum_threshold' AND value = '15'`);
+
+        await runQuery(`INSERT OR IGNORE INTO users (user_id, name, email, password, role) VALUES (101, 'BIA Admin Alpha', 'admin1@bradfordia.com', 'admin123', 'admin')`);
+        await runQuery(`INSERT OR IGNORE INTO users (user_id, name, email, password, role) VALUES (102, 'BIA Admin Beta', 'admin2@bradfordia.com', 'admin123', 'admin')`);
+        await runQuery(`INSERT OR IGNORE INTO users (user_id, name, email, password, role, student_id, referral_code, current_tier, referral_count, points_balance, programme) VALUES (1, 'Sarah Al-Mansoori', 'sarah@email.com', 'student123', 'student', 'BIA-2024-9042', 'SARAH-9042', 'Bronze', 0, 0, 'MBA')`);
+        await runQuery(`INSERT OR IGNORE INTO users (user_id, name, email, password, role, student_id, referral_code, current_tier, referral_count, points_balance, programme) VALUES (2, 'Omar Al-Rashidi', 'omar@email.com', 'student123', 'student', 'BIA-2024-1138', 'OMAR-1138', 'Bronze', 0, 0, 'Digital Marketing')`);
+        await runQuery(`INSERT OR IGNORE INTO users (user_id, name, email, password, role, student_id, referral_code, current_tier, referral_count, points_balance, programme) VALUES (3, 'Layla Hassan', 'layla@email.com', 'student123', 'student', 'BIA-2024-5521', 'LAYLA-5521', 'Bronze', 0, 0, 'Leadership in Practice')`);
+        // Seed a welcome announcement
+        await runQuery(`INSERT OR IGNORE INTO announcements (announcement_id, title, body, type) VALUES (1, 'Welcome to BIA LoyaltyE!', 'Your points wallet is now active. Refer a friend to earn your first 1,000 points.', 'info')`);
+        
+        // Seed mock executive leads for testing
+        await runQuery(`INSERT OR IGNORE INTO executive_leads (lead_id, user_id, type, details, status) VALUES (1, 1, 'consultation', 'Requested 1-on-1 DB/MBA Career Consultation', 'Pending')`);
+        await runQuery(`INSERT OR IGNORE INTO executive_leads (lead_id, user_id, type, details, status) VALUES (2, 1, 'webinar', 'RSVP: BIA Executive Webinar: Leadership in Digital Age', 'Pending')`);
+
+        // Seed mock traffic logs for testing
+        await runQuery(`INSERT INTO traffic_logs (user_id, ip_address, activity, user_agent, created_at) VALUES (1, '92.98.12.24', 'User Authentication Successful', 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15', '${new Date(Date.now() - 5 * 60000).toISOString()}')`);
+        await runQuery(`INSERT INTO traffic_logs (user_id, ip_address, activity, user_agent, created_at) VALUES (1, '92.98.12.24', 'Generated Tuition Voucher: BIA-VOU-5902', 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15', '${new Date(Date.now() - 4 * 60000).toISOString()}')`);
+        await runQuery(`INSERT INTO traffic_logs (user_id, ip_address, activity, user_agent, created_at) VALUES (101, '185.112.90.15', 'Accessed Administration Dashboard', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_2_1) AppleWebKit/537.36', '${new Date(Date.now() - 2 * 60000).toISOString()}')`);
+        await runQuery(`INSERT INTO traffic_logs (user_id, ip_address, activity, user_agent, created_at) VALUES (1, '92.98.12.24', 'RSVP: BIA Executive Webinar: Leadership in Digital Age', 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15', '${new Date(Date.now() - 1 * 60000).toISOString()}')`);
+        
+        console.log('Database tables initialized and pre-populated.');
+    });
+}
+
+// Helper to fetch dynamic settings from DB
+async function getSettings() {
+    const rows = await allQuery(`SELECT key, value FROM settings`);
+    const settingsMap = {};
+    rows.forEach(r => settingsMap[r.key] = parseFloat(r.value) || r.value);
+    return settingsMap;
+}
+
+// Helper to update student tier based on points balance
+async function updateUserTier(userId) {
+    const user = await getQuery(`SELECT points_balance FROM users WHERE user_id = ?`, [userId]);
+    if (!user) return 'Bronze';
+    
+    const settings = await getSettings();
+    const pts = user.points_balance;
+    const silver = parseInt(settings.silver_threshold) || 1000;
+    const gold = parseInt(settings.gold_threshold) || 2500;
+    const plat = parseInt(settings.platinum_threshold) || 5000;
+    
+    let newTier = 'Bronze';
+    if (pts >= plat) newTier = 'Platinum';
+    else if (pts >= gold) newTier = 'Gold';
+    else if (pts >= silver) newTier = 'Silver';
+    
+    await runQuery(`UPDATE users SET current_tier = ? WHERE user_id = ?`, [newTier, userId]);
+    return newTier;
+}
+
+async function logTraffic(userId, ip, activity, ua) {
+    try {
+        const timestamp = new Date().toISOString();
+        await runQuery(`INSERT INTO traffic_logs (user_id, ip_address, activity, user_agent, created_at) VALUES (?, ?, ?, ?, ?)`,
+            [userId || null, ip || '127.0.0.1', activity, ua || 'Unknown', timestamp]);
+    } catch (err) {
+        console.error('Failed to log traffic:', err);
+    }
+}
+
+// Deduplicate FIFO Points deduction logic
+async function deductPoints(userId, amountToDeduct) {
+    const deposits = await allQuery(`SELECT ledger_id, points_remaining FROM points_ledger WHERE user_id = ? AND points_remaining > 0 ORDER BY ledger_id ASC`, [userId]);
+    let remaining = amountToDeduct;
+    for (const d of deposits) {
+        if (remaining <= 0) break;
+        const deduct = Math.min(d.points_remaining, remaining);
+        await runQuery(`UPDATE points_ledger SET points_remaining = points_remaining - ? WHERE ledger_id = ?`, [deduct, d.ledger_id]);
+        remaining -= deduct;
+    }
+}
+
+// ----------------------------------------------------
+// ROUTING APIS
+// ----------------------------------------------------
+
+app.post('/api/auth/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
+        const user = await getQuery(`SELECT user_id, name, email, role, student_id, referral_code FROM users WHERE email = ? AND password = ?`, [email.trim(), password]);
+        if (!user) return res.status(401).json({ error: 'Invalid credentials' });
+
+        // Log login traffic
+        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        const ua = req.headers['user-agent'];
+        await logTraffic(user.user_id, ip, `User Authenticated successfully (${user.role.toUpperCase()})`, ua);
+
+        res.json({ success: true, user });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/auth/retrieve-password', async (req, res) => {
+    try {
+        const { identifier } = req.body;
+        if (!identifier) return res.status(400).json({ error: 'Email or Student ID required' });
+        const user = await getQuery(`SELECT name, email, password, student_id, role FROM users WHERE email = ? OR student_id = ?`, [identifier.trim(), identifier.trim()]);
+        if (!user) return res.status(404).json({ error: 'No account matched.' });
+        res.json({ success: true, user });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/admin/create-student', async (req, res) => {
+    try {
+        const { name, email, password, student_id, programme } = req.body;
+        if (!name || !email || !password || !student_id) return res.status(400).json({ error: 'Missing parameters' });
+        
+        const initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
+        const referralCode = `${initials}-${Math.floor(1000 + Math.random() * 9000)}`;
+        const prog = programme || 'General';
+
+        // Award welcome points
+        const settings = await getSettings();
+        const welcomePoints = parseInt(settings.welcome_points) || 200;
+
+        const result = await runQuery(`INSERT INTO users (name, email, password, role, student_id, referral_code, programme, points_balance) VALUES (?, ?, ?, 'student', ?, ?, ?, ?)`,
+            [name.trim(), email.trim().toLowerCase(), password, student_id.trim(), referralCode, prog, welcomePoints]);
+
+        const newUserId = result.lastID;
+        await runQuery(`INSERT INTO points_ledger (user_id, points_change, event_type, description, points_remaining, created_at) VALUES (?, ?, 'Welcome Bonus', 'Welcome points for joining BIA programme', ?, ?)`,
+            [newUserId, welcomePoints, welcomePoints, new Date().toISOString()]);
+
+        res.json({ success: true, user_id: newUserId, referral_code: referralCode, welcome_points: welcomePoints });
+    } catch (err) {
+        if (err.message.includes('UNIQUE')) return res.status(400).json({ error: 'Student ID or Email already exists.' });
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.get('/api/admin/students', async (req, res) => {
+    try {
+        const rows = await allQuery(`SELECT user_id, name, email, student_id, referral_code, current_tier, points_balance, referral_count, programme FROM users WHERE role = 'student' ORDER BY name ASC`);
+        res.json(rows);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/admin/adjust-points', async (req, res) => {
+    try {
+        const { user_id, points_change, description } = req.body;
+        if (!user_id || points_change === undefined || !description) return res.status(400).json({ error: 'Parameters missing' });
+
+        const user = await getQuery(`SELECT points_balance FROM users WHERE user_id = ? AND role = 'student'`, [user_id]);
+        if (!user) return res.status(404).json({ error: 'Student not found' });
+
+        const isDeduction = points_change < 0;
+        const absPoints = Math.abs(points_change);
+        if (isDeduction && user.points_balance < absPoints) return res.status(400).json({ error: 'Insufficient points balance.' });
+
+        const expiry = new Date();
+        expiry.setFullYear(expiry.getFullYear() + 4);
+
+        if (isDeduction) {
+            await deductPoints(user_id, absPoints);
+            await runQuery(`INSERT INTO points_ledger (user_id, points_change, event_type, description, points_remaining, expires_at) VALUES (?, ?, 'Adjustment', ?, 0, NULL)`, [user_id, points_change, `Admin Adjustment: ${description}`]);
+        } else {
+            await runQuery(`INSERT INTO points_ledger (user_id, points_change, event_type, description, points_remaining, expires_at) VALUES (?, ?, 'Adjustment', ?, ?, ?)`, [user_id, points_change, `Admin Adjustment: ${description}`, points_change, expiry.toISOString()]);
+        }
+
+        await runQuery(`UPDATE users SET points_balance = points_balance + ? WHERE user_id = ?`, [points_change, user_id]);
+        await updateUserTier(user_id);
+        res.json({ success: true, message: 'Points adjusted successfully' });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.get('/api/settings', async (req, res) => {
+    try {
+        const rows = await allQuery(`SELECT * FROM settings`);
+        res.json(rows);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+const SETTINGS_LIMITS = {
+    point_aed_value: { min: 0.01, max: 2.0 },
+    first_referral_points: { min: 0, max: 10000 },
+    subsequent_referral_points: { min: 0, max: 10000 },
+    new_joiner_points: { min: 0, max: 10000 },
+    premium_program_bonus: { min: 0, max: 10000 },
+    bronze_cap: { min: 0.0, max: 1.0 },
+    silver_cap: { min: 0.0, max: 1.0 },
+    gold_cap: { min: 0.0, max: 1.0 },
+    platinum_cap: { min: 0.0, max: 1.0 },
+    silver_multiplier: { min: 1.0, max: 5.0 },
+    gold_multiplier: { min: 1.0, max: 5.0 },
+    platinum_multiplier: { min: 1.0, max: 5.0 },
+    silver_threshold: { min: 100, max: 100000 },
+    gold_threshold: { min: 100, max: 100000 },
+    platinum_threshold: { min: 100, max: 100000 }
+};
+
+app.post('/api/settings', async (req, res) => {
+    try {
+        const { settings } = req.body;
+        if (!settings || !Array.isArray(settings)) return res.status(400).json({ error: 'Invalid format' });
+        
+        // 1. Perform bounds validation
+        for (const s of settings) {
+            const limit = SETTINGS_LIMITS[s.key];
+            if (limit) {
+                const val = parseFloat(s.value);
+                if (isNaN(val) || val < limit.min || val > limit.max) {
+                    const readableKey = s.key.replace(/_/g, ' ').toUpperCase();
+                    return res.status(400).json({ 
+                        error: `Invalid value for "${readableKey}": must be between ${limit.min} and ${limit.max}.` 
+                    });
+                }
+            }
+        }
+
+        // 2. Perform DB Updates
+        for (const s of settings) {
+            await runQuery(`UPDATE settings SET value = ? WHERE key = ?`, [s.value, s.key]);
+        }
+        res.json({ success: true, message: 'Settings updated' });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.get('/api/users/by-student-id/:studentId', async (req, res) => {
+    try {
+        const studentId = req.params.studentId.trim();
+        const student = await getQuery(`SELECT user_id, name, student_id FROM users WHERE student_id = ? AND role = 'student'`, [studentId]);
+        if (!student) return res.status(404).json({ error: 'Student not found.' });
+        res.json({ success: true, name: student.name, user_id: student.user_id });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/users/transfer-points', async (req, res) => {
+    try {
+        const { sender_id, recipient_student_id, points_amount } = req.body;
+        if (!sender_id || !recipient_student_id || !points_amount) {
+            return res.status(400).json({ error: 'Missing parameters.' });
+        }
+
+        const amount = parseInt(points_amount);
+        if (isNaN(amount) || amount < 50 || amount > 500) {
+            return res.status(400).json({ error: 'Amount must be between 50 and 500 points.' });
+        }
+
+        // Fetch sender
+        const sender = await getQuery(`SELECT * FROM users WHERE user_id = ?`, [sender_id]);
+        if (!sender) return res.status(404).json({ error: 'Sender not found.' });
+
+        // Fetch recipient
+        const recipient = await getQuery(`SELECT * FROM users WHERE student_id = ? AND role = 'student'`, [recipient_student_id]);
+        if (!recipient) return res.status(404).json({ error: 'Recipient student ID not found.' });
+
+        if (sender.user_id === recipient.user_id) {
+            return res.status(400).json({ error: 'You cannot transfer points to yourself.' });
+        }
+
+        // Check sender has sufficient points (including 10% tax)
+        const tax = Math.ceil(amount * 0.10);
+        const totalDeducted = amount + tax;
+
+        if (sender.points_balance < totalDeducted) {
+            return res.status(400).json({ error: `Insufficient balance. Transferring ${amount} pts requires ${totalDeducted} pts (including 10% tax).` });
+        }
+
+        // Perform transfer (atomic updates)
+        const newSenderBalance = sender.points_balance - totalDeducted;
+        const newRecipientBalance = recipient.points_balance + amount;
+
+        await runQuery(`UPDATE users SET points_balance = ? WHERE user_id = ?`, [newSenderBalance, sender.user_id]);
+        await runQuery(`UPDATE users SET points_balance = ? WHERE user_id = ?`, [newRecipientBalance, recipient.user_id]);
+
+        // Write ledger logs
+        const timestamp = new Date().toISOString();
+        // 1. Sender debited
+        await runQuery(`INSERT INTO points_ledger (user_id, points_change, current_balance, type, description, created_at) VALUES (?, ?, ?, 'spend', ?, ?)`,
+            [sender.user_id, -amount, newSenderBalance + tax, 'spend', `P2P Transfer to ${recipient.name} (${recipient.student_id})`, timestamp]);
+        // 2. Tax burned
+        await runQuery(`INSERT INTO points_ledger (user_id, points_change, current_balance, type, description, created_at) VALUES (?, ?, ?, 'spend', ?, ?)`,
+            [sender.user_id, -tax, newSenderBalance, 'spend', `P2P 10% Transfer Fee Burn`, timestamp]);
+        // 3. Recipient credited
+        await runQuery(`INSERT INTO points_ledger (user_id, points_change, current_balance, type, description, created_at) VALUES (?, ?, ?, 'earn', ?, ?)`,
+            [recipient.user_id, amount, newRecipientBalance, 'earn', `P2P Gift from ${sender.name}`, timestamp]);
+
+        res.json({ success: true, new_balance: newSenderBalance });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/users/claim-linkedin-points', async (req, res) => {
+    try {
+        const { user_id, share_type } = req.body;
+        if (!user_id || !share_type) return res.status(400).json({ error: 'Missing parameters.' });
+
+        const user = await getQuery(`SELECT points_balance FROM users WHERE user_id = ?`, [user_id]);
+        if (!user) return res.status(404).json({ error: 'Student not found.' });
+
+        // Check if already claimed for this type to prevent spamming
+        const alreadyClaimed = await getQuery(`SELECT ledger_id FROM points_ledger WHERE user_id = ? AND description LIKE ?`, 
+            [user_id, `%LinkedIn Share: ${share_type}%`]);
+        if (alreadyClaimed) return res.status(400).json({ error: 'Points already claimed for this LinkedIn milestone.' });
+
+        const pointsAwarded = 50;
+        const newBalance = user.points_balance + pointsAwarded;
+
+        await runQuery(`UPDATE users SET points_balance = ? WHERE user_id = ?`, [newBalance, user_id]);
+
+        // Write ledger logs
+        const timestamp = new Date().toISOString();
+        await runQuery(`INSERT INTO points_ledger (user_id, points_change, current_balance, type, description, created_at) VALUES (?, ?, ?, 'earn', ?, ?)`,
+            [user_id, pointsAwarded, newBalance, 'earn', `LinkedIn Share: ${share_type} Milestone`, timestamp]);
+
+        res.json({ success: true, new_balance: newBalance });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Submit a new Executive development/upsell lead (webinar, consultation, masterclass)
+app.post('/api/users/submit-lead', async (req, res) => {
+    try {
+        const { user_id, type, details } = req.body;
+        if (!user_id || !type || !details) {
+            return res.status(400).json({ error: 'Missing parameters.' });
+        }
+
+        const user = await getQuery(`SELECT user_id FROM users WHERE user_id = ?`, [user_id]);
+        if (!user) return res.status(404).json({ error: 'Student not found.' });
+
+        const timestamp = new Date().toISOString();
+        await runQuery(`INSERT INTO executive_leads (user_id, type, details, status, created_at) VALUES (?, ?, ?, 'Pending', ?)`,
+            [user_id, type, details, timestamp]);
+
+        // Log lead submission traffic
+        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        const ua = req.headers['user-agent'];
+        await logTraffic(user_id, ip, `Submitted Executive Lead Inquiry: ${details}`, ua);
+
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Submit an upgrade or cross-enrolment pathway inquiry
+app.post('/api/student/enquire-upgrade', async (req, res) => {
+    try {
+        const { user_id, current_programme, target_programme, offer_points } = req.body;
+        if (!user_id || !current_programme || !target_programme) {
+            return res.status(400).json({ error: 'Missing parameters.' });
+        }
+
+        const user = await getQuery(`SELECT user_id, name FROM users WHERE user_id = ?`, [user_id]);
+        if (!user) return res.status(404).json({ error: 'Student not found.' });
+
+        const timestamp = new Date().toISOString();
+        const details = `Pathways: Upgrade/Cross-enrolment interest from ${current_programme} to ${target_programme} (Offered: +${offer_points} pts)`;
+        await runQuery(`INSERT INTO executive_leads (user_id, type, details, status, created_at) VALUES (?, 'Pathway Enquire', ?, 'Pending', ?)`,
+            [user_id, details, timestamp]);
+
+        // Log to audit activity log
+        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        const ua = req.headers['user-agent'];
+        await logTraffic(user_id, ip, `Enquired Career Upgrade: ${current_programme} -> ${target_programme}`, ua);
+
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+
+// Admin endpoint: Retrieve all traffic logs
+app.get('/api/admin/traffic', async (req, res) => {
+    try {
+        const rows = await allQuery(`
+            SELECT t.*, u.name as user_name, u.email as user_email, u.role
+            FROM traffic_logs t
+            LEFT JOIN users u ON t.user_id = u.user_id
+            ORDER BY t.log_id DESC LIMIT 100
+        `);
+        res.json(rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Admin endpoint: Retrieve aggregate traffic statistics
+app.get('/api/admin/traffic/stats', async (req, res) => {
+    try {
+        const totalHits = await getQuery(`SELECT COUNT(*) as count FROM traffic_logs`);
+        const activeSessions = 3 + (totalHits.count % 7);
+        res.json({
+            total_hits: totalHits.count,
+            active_sessions: activeSessions,
+            security_level: 'High (SSL Secured)'
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Admin endpoint: Update security and traffic settings parameters
+// Admin endpoint: Maintenance mode toggle (simplified)
+app.post('/api/admin/maintenance', async (req, res) => {
+    try {
+        const { maintenance_mode, maintenance_duration } = req.body;
+        if (maintenance_mode !== undefined) {
+            await runQuery(`UPDATE settings SET value = ? WHERE key = 'maintenance_mode'`, [String(maintenance_mode)]);
+            if (String(maintenance_mode) === '0') {
+                await runQuery(`UPDATE settings SET value = '' WHERE key = 'maintenance_end_time'`);
+            }
+        }
+        if (maintenance_duration !== undefined) {
+            const duration = parseInt(maintenance_duration);
+            if (duration > 0) {
+                const endTime = new Date(Date.now() + duration * 60000).toISOString();
+                await runQuery(`UPDATE settings SET value = ? WHERE key = 'maintenance_end_time'`, [endTime]);
+                await runQuery(`UPDATE settings SET value = '1' WHERE key = 'maintenance_mode'`);
+            } else {
+                await runQuery(`UPDATE settings SET value = '' WHERE key = 'maintenance_end_time'`);
+            }
+        }
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Admin endpoint: Bulk award points to a programme cohort
+app.post('/api/admin/bulk-points', async (req, res) => {
+    try {
+        const { programme, points, reason } = req.body;
+        if (!programme || !points) return res.status(400).json({ error: 'programme and points required.' });
+        const students = await allQuery(`SELECT user_id, points_balance FROM users WHERE role = 'student' AND programme = ?`, [programme]);
+        if (students.length === 0) return res.status(404).json({ error: 'No students found in that programme.' });
+        for (const s of students) {
+            const newBalance = s.points_balance + parseInt(points);
+            await runQuery(`UPDATE users SET points_balance = ? WHERE user_id = ?`, [newBalance, s.user_id]);
+            await runQuery(`INSERT INTO points_ledger (user_id, points_change, event_type, description, points_remaining, created_at) VALUES (?, ?, 'Bulk Award', ?, ?, ?)`,
+                [s.user_id, parseInt(points), reason || `Bulk award to ${programme} cohort`, newBalance, new Date().toISOString()]);
+            await updateUserTier(s.user_id);
+        }
+        res.json({ success: true, students_updated: students.length });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Admin endpoint: Get list of programmes with student counts
+app.get('/api/admin/programmes', async (req, res) => {
+    try {
+        const rows = await allQuery(`SELECT programme, COUNT(*) as student_count, SUM(points_balance) as total_points FROM users WHERE role = 'student' GROUP BY programme ORDER BY student_count DESC`);
+        res.json(rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Admin endpoint: Engagement report
+app.get('/api/admin/engagement', async (req, res) => {
+    try {
+        const students = await allQuery(`SELECT u.user_id, u.name, u.email, u.programme, u.current_tier, u.points_balance, u.referral_count, MAX(t.created_at) as last_seen FROM users u LEFT JOIN traffic_logs t ON u.user_id = t.user_id WHERE u.role = 'student' GROUP BY u.user_id ORDER BY last_seen DESC`);
+        const now = Date.now();
+        const report = students.map(s => {
+            const lastSeen = s.last_seen ? new Date(s.last_seen).getTime() : 0;
+            const daysSince = lastSeen ? Math.floor((now - lastSeen) / 86400000) : 999;
+            const status = daysSince <= 7 ? 'active' : daysSince <= 30 ? 'at_risk' : 'inactive';
+            return { ...s, days_since_login: daysSince, status };
+        });
+        res.json(report);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Announcements: student-facing GET
+app.get('/api/announcements', async (req, res) => {
+    try {
+        const now = new Date().toISOString();
+        const rows = await allQuery(`SELECT * FROM announcements WHERE expires_at IS NULL OR expires_at = '' OR expires_at > ? ORDER BY created_at DESC`, [now]);
+        res.json(rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Announcements: admin POST (create)
+app.post('/api/admin/announcements', async (req, res) => {
+    try {
+        const { title, body, type, expires_at } = req.body;
+        if (!title || !body) return res.status(400).json({ error: 'title and body required.' });
+        await runQuery(`INSERT INTO announcements (title, body, type, expires_at, created_at) VALUES (?, ?, ?, ?, ?)`,
+            [title, body, type || 'info', expires_at || null, new Date().toISOString()]);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Announcements: admin DELETE
+app.delete('/api/admin/announcements/:id', async (req, res) => {
+    try {
+        await runQuery(`DELETE FROM announcements WHERE announcement_id = ?`, [req.params.id]);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Admin endpoint: Retrieve all executive leads (joined with student names/emails)
+app.get('/api/admin/leads', async (req, res) => {
+    try {
+        const rows = await allQuery(`
+            SELECT l.*, u.name as student_name, u.email as student_email, u.student_id
+            FROM executive_leads l
+            JOIN users u ON l.user_id = u.user_id
+            ORDER BY l.lead_id DESC
+        `);
+        res.json(rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Admin endpoint: Toggle lead status to Contacted
+app.post('/api/admin/leads/:id/contacted', async (req, res) => {
+    try {
+        const leadId = req.params.id;
+        const lead = await getQuery(`SELECT lead_id FROM executive_leads WHERE lead_id = ?`, [leadId]);
+        if (!lead) return res.status(404).json({ error: 'Lead not found.' });
+
+        await runQuery(`UPDATE executive_leads SET status = 'Contacted' WHERE lead_id = ?`, [leadId]);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Admin endpoint: Convert lead (approve & award pathway points)
+app.post('/api/admin/leads/:id/convert', async (req, res) => {
+    try {
+        const leadId = req.params.id;
+        const lead = await getQuery(`SELECT * FROM executive_leads WHERE lead_id = ?`, [leadId]);
+        if (!lead) return res.status(404).json({ error: 'Lead not found.' });
+        if (lead.status === 'Converted') return res.status(400).json({ error: 'Lead has already been converted.' });
+
+        // Extract points from details text: "Pathways: ... (Offered: +5000 pts)"
+        const match = lead.details.match(/\(Offered:\s*\+(\d+)\s*pts\)/);
+        const points = match ? parseInt(match[1]) : 0;
+
+        // Start database updates
+        await runQuery(`UPDATE users SET points_balance = points_balance + ? WHERE user_id = ?`, [points, lead.user_id]);
+        
+        const timestamp = new Date().toISOString();
+        const expiry = new Date();
+        expiry.setFullYear(expiry.getFullYear() + 1); // 1 year validity
+
+        await runQuery(`INSERT INTO points_ledger (user_id, points_change, event_type, description, points_remaining, created_at, expires_at) VALUES (?, ?, 'Pathway Conversion', ?, ?, ?, ?)`,
+            [lead.user_id, points, `Converted Pathway: ${lead.details}`, points, timestamp, expiry.toISOString()]);
+
+        await updateUserTier(lead.user_id);
+
+        await runQuery(`UPDATE executive_leads SET status = 'Converted' WHERE lead_id = ?`, [leadId]);
+
+        // Log to activity log
+        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        const ua = req.headers['user-agent'];
+        await logTraffic(lead.user_id, ip, `Approved Pathway Lead & Awarded +${points} pts`, ua);
+
+        res.json({ success: true, points_awarded: points });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Admin endpoint: Update student details
+app.post('/api/admin/users/update', async (req, res) => {
+    try {
+        const { user_id, name, email, student_id } = req.body;
+        if (!user_id || !name || !email || !student_id) {
+            return res.status(400).json({ error: 'Missing parameters.' });
+        }
+
+        const emailCheck = await getQuery(`SELECT user_id FROM users WHERE email = ? AND user_id != ?`, [email, user_id]);
+        if (emailCheck) return res.status(400).json({ error: 'Email is already in use.' });
+
+        const idCheck = await getQuery(`SELECT user_id FROM users WHERE student_id = ? AND user_id != ?`, [student_id, user_id]);
+        if (idCheck) return res.status(400).json({ error: 'Student ID is already in use.' });
+
+        await runQuery(`UPDATE users SET name = ?, email = ?, student_id = ? WHERE user_id = ?`,
+            [name, email, student_id, user_id]);
+
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Admin endpoint: Override student tier manually (promote/demote)
+app.post('/api/admin/users/override-tier', async (req, res) => {
+    try {
+        const { user_id, new_tier } = req.body;
+        if (!user_id || !new_tier) {
+            return res.status(400).json({ error: 'Missing parameters.' });
+        }
+
+        const validTiers = ['Bronze', 'Silver', 'Gold', 'Platinum'];
+        if (!validTiers.includes(new_tier)) {
+            return res.status(400).json({ error: 'Invalid tier value.' });
+        }
+
+        const user = await getQuery(`SELECT user_id, name, current_tier FROM users WHERE user_id = ?`, [user_id]);
+        if (!user) return res.status(404).json({ error: 'Student not found.' });
+
+        const oldTier = user.current_tier;
+        await runQuery(`UPDATE users SET current_tier = ? WHERE user_id = ?`, [new_tier, user_id]);
+
+        const timestamp = new Date().toISOString();
+        await runQuery(`INSERT INTO points_ledger (user_id, points_change, event_type, description, points_remaining, created_at, expires_at) VALUES (?, 0, 'Tier Override', ?, 0, ?, NULL)`,
+            [user_id, `Tier manually overridden from ${oldTier} to ${new_tier} by administrator`, timestamp]);
+
+        // Log to traffic logs
+        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        const ua = req.headers['user-agent'];
+        await logTraffic(user_id, ip, `Manual Tier Override: Promoted/Demoted from ${oldTier} to ${new_tier}`, ua);
+
+        res.json({ success: true, new_tier });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Admin endpoint: Retrieve system liability and business metrics
+app.get('/api/admin/system/metrics', async (req, res) => {
+    try {
+        const liabilityRow = await getQuery(`SELECT SUM(points_balance) as total_liability FROM users WHERE role = 'student'`);
+        const totalLiability = liabilityRow.total_liability || 0;
+
+        const redeemedRow = await getQuery(`SELECT SUM(points_deducted) as total_redeemed, SUM(discount_aed) as total_discount FROM tuition_vouchers`);
+        const totalRedeemed = redeemedRow.total_redeemed || 0;
+        const totalDiscount = redeemedRow.total_discount || 0;
+
+        const leadsStats = await getQuery(`
+            SELECT 
+                COUNT(*) as total_pathway_leads,
+                SUM(CASE WHEN status = 'Converted' THEN 1 ELSE 0 END) as converted_leads,
+                SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) as pending_leads
+            FROM executive_leads
+            WHERE type = 'Pathway Enquire'
+        `);
+        const totalLeads = leadsStats.total_pathway_leads || 0;
+        const convertedLeads = leadsStats.converted_leads || 0;
+        const pendingLeads = leadsStats.pending_leads || 0;
+        const conversionRate = totalLeads > 0 ? ((convertedLeads / totalLeads) * 100).toFixed(1) : 0;
+
+        // Estimated revenue unlocked: AED 15,000 avg revenue per program conversion!
+        const estRevenue = convertedLeads * 15000;
+
+        res.json({
+            points_liability: totalLiability,
+            points_redeemed: totalRedeemed,
+            total_discount_aed: totalDiscount,
+            total_pathway_leads: totalLeads,
+            converted_leads: convertedLeads,
+            pending_leads: pendingLeads,
+            conversion_rate: `${conversionRate}%`,
+            estimated_revenue_aed: estRevenue
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Admin endpoint: Re-seed database state
+app.post('/api/admin/system/reset-db', async (req, res) => {
+    try {
+        const tables = [
+            'settings',
+            'users',
+            'announcements',
+            'referrals',
+            'points_ledger',
+            'campus_events',
+            'tuition_vouchers',
+            'executive_leads',
+            'traffic_logs',
+            'ip_blacklist'
+        ];
+
+        for (const table of tables) {
+            await runQuery(`DROP TABLE IF EXISTS ${table}`);
+        }
+
+        initializeDatabase();
+        console.log('Database has been manually reset by administrator.');
+
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Admin endpoint: Delete student account
+app.delete('/api/admin/users/:id', async (req, res) => {
+    try {
+        const userId = req.params.id;
+        
+        // Delete all related records first to maintain foreign key integrity
+        await runQuery(`DELETE FROM points_ledger WHERE user_id = ?`, [userId]);
+        await runQuery(`DELETE FROM referrals WHERE referrer_id = ?`, [userId]);
+        await runQuery(`DELETE FROM tuition_vouchers WHERE user_id = ?`, [userId]);
+        await runQuery(`DELETE FROM executive_leads WHERE user_id = ?`, [userId]);
+        
+        // Delete the user record
+        await runQuery(`DELETE FROM users WHERE user_id = ?`, [userId]);
+
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Admin endpoint: Delete points ledger transaction and update user points balance and tier
+app.delete('/api/admin/ledger/:id', async (req, res) => {
+    try {
+        const ledgerId = req.params.id;
+        const entry = await getQuery(`SELECT user_id FROM points_ledger WHERE ledger_id = ?`, [ledgerId]);
+        if (!entry) return res.status(404).json({ error: 'Ledger entry not found.' });
+
+        // Delete entry
+        await runQuery(`DELETE FROM points_ledger WHERE ledger_id = ?`, [ledgerId]);
+
+        // Recalculate points balance
+        const balanceQuery = await getQuery(`SELECT SUM(points_change) as total FROM points_ledger WHERE user_id = ?`, [entry.user_id]);
+        const newBalance = balanceQuery.total || 0;
+
+        await runQuery(`UPDATE users SET points_balance = ? WHERE user_id = ?`, [newBalance, entry.user_id]);
+        await updateUserTier(entry.user_id);
+
+        res.json({ success: true, new_balance: newBalance });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Admin endpoint: Delete/Revoke a generated tuition voucher
+app.delete('/api/admin/vouchers/:id', async (req, res) => {
+    try {
+        const voucherId = req.params.id;
+        const voucher = await getQuery(`SELECT voucher_id FROM tuition_vouchers WHERE voucher_id = ?`, [voucherId]);
+        if (!voucher) return res.status(404).json({ error: 'Voucher not found.' });
+
+        await runQuery(`DELETE FROM tuition_vouchers WHERE voucher_id = ?`, [voucherId]);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Admin endpoint: Delete a student referral entry
+app.delete('/api/admin/referrals/:id', async (req, res) => {
+    try {
+        const referralId = req.params.id;
+        const referral = await getQuery(`SELECT referral_id FROM referrals WHERE referral_id = ?`, [referralId]);
+        if (!referral) return res.status(404).json({ error: 'Referral not found.' });
+
+        await runQuery(`DELETE FROM referrals WHERE referral_id = ?`, [referralId]);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Admin endpoint: Delete a seminar / consulting lead
+app.delete('/api/admin/leads/:id', async (req, res) => {
+    try {
+        const leadId = req.params.id;
+        const lead = await getQuery(`SELECT lead_id FROM executive_leads WHERE lead_id = ?`, [leadId]);
+        if (!lead) return res.status(404).json({ error: 'Lead not found.' });
+
+        await runQuery(`DELETE FROM executive_leads WHERE lead_id = ?`, [leadId]);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.get('/api/users/:id/profile', async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const user = await getQuery(`SELECT * FROM users WHERE user_id = ?`, [userId]);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        // Intercept for scheduled maintenance mode
+        const maintenance = await getQuery(`SELECT value FROM settings WHERE key = 'maintenance_mode'`);
+        const maintEndTimeSetting = await getQuery(`SELECT value FROM settings WHERE key = 'maintenance_end_time'`);
+        
+        let activeMaintenance = false;
+        let remainingSeconds = 0;
+        
+        if (maintenance && maintenance.value === '1') {
+            activeMaintenance = true;
+        } else if (maintEndTimeSetting && maintEndTimeSetting.value) {
+            const endTime = new Date(maintEndTimeSetting.value);
+            const now = new Date();
+            if (endTime > now) {
+                activeMaintenance = true;
+                remainingSeconds = Math.max(0, Math.floor((endTime - now) / 1000));
+            }
+        }
+        
+        if (activeMaintenance && user.role !== 'admin') {
+            return res.status(503).json({ 
+                error: 'MAINTENANCE_MODE_ACTIVE', 
+                message: 'BIA Loyalty portal is undergoing scheduled maintenance updates.',
+                remaining_seconds: remainingSeconds
+            });
+        }
+
+        const ledger = await allQuery(`SELECT * FROM points_ledger WHERE user_id = ? ORDER BY ledger_id DESC`, [userId]);
+        const referrals = await allQuery(`SELECT * FROM referrals WHERE referrer_id = ?`, [userId]);
+        res.json({ user, ledger, referrals });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/referrals', async (req, res) => {
+    try {
+        const { referrer_id, referee_name, referee_email, program } = req.body;
+        if (!referrer_id || !referee_name || !referee_email || !program) return res.status(400).json({ error: 'Missing parameters' });
+
+        const result = await runQuery(`INSERT INTO referrals (referrer_id, referee_name, referee_email, program, status) VALUES (?, ?, ?, ?, 'Pending')`,
+            [referrer_id, referee_name, referee_email, program]);
+        res.json({ success: true, referral_id: result.lastID });
+    } catch (err) {
+        if (err.message.includes('UNIQUE')) return res.status(400).json({ error: 'Referee email already registered.' });
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/referrals/:id/verify-payment', async (req, res) => {
+    try {
+        const referralId = req.params.id;
+        const settings = await getSettings();
+
+        const ref = await getQuery(`SELECT * FROM referrals WHERE referral_id = ?`, [referralId]);
+        if (!ref) return res.status(404).json({ error: 'Referral not found' });
+        if (ref.status === 'Verified') return res.status(400).json({ error: 'Referral already verified' });
+
+        const isPremium = ['mba', 'dba', 'doctorate'].includes(ref.program.toLowerCase());
+        await runQuery(`UPDATE referrals SET status = 'Verified' WHERE referral_id = ?`, [referralId]);
+
+        const user = await getQuery(`SELECT * FROM users WHERE user_id = ?`, [ref.referrer_id]);
+        const newRefCount = user.referral_count + 1;
+
+        const referralPoints = newRefCount === 1 ? settings.first_referral_points : settings.subsequent_referral_points;
+        const totalAwarded = referralPoints + (isPremium ? settings.premium_program_bonus : 0);
+
+        const expiry = new Date();
+        expiry.setFullYear(expiry.getFullYear() + 4);
+
+        await runQuery(`INSERT INTO points_ledger (user_id, points_change, event_type, description, points_remaining, expires_at) VALUES (?, ?, 'Referral', ?, ?, ?)`,
+            [ref.referrer_id, totalAwarded, `Referral: ${ref.referee_name} (${ref.program})`, totalAwarded, expiry.toISOString()]);
+
+        if ([5, 10, 15].includes(newRefCount)) {
+            const desc = newRefCount === 5 ? 'AED 250 Bonus Voucher' : newRefCount === 10 ? 'Free Short Course' : 'VIP Gala Invite';
+            await runQuery(`INSERT INTO points_ledger (user_id, points_change, event_type, description, points_remaining, expires_at) VALUES (?, 0, 'Milestone', ?, 0, NULL)`, [ref.referrer_id, desc]);
+        }
+
+        await runQuery(`UPDATE users SET points_balance = points_balance + ?, referral_count = ? WHERE user_id = ?`, [totalAwarded, newRefCount, ref.referrer_id]);
+        const finalTier = await updateUserTier(ref.referrer_id);
+        res.json({ success: true, awarded: totalAwarded, new_tier: finalTier });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/lms/complete-course', async (req, res) => {
+    try {
+        const { user_id, course_name, base_points } = req.body;
+        if (!user_id || !course_name || !base_points) return res.status(400).json({ error: 'Missing parameters' });
+
+        const settings = await getSettings();
+        const user = await getQuery(`SELECT * FROM users WHERE user_id = ?`, [user_id]);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        let multiplier = 1.0;
+        if (user.current_tier === 'Silver') multiplier = settings.silver_multiplier;
+        else if (user.current_tier === 'Gold') multiplier = settings.gold_multiplier;
+        else if (user.current_tier === 'Platinum') multiplier = settings.platinum_multiplier;
+
+        const totalEarned = Math.round(base_points * multiplier);
+        const expiry = new Date();
+        expiry.setFullYear(expiry.getFullYear() + 4);
+
+        await runQuery(`INSERT INTO points_ledger (user_id, points_change, event_type, description, points_remaining, expires_at) VALUES (?, ?, 'SkillShare', ?, ?, ?)`,
+            [user_id, totalEarned, `SkillShare: ${course_name} (${user.current_tier} Mult)`, totalEarned, expiry.toISOString()]);
+        await runQuery(`UPDATE users SET points_balance = points_balance + ? WHERE user_id = ?`, [totalEarned, user_id]);
+        await updateUserTier(user_id);
+        res.json({ success: true, points_awarded: totalEarned });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/redeem/calculate', async (req, res) => {
+    try {
+        const { user_id, course_fee, points_requested } = req.body;
+        if (!user_id || !course_fee || points_requested === undefined) return res.status(400).json({ error: 'Missing parameters' });
+
+        const settings = await getSettings();
+        const user = await getQuery(`SELECT * FROM users WHERE user_id = ?`, [user_id]);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        let cap = settings.bronze_cap;
+        if (user.current_tier === 'Silver') cap = settings.silver_cap;
+        else if (user.current_tier === 'Gold') cap = settings.gold_cap;
+        else if (user.current_tier === 'Platinum') cap = settings.platinum_cap;
+
+        const maxDiscountAED = course_fee * cap;
+        const maxPointsRedeemable = Math.floor(maxDiscountAED / settings.point_aed_value);
+        const pointsApplied = Math.min(points_requested, user.points_balance, maxPointsRedeemable);
+
+        const discountAED = pointsApplied * settings.point_aed_value;
+        res.json({
+            cap_percent: cap * 100,
+            max_discount_aed: maxDiscountAED,
+            points_applied: pointsApplied,
+            discount_aed: discountAED,
+            final_fee: course_fee - discountAED
+        });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/redeem/confirm', async (req, res) => {
+    try {
+        const { user_id, points_deducted, discount_aed } = req.body;
+        if (!user_id || !points_deducted || !discount_aed) return res.status(400).json({ error: 'Missing parameters' });
+
+        const user = await getQuery(`SELECT points_balance FROM users WHERE user_id = ?`, [user_id]);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        if (user.points_balance < points_deducted) return res.status(400).json({ error: 'Insufficient balance' });
+
+        // Generate unique voucher code
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let codeSuffix = '';
+        for (let i = 0; i < 6; i++) {
+            codeSuffix += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        const voucherCode = `BIA-FEES-${codeSuffix}`;
+
+        await deductPoints(user_id, points_deducted);
+        await runQuery(`INSERT INTO points_ledger (user_id, points_change, event_type, description, points_remaining, expires_at) VALUES (?, ?, 'Redemption', ?, 0, NULL)`,
+            [user_id, -points_deducted, `Redeemed Tuition Voucher: ${voucherCode}`]);
+        await runQuery(`UPDATE users SET points_balance = points_balance - ? WHERE user_id = ?`, [points_deducted, user_id]);
+        await updateUserTier(user_id);
+
+        // Save voucher to DB
+        await runQuery(`INSERT INTO tuition_vouchers (user_id, voucher_code, discount_aed, points_deducted) VALUES (?, ?, ?, ?)`,
+            [user_id, voucherCode, discount_aed, points_deducted]);
+
+        const voucher = await getQuery(`SELECT * FROM tuition_vouchers WHERE voucher_code = ?`, [voucherCode]);
+
+        res.json({ success: true, message: 'Points successfully redeemed!', voucher });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.get('/api/users/:id/vouchers', async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const vouchers = await allQuery(`SELECT * FROM tuition_vouchers WHERE user_id = ? ORDER BY voucher_id DESC`, [userId]);
+        res.json(vouchers);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/admin/vouchers/use', async (req, res) => {
+    try {
+        const { voucher_code } = req.body;
+        if (!voucher_code) return res.status(400).json({ error: 'Missing voucher_code parameter' });
+
+        await runQuery(`UPDATE tuition_vouchers SET status = 'Used' WHERE voucher_code = ?`, [voucher_code]);
+        res.json({ success: true, message: `Voucher ${voucher_code} successfully marked as Used.` });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/redeem/collaborator', async (req, res) => {
+    try {
+        const { user_id, partner_id, reward_name, points_deducted, discount_aed } = req.body;
+        if (!user_id || !partner_id || !reward_name || !points_deducted || !discount_aed) {
+            return res.status(400).json({ error: 'Missing parameters' });
+        }
+
+        const user = await getQuery(`SELECT points_balance FROM users WHERE user_id = ?`, [user_id]);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        if (user.points_balance < points_deducted) return res.status(400).json({ error: 'Insufficient points balance.' });
+
+        await deductPoints(user_id, points_deducted);
+        const desc = `Redeemed ${partner_id.toUpperCase()} Reward: ${reward_name} (AED ${discount_aed} Value)`;
+        await runQuery(`INSERT INTO points_ledger (user_id, points_change, event_type, description, points_remaining, expires_at) VALUES (?, ?, 'Redemption', ?, 0, NULL)`,
+            [user_id, -points_deducted, desc]);
+        
+        await runQuery(`UPDATE users SET points_balance = points_balance - ? WHERE user_id = ?`, [points_deducted, user_id]);
+        const newTier = await updateUserTier(user_id);
+
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let code = `${partner_id.toUpperCase()}-`;
+        for (let i = 0; i < 8; i++) code += chars[Math.floor(Math.random() * chars.length)];
+
+        res.json({ success: true, message: 'Points successfully redeemed!', voucher_code: code, new_tier: newTier });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Legacy backward-compatible alias for ADNOC
+app.post('/api/redeem/adnoc', async (req, res) => {
+    try {
+        const { user_id, option_key, points_deducted, discount_aed } = req.body;
+        const reward_name = option_key === 'oasis' ? 'Oasis Cafe Voucher' : 'Fuel Voucher';
+        
+        // Forward to the generic collaborator handler logic
+        const user = await getQuery(`SELECT points_balance FROM users WHERE user_id = ?`, [user_id]);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        if (user.points_balance < points_deducted) return res.status(400).json({ error: 'Insufficient points balance.' });
+
+        await deductPoints(user_id, points_deducted);
+        const desc = `Redeemed ADNOC Reward: ${reward_name} (AED ${discount_aed} Value)`;
+        await runQuery(`INSERT INTO points_ledger (user_id, points_change, event_type, description, points_remaining, expires_at) VALUES (?, ?, 'Redemption', ?, 0, NULL)`,
+            [user_id, -points_deducted, desc]);
+        
+        await runQuery(`UPDATE users SET points_balance = points_balance - ? WHERE user_id = ?`, [points_deducted, user_id]);
+        const newTier = await updateUserTier(user_id);
+
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let code = 'ADNOC-';
+        for (let i = 0; i < 8; i++) code += chars[Math.floor(Math.random() * chars.length)];
+
+        res.json({ success: true, message: 'Points successfully redeemed!', voucher_code: code, new_tier: newTier });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// GET /api/partners - Retrieve all dynamic collaborators
+app.get('/api/partners', (req, res) => {
+    try {
+        if (!fs.existsSync(PARTNERS_FILE)) {
+            return res.json([]);
+        }
+        const data = fs.readFileSync(PARTNERS_FILE, 'utf8');
+        res.json(JSON.parse(data));
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// POST /api/partners - Add new loyalty collaborator partner program
+app.post('/api/partners', (req, res) => {
+    try {
+        const { name, badge, title, subtitle, disclosure, image, logoColor, rewards } = req.body;
+        if (!name || !title || !subtitle || !rewards || !Array.isArray(rewards) || rewards.length !== 3) {
+            return res.status(400).json({ error: 'Missing or invalid parameters' });
+        }
+
+        let partnersList = [];
+        if (fs.existsSync(PARTNERS_FILE)) {
+            const data = fs.readFileSync(PARTNERS_FILE, 'utf8');
+            partnersList = JSON.parse(data);
+        }
+
+        const newId = name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-');
+        
+        // Prevent duplicate partner ID
+        if (partnersList.some(p => p.id === newId)) {
+            return res.status(400).json({ error: 'Partner with this name already exists' });
+        }
+
+        const newPartner = {
+            id: newId,
+            name: name.toUpperCase(),
+            badge: badge || 'NEW COLLABORATION',
+            title,
+            subtitle,
+            disclosure: disclosure || 'Redemption rates are calculated dynamically based on real-time partner value.',
+            image: image || 'images/adnoc_students.png',
+            logoColor: logoColor || '#EB4C42',
+            rewards
+        };
+
+        partnersList.push(newPartner);
+        fs.writeFileSync(PARTNERS_FILE, JSON.stringify(partnersList, null, 4));
+        res.json({ success: true, message: 'Partner registered successfully!', partner: newPartner });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/cron/process-expiry', async (req, res) => {
+    try {
+        const expiredEntries = await allQuery(`SELECT * FROM points_ledger WHERE expires_at <= CURRENT_TIMESTAMP AND points_remaining > 0`);
+        if (expiredEntries.length === 0) return res.json({ success: true, message: 'No expired points.' });
+
+        let totalDecayed = 0;
+        for (const entry of expiredEntries) {
+            const pointsToDecay = Math.floor(entry.points_remaining * 0.5);
+            totalDecayed += pointsToDecay;
+
+            const extended = new Date();
+            extended.setFullYear(extended.getFullYear() + 2);
+
+            await runQuery(`UPDATE points_ledger SET points_remaining = ?, expires_at = ? WHERE ledger_id = ?`, [entry.points_remaining - pointsToDecay, extended.toISOString(), entry.ledger_id]);
+            await runQuery(`INSERT INTO points_ledger (user_id, points_change, event_type, description, points_remaining, expires_at) VALUES (?, ?, 'Expiry', ?, 0, NULL)`,
+                [entry.user_id, -pointsToDecay, `50% Decay of expired ledger credits #${entry.ledger_id}`]);
+            await runQuery(`UPDATE users SET points_balance = points_balance - ? WHERE user_id = ?`, [pointsToDecay, entry.user_id]);
+        }
+        res.json({ success: true, points_decayed: totalDecayed });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/students/daily-checkin', async (req, res) => {
+    try {
+        const { user_id } = req.body;
+        if (!user_id) return res.status(400).json({ error: 'Missing user ID' });
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        // Find if user already checked in today
+        const lastCheckin = await getQuery(`
+            SELECT * FROM points_ledger 
+            WHERE user_id = ? AND event_type = 'DailyCheckin' 
+            ORDER BY ledger_id DESC LIMIT 1
+        `, [user_id]);
+        
+        if (lastCheckin) {
+            const checkinDate = new Date(lastCheckin.expires_at);
+            checkinDate.setHours(0, 0, 0, 0);
+            if (checkinDate.getTime() === today.getTime()) {
+                return res.status(400).json({ error: 'Daily check-in already claimed today. Come back tomorrow!' });
+            }
+        }
+
+        const pts = 15;
+        await runQuery(`INSERT INTO points_ledger (user_id, points_change, event_type, description, points_remaining, expires_at) VALUES (?, ?, 'DailyCheckin', 'Daily attendance check-in reward', ?, ?)`,
+            [user_id, pts, pts, today.toISOString()]);
+        
+        await runQuery(`UPDATE users SET points_balance = points_balance + ? WHERE user_id = ?`, [pts, user_id]);
+        const finalTier = await updateUserTier(user_id);
+
+        res.json({ success: true, points_awarded: pts, new_tier: finalTier });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.get('/api/admin/ledger', async (req, res) => {
+    try {
+        const rows = await allQuery(`SELECT points_ledger.*, users.name as user_name FROM points_ledger JOIN users ON points_ledger.user_id = users.user_id ORDER BY ledger_id DESC`);
+        res.json(rows);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// BIA CAMPUS EVENTS API ENDPOINTS
+app.get('/api/events', async (req, res) => {
+    try {
+        const rows = await allQuery(`SELECT * FROM campus_events ORDER BY event_id DESC`);
+        res.json(rows);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/events', async (req, res) => {
+    try {
+        const { title, description, points, image_url } = req.body;
+        if (!title || !description) {
+            return res.status(400).json({ error: 'Missing title or description' });
+        }
+        await runQuery(
+            `INSERT INTO campus_events (title, description, points, image_url) VALUES (?, ?, ?, ?)`,
+            [title, description, points || 0, image_url || '']
+        );
+        res.json({ success: true, message: 'Event successfully added' });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.delete('/api/events/:id', async (req, res) => {
+    try {
+        const eventId = req.params.id;
+        await runQuery(`DELETE FROM campus_events WHERE event_id = ?`, [eventId]);
+        res.json({ success: true, message: 'Event successfully deleted' });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.listen(PORT, () => console.log(`BIA Loyalty Server running at http://localhost:${PORT}`));

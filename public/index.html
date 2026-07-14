@@ -1,0 +1,2127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BIA LoyalityE Portal</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css?v=1.2.2">
+</head>
+<body>
+    <!-- Interactive Canvas background representing pixelated grid grid mesh -->
+    <canvas id="pixel-grid-canvas"></canvas>
+
+    <!-- Top viewport scroll progress indicator -->
+    <div id="scroll-progress-indicator"></div>
+
+
+    <!-- Login Overlay Panel containing the Landing Page -->
+    <div id="login-overlay">
+        <!-- Floating Theme Switcher Button -->
+        <button id="theme-toggle-btn" class="nav-theme-toggle" aria-label="Toggle Dark/Light Theme">
+            <i class="fa-solid fa-moon"></i>
+        </button>
+        <!-- Video Background Container (Mixkit Modern Library Loop) -->
+        <div class="video-bg-container">
+            <video autoplay loop muted playsinline class="video-bg-element">
+                <source src="https://assets.mixkit.co/videos/preview/mixkit-modern-library-with-bookshelves-and-study-tables-40018-large.mp4" type="video/mp4">
+            </video>
+            <div class="video-bg-overlay"></div>
+        </div>
+
+        <!-- Carmowood-style Vertical Slat Lines Background -->
+        <div class="bg-vertical-slats">
+            <div class="slat-line"></div>
+            <div class="slat-line"></div>
+            <div class="slat-line"></div>
+            <div class="slat-line"></div>
+        </div>
+
+        <!-- Top Left Brand Logo (Initially there) -->
+        <div class="landing-top-left-logo" id="landing-logo">
+            <svg class="bia-logo-svg" width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="2" y="2" width="9" height="9" rx="2" fill="#4f46e5"/>
+                <rect x="13" y="2" width="9" height="9" rx="2" fill="#0f766e"/>
+                <rect x="2" y="13" width="9" height="9" rx="2" fill="#d97706"/>
+                <rect x="13" y="13" width="9" height="9" rx="2" fill="#8052ff"/>
+            </svg>
+            <span class="logo-text">BIA <span style="font-weight: 300; opacity: 0.7;">loyalty</span></span>
+        </div>
+
+        <!-- Landing Header (Co Paradiso-Style floating pill with centered links) -->
+        <div class="landing-header-wrapper">
+            <header class="landing-header">
+                <div class="landing-nav-links" style="width: 100%; justify-content: center; gap: 2rem;">
+                    <a href="#about" class="nav-link-item">ABOUT</a>
+                    <a href="#manifesto" class="nav-link-item">VALUES</a>
+                    <a href="#tiers" class="nav-link-item">TIERS</a>
+                    <a href="#team" class="nav-link-item">TEAM</a>
+                    <button class="btn-request-access" id="btn-show-login-modal">LOGIN</button>
+                </div>
+            </header>
+        </div>
+
+        <!-- Landing Split Hero (Co Paradiso-Style Centered Hero) -->
+        <div class="landing-split-hero" id="about">
+            <div class="hero-left-col">
+                <!-- Academic Crest Line-art Vector Icon -->
+                <div class="academic-crest-wrapper">
+                    <svg class="crest-svg" width="90" height="90" viewBox="0 0 100 100" fill="none" stroke="#E8B838" stroke-width="1.2">
+                        <path d="M25,70 C15,60 15,35 25,25 C30,35 30,55 25,70 Z" fill="rgba(232, 184, 56, 0.05)"/>
+                        <path d="M75,70 C85,60 85,35 75,25 C70,35 70,55 75,70 Z" fill="rgba(232, 184, 56, 0.05)"/>
+                        <rect x="38" y="32" width="24" height="30" rx="3" fill="var(--bg-card)"/>
+                        <path d="M43,38 L57,38 M43,44 L57,44 M43,50 L57,50" stroke="#E8B838" stroke-width="1.5"/>
+                        <polygon points="50,12 53,20 62,20 55,25 57,33 50,28 43,33 45,25 38,20 47,20" fill="#E8B838"/>
+                    </svg>
+                </div>
+                
+                <h1 class="hero-subtitle text">Your Academic <br>Dedication, Rewarded</h1>
+                <p class="hero-body-text">
+                    Welcome to the premier closed-loop student rewards portal for the Bradford International Alliance. Complete course modules, maintain high attendance, refer peer candidates, and build credit points towards direct tuition fee vouchers.
+                    <br><br>
+                    <span style="opacity: 0.65; font-size: 0.92rem; font-weight: 300;">
+                        * Registrations must be processed directly with BIA Student Services. Members may log in with their pre-authorized credentials below.
+                    </span>
+                </p>
+                <div style="margin-top: 2.5rem;">
+                    <button class="btn-request-access" id="btn-hero-login" style="padding: 1.15rem 2.8rem; font-size: 0.95rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;">
+                        <i class="fa-solid fa-right-to-bracket" style="margin-right: 0.50rem;"></i> Access Student Wallet
+                    </button>
+                </div>
+
+
+
+                <!-- Hero Animated Stats Row -->
+                <div class="hero-stats-row">
+                    <div class="hero-stat-item">
+                        <span class="hero-stat-num" data-target="12400">0</span><span class="hero-stat-suffix">+</span>
+                        <span class="hero-stat-label">Points Awarded</span>
+                    </div>
+                    <div class="hero-stat-divider"></div>
+                    <div class="hero-stat-item">
+                        <span class="hero-stat-num" data-target="340">0</span>
+                        <span class="hero-stat-label">Active Students</span>
+                    </div>
+                    <div class="hero-stat-divider"></div>
+                    <div class="hero-stat-item">
+                        <span class="hero-stat-num" data-target="6">0</span>
+                        <span class="hero-stat-label">Partner Brands</span>
+                    </div>
+                </div>
+                
+                <!-- Continuous Scrolling Partner Brand Marquee -->
+                <div class="logo-marquee-container">
+                    <div class="logo-marquee-track">
+                        <!-- Group 1 -->
+                        <div class="logo-item" style="color: #ffb829;">
+                            <svg class="bia-logo-svg" width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="transform: rotate(45deg); filter: drop-shadow(0 0 4px rgba(255, 184, 41, 0.4));">
+                                <rect class="logo-box box-purple" x="2" y="2" width="8" height="8" rx="2" fill="#8052ff"/>
+                                <rect class="logo-box box-amber" x="14" y="14" width="8" height="8" rx="2" fill="#ffb829"/>
+                                <rect class="logo-box box-green" x="14" y="2" width="8" height="8" rx="2" fill="#15846e"/>
+                                <rect class="logo-box box-white" x="2" y="14" width="8" height="8" rx="2" fill="#ffffff"/>
+                            </svg>
+                            <span>BIA</span>
+                        </div>
+                        <div class="logo-item"><i class="fa-solid fa-gas-pump"></i><span>ADNOC</span></div>
+                        <div class="logo-item"><i class="fa-solid fa-gift"></i><span>SHUKRAN</span></div>
+                        <div class="logo-item"><i class="fa-solid fa-couch"></i><span>IKEA</span></div>
+                        <div class="logo-item"><i class="fa-solid fa-car"></i><span>TOYOTA</span></div>
+                        <div class="logo-item"><i class="fa-solid fa-credit-card"></i><span>VISA</span></div>
+                        <div class="logo-item"><i class="fa-solid fa-cart-shopping"></i><span>EBAY</span></div>
+                        <div class="logo-item"><i class="fa-solid fa-headphones"></i><span>BOSE</span></div>
+                        <div class="logo-item"><i class="fa-solid fa-shirt"></i><span>H&M</span></div>
+                        <!-- Group 2 (Duplicate for loop) -->
+                        <div class="logo-item" style="color: #ffb829;">
+                            <svg class="bia-logo-svg" width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="transform: rotate(45deg); filter: drop-shadow(0 0 4px rgba(255, 184, 41, 0.4));">
+                                <rect class="logo-box box-purple" x="2" y="2" width="8" height="8" rx="2" fill="#8052ff"/>
+                                <rect class="logo-box box-amber" x="14" y="14" width="8" height="8" rx="2" fill="#ffb829"/>
+                                <rect class="logo-box box-green" x="14" y="2" width="8" height="8" rx="2" fill="#15846e"/>
+                                <rect class="logo-box box-white" x="2" y="14" width="8" height="8" rx="2" fill="#ffffff"/>
+                            </svg>
+                            <span>BIA</span>
+                        </div>
+                        <div class="logo-item"><i class="fa-solid fa-gas-pump"></i><span>ADNOC</span></div>
+                        <div class="logo-item"><i class="fa-solid fa-gift"></i><span>SHUKRAN</span></div>
+                        <div class="logo-item"><i class="fa-solid fa-couch"></i><span>IKEA</span></div>
+                        <div class="logo-item"><i class="fa-solid fa-car"></i><span>TOYOTA</span></div>
+                        <div class="logo-item"><i class="fa-solid fa-credit-card"></i><span>VISA</span></div>
+                        <div class="logo-item"><i class="fa-solid fa-cart-shopping"></i><span>EBAY</span></div>
+                        <div class="logo-item"><i class="fa-solid fa-headphones"></i><span>BOSE</span></div>
+                        <div class="logo-item"><i class="fa-solid fa-shirt"></i><span>H&M</span></div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+
+        <!-- Partnerships Container (Populated dynamically by the engine) -->
+        <div id="dynamic-partnerships-container"></div>
+
+        <!-- How It Works Section -->
+        <section class="landing-section reveal-on-scroll how-it-works-section" id="how-it-works">
+            <div class="hiw-title-wrap">
+                <span class="section-badge badge-amber">HOW IT WORKS</span>
+                <h2 style="font-family: 'DM Serif Display', serif; font-size: clamp(2.2rem, 5vw, 3.2rem); color: #EFECE3; margin-top: 0.5rem; margin-bottom: 1rem;">Academy to Rewards Path</h2>
+            </div>
+            
+            <div class="hiw-grid">
+                <div class="hiw-connector-path"></div>
+                
+                <!-- Step 1 -->
+                <div class="hiw-step-card">
+                    <span class="hiw-step-num">1</span>
+                    <div class="hiw-step-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+                    <h4>Earn Loyalty Credits</h4>
+                    <p>Complete academic course modules, attend industry check-in events, and maintain streaks to claim points balance.</p>
+                </div>
+                
+                <!-- Step 2 -->
+                <div class="hiw-step-card">
+                    <span class="hiw-step-num">2</span>
+                    <div class="hiw-step-icon"><i class="fa-solid fa-layer-group"></i></div>
+                    <h4>Scale Progression Tiers</h4>
+                    <p>Unlock higher tuition multipliers (up to 1.3x) and increased redemption limits as you level through Bronze, Silver, Gold, and Platinum.</p>
+                </div>
+                
+                <!-- Step 3 -->
+                <div class="hiw-step-card">
+                    <span class="hiw-step-num">3</span>
+                    <div class="hiw-step-icon"><i class="fa-solid fa-receipt"></i></div>
+                    <h4>Deduct & Redeem</h4>
+                    <p>Convert your points balance directly into BIA tuition discount fee vouchers or digital partner store cards instantly.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dynamic BIA Campus Events Section (Parallax & Custom Animations) -->
+        <section class="landing-section reveal-on-scroll events-section" id="events-section" style="padding-top: 2rem;">
+            <div class="hiw-title-wrap" style="margin-bottom: 3.5rem;">
+                <span class="section-badge badge-blue">CAMPUS EVENTS</span>
+                <h2 style="font-family: 'DM Serif Display', serif; font-size: clamp(2.2rem, 5vw, 3.2rem); color: #EFECE3; margin-top: 0.5rem; margin-bottom: 0.8rem;">Active Knowledge Hubs</h2>
+                <p class="section-desc" style="max-width: 600px; margin: 0 auto; color: rgba(239,236,227,0.65);">Accelerate your points balance by participating in BIA student network activities, hackathons, and workshops.</p>
+            </div>
+            
+            <!-- Parallax Grid Container -->
+            <div class="events-parallax-grid" id="public-events-container">
+                <!-- Injected dynamically via app.js -->
+            </div>
+        </section>
+
+        <!-- Manifesto / Core Values Section -->
+        <section class="landing-section reveal-on-scroll" id="manifesto">
+            <!-- Blueprint lines and nodes (Cipher Digital style) -->
+            <div class="section-blueprint-grid">
+                <div class="blueprint-line line-top"></div>
+                <div class="blueprint-line line-bottom"></div>
+                <div class="blueprint-line line-card-split-1"></div>
+                <div class="blueprint-line line-card-split-2"></div>
+                <div class="grid-node mnode-tl"></div>
+                <div class="grid-node mnode-tr"></div>
+                <div class="grid-node mnode-bl"></div>
+                <div class="grid-node mnode-br"></div>
+            </div>
+            
+            <div class="manifesto-grid">
+                <div class="manifesto-header">
+                    <span class="section-badge badge-amber">MANIFESTO</span>
+                    <h2 class="manifesto-title" style="font-family: 'DM Serif Display', serif; font-size: clamp(2rem, 5vw, 3.2rem); color: #EFECE3; margin-top: 0.5rem; margin-bottom: 1rem;">Our Core Principles</h2>
+                    <p class="manifesto-subtitle" style="color: rgba(239, 236, 227, 0.7); max-width: 600px; margin: 0 auto; line-height: 1.6;">We believe that dedication to learning should be recognized, nurtured, and directly rewarded.</p>
+                </div>
+                <div class="values-columns">
+                    <div class="value-card value-card--amber">
+                        <div class="value-card-icon-wrap" style="--icon-color: #ffb829;">
+                            <i class="fa-solid fa-trophy"></i>
+                        </div>
+                        <span class="value-num">01</span>
+                        <h4>Academic Achievement</h4>
+                        <p>Every milestone completed, seminar attended, and module mastered builds immediate tangible credit towards your education.</p>
+                    </div>
+                    <div class="value-card value-card--purple">
+                        <div class="value-card-icon-wrap" style="--icon-color: #8052ff;">
+                            <i class="fa-solid fa-network-wired"></i>
+                        </div>
+                        <span class="value-num">02</span>
+                        <h4>Ecosystem Unity</h4>
+                        <p>A closed-loop secure network connects all Bradford International Alliance branches, aligning incentives for global growth.</p>
+                    </div>
+                    <div class="value-card value-card--emerald">
+                        <div class="value-card-icon-wrap" style="--icon-color: #15846e;">
+                            <i class="fa-solid fa-users-between-lines"></i>
+                        </div>
+                        <span class="value-num">03</span>
+                        <h4>Peer Progression</h4>
+                        <p>By referring qualified peers, you directly support BIA's educational standard while unlocking higher multiplier tiers.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Automated Programs & Benefits Slideshow Section -->
+        <section class="landing-section reveal-on-scroll" id="tiers">
+            <div class="carousel-container spotlight-card">
+                <!-- Section Badge & Header -->
+                <div class="carousel-header">
+                    <span class="section-badge badge-amber">KEY BENEFITS</span>
+                    <h2 style="font-family: 'DM Serif Display', serif; color: #EFECE3;">Programs & Loyalty Rewards</h2>
+                </div>
+
+                <!-- Slide Content Area -->
+                <div class="carousel-track-wrapper">
+                    <!-- Slide 1: MBA -->
+                    <div class="carousel-slide active" data-index="0">
+                        <div class="slide-grid">
+                            <div class="slide-text">
+                                <span class="slide-badge">MBA INCENTIVE</span>
+                                <h3>Global Executive MBA</h3>
+                                <p>Enroll in our flagship business leadership course. Accumulate direct loyalty credits and redeem them to cover up to 40% of future tuition invoices.</p>
+                                <div class="points-indicator-widget">
+                                    <div class="widget-col">
+                                        <span class="w-label">POINTS EARNED</span>
+                                        <strong class="w-val text-primary">+2,500 pts</strong>
+                                    </div>
+                                    <div class="widget-col">
+                                        <span class="w-label">MAX DISCOUNT CAP</span>
+                                        <strong class="w-val text-emerald">40% Cap</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="slide-graphic">
+                                <svg class="graphic-wireframe" viewBox="0 0 100 100" width="100" height="100">
+                                    <circle cx="50" cy="50" r="35" fill="none" stroke="#ffb829" stroke-width="1.5" stroke-dasharray="5 3" />
+                                    <polygon points="50,25 70,65 30,65" fill="none" stroke="#8052ff" stroke-width="1.5" />
+                                    <circle cx="50" cy="50" r="5" fill="#15846e" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Slide 2: MSc Data Science -->
+                    <div class="carousel-slide" data-index="1">
+                        <div class="slide-grid">
+                            <div class="slide-text">
+                                <span class="slide-badge">TECH WELCOME</span>
+                                <h3>MSc Data Science & AI</h3>
+                                <p>Jumpstart your tech journey with a welcome credit of 1,200 points. Cover textbook expenses, lab licensing fees, or discount your coding modules instantly.</p>
+                                <div class="points-indicator-widget">
+                                    <div class="widget-col">
+                                        <span class="w-label">WELCOME BONUS</span>
+                                        <strong class="w-val text-primary">+1,200 pts</strong>
+                                    </div>
+                                    <div class="widget-col">
+                                        <span class="w-label">CASH VALUE</span>
+                                        <strong class="w-val text-gold">AED 300</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="slide-graphic">
+                                <svg class="graphic-wireframe" viewBox="0 0 100 100" width="100" height="100">
+                                    <rect x="25" y="25" width="50" height="50" rx="6" fill="none" stroke="#15846e" stroke-width="1.5" />
+                                    <line x1="25" y1="25" x2="75" y2="75" stroke="#ffb829" stroke-width="1" />
+                                    <circle cx="50" cy="50" r="10" fill="none" stroke="#8052ff" stroke-width="1.5" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Slide 3: DBA Peer Referrals -->
+                    <div class="carousel-slide" data-index="2">
+                        <div class="slide-grid">
+                            <div class="slide-text">
+                                <span class="slide-badge">REFERRAL LOOPS</span>
+                                <h3>Doctor of Business Administration (DBA)</h3>
+                                <p>Invite your professional circle to register. Verify peer enrollment to unlock the Gold tier points multiplier and receive a direct AED 250 voucher.</p>
+                                <div class="points-indicator-widget">
+                                    <div class="widget-col">
+                                        <span class="w-label">REFERRAL REWARD</span>
+                                        <strong class="w-val text-primary">1,000 pts</strong>
+                                    </div>
+                                    <div class="widget-col">
+                                        <span class="w-label">TIER MULTIPLIER</span>
+                                        <strong class="w-val text-gold">1.2x Gold</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="slide-graphic">
+                                <svg class="graphic-wireframe" viewBox="0 0 100 100" width="100" height="100">
+                                    <polygon points="50,15 85,45 70,85 30,85 15,45" fill="none" stroke="#ffb829" stroke-width="1.5" />
+                                    <line x1="50" y1="15" x2="50" y2="85" stroke="#15846e" stroke-width="1" />
+                                    <circle cx="50" cy="50" r="12" fill="none" stroke="#8052ff" stroke-width="1.5" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Slide 4: Physical Seminars -->
+                    <div class="carousel-slide" data-index="3">
+                        <div class="slide-grid">
+                            <div class="slide-text">
+                                <span class="slide-badge">ATTENDANCE CREDIT</span>
+                                <h3>Physical Seminars Check-ins</h3>
+                                <p>Complete seminar sessions or study modules to verify check-ins. Scan QR codes on-site to instantly credit study points to your student profile wallet.</p>
+                                <div class="points-indicator-widget">
+                                    <div class="widget-col">
+                                        <span class="w-label">SEMINAR VALUE</span>
+                                        <strong class="w-val text-primary">+100 pts</strong>
+                                    </div>
+                                    <div class="widget-col">
+                                        <span class="w-label">VERIFICATION TYPE</span>
+                                        <strong class="w-val text-emerald">QR Webhook</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="slide-graphic">
+                                <svg class="graphic-wireframe" viewBox="0 0 100 100" width="100" height="100">
+                                    <rect x="30" y="30" width="40" height="40" fill="none" stroke="#8052ff" stroke-width="1.5" />
+                                    <rect x="20" y="20" width="60" height="60" fill="none" stroke="#ffb829" stroke-width="1" stroke-dasharray="4 2" />
+                                    <circle cx="50" cy="50" r="6" fill="#15846e" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Slide 5: Shared Loops -->
+                    <div class="carousel-slide" data-index="4">
+                        <div class="slide-grid">
+                            <div class="slide-text">
+                                <span class="slide-badge">ECOSYSTEM LOOP</span>
+                                <h3>Unified Subsidiary Balance</h3>
+                                <p>Spend and earn points seamlessly across all BIA brands. Connect academic milestones to Global Seminars and EduAbroad student placements.</p>
+                                <div class="points-indicator-widget">
+                                    <div class="widget-col">
+                                        <span class="w-label">CONNECTED BRANDS</span>
+                                        <strong class="w-val text-primary">3 Subsidiaries</strong>
+                                    </div>
+                                    <div class="widget-col">
+                                        <span class="w-label">DEDUCTION GAP</span>
+                                        <strong class="w-val text-emerald">Shared Loop</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="slide-graphic">
+                                <svg class="graphic-wireframe" viewBox="0 0 100 100" width="100" height="100">
+                                    <circle cx="35" cy="50" r="20" fill="none" stroke="#8052ff" stroke-width="1.2" />
+                                    <circle cx="65" cy="50" r="20" fill="none" stroke="#ffb829" stroke-width="1.2" />
+                                    <circle cx="50" cy="35" r="20" fill="none" stroke="#15846e" stroke-width="1.2" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Carousel Footer: Progress & Navigation Controls -->
+                <div class="carousel-footer">
+                    <!-- Dynamic Progress Line -->
+                    <div class="carousel-progress-bar-container">
+                        <div class="carousel-progress-line" id="carousel-progress"></div>
+                    </div>
+                    <!-- Dots & Navigation -->
+                    <div class="carousel-controls">
+                        <div class="carousel-dots" id="carousel-dots-container"></div>
+                        <div class="carousel-arrows">
+                            <button class="arrow-btn" id="btn-prev-slide"><i class="fa-solid fa-arrow-left"></i></button>
+                            <button class="arrow-btn" id="btn-next-slide"><i class="fa-solid fa-arrow-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Teams Section (Horizontal Grid Layout) -->
+        <section class="landing-section" id="team">
+            <div class="team-layout-container">
+                <div class="team-header-full">
+                    <span class="section-badge badge-amber">AMBASSADORS</span>
+                    <h2 class="team-title">Our team</h2>
+                    <p class="team-subtitle">We are supported by some of the world's most pioneering educators, developers, and designers to fuel our growth.</p>
+                </div>
+                
+                <div class="team-members-grid">
+                    <!-- Premium Loyalty Ambassador Card (Platinum) -->
+                    <div class="team-member-item team-tier-platinum">
+                        <span class="member-num">01</span>
+                        <div class="member-card-body">
+                            <svg class="member-card-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" stroke-width="1.5">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                            </svg>
+                            <span class="status-pill status-platinum">PLATINUM LEVEL</span>
+                            <div class="member-meta">
+                                <h4>Dr. Aris Papas</h4>
+                                <p>Academic Director</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Premium Loyalty Ambassador Card (Gold) -->
+                    <div class="team-member-item team-tier-gold">
+                        <span class="member-num">02</span>
+                        <div class="member-card-body">
+                            <svg class="member-card-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ffb829" stroke-width="1.5">
+                                <polygon points="12,2 15,9 22,9 17,14 19,21 12,17 5,21 7,14 2,9 9,9"/>
+                            </svg>
+                            <span class="status-pill status-gold">GOLD MEMBER</span>
+                            <div class="member-meta">
+                                <h4>Sarah Mansoor</h4>
+                                <p>Head of Product</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Premium Loyalty Ambassador Card (Silver) -->
+                    <div class="team-member-item team-tier-silver">
+                        <span class="member-num">03</span>
+                        <div class="member-card-body">
+                            <svg class="member-card-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.5">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                            </svg>
+                            <span class="status-pill status-silver">SILVER PARTNER</span>
+                            <div class="member-meta">
+                                <h4>James Sterling</h4>
+                                <p>Systems Lead</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Premium Loyalty Ambassador Card (Bronze) -->
+                    <div class="team-member-item team-tier-bronze">
+                        <span class="member-num">04</span>
+                        <div class="member-card-body">
+                            <svg class="member-card-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#cd7f32" stroke-width="1.5">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 8v8M8 12h8"/>
+                            </svg>
+                            <span class="status-pill status-bronze">BRONZE AFFILIATE</span>
+                            <div class="member-meta">
+                                <h4>Fatma Al-Jaber</h4>
+                                <p>Admissions Chair</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Giant Bottom Title section -->
+        <div class="landing-bottom-bar">
+            <div class="bottom-headline-wrapper">
+                <h2 class="bottom-headline">Your university has the answer. Just ask BIA for it.</h2>
+                <span class="bottom-subtext">constellation floating on black velvet</span>
+            </div>
+            <div class="bottom-logo-wrapper">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="transform: rotate(45deg);">
+                    <rect x="2" y="2" width="8" height="8" rx="2" fill="#8052ff"/>
+                    <rect x="14" y="14" width="8" height="8" rx="2" fill="#ffb829"/>
+                    <rect x="14" y="2" width="8" height="8" rx="2" fill="#15846e"/>
+                    <rect x="2" y="14" width="8" height="8" rx="2" fill="#ffffff"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Shukran-Style BIA Branded Footer -->
+        <footer class="bia-footer-container">
+            <!-- Top Panel: App Link Promo -->
+            <div class="footer-app-promo">
+                <div class="app-promo-inner">
+                    <div class="app-promo-graphics">
+                        <img src="images/adnoc_students.png" alt="BIA App Screenshot" class="app-phone-mockup">
+                    </div>
+                    <div class="app-promo-text">
+                        <h3>Send the app link directly to your phone.</h3>
+                    </div>
+                    <div class="app-promo-action-form">
+                        <form id="footer-sms-form" class="sms-form-row">
+                            <span class="country-prefix">+971</span>
+                            <input type="tel" id="sms-phone-input" required placeholder="Enter your mobile number">
+                            <button type="submit" class="btn-send-sms">Send link</button>
+                        </form>
+                    </div>
+                    <div class="app-promo-divider">
+                        <span>OR</span>
+                    </div>
+                    <div class="app-promo-badges">
+                        <a href="#" class="store-badge-link">
+                            <i class="fa-brands fa-apple"></i>
+                            <div class="badge-text-wrap">
+                                <span class="badge-sub text-left">Download on the</span>
+                                <span class="badge-main">App Store</span>
+                            </div>
+                        </a>
+                        <a href="#" class="store-badge-link">
+                            <i class="fa-brands fa-google-play"></i>
+                            <div class="badge-text-wrap">
+                                <span class="badge-sub text-left">GET IT ON</span>
+                                <span class="badge-main">Google Play</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Panel: Links, Socials & Newsletter -->
+            <div class="footer-bottom-panel">
+                <div class="footer-links-grid">
+                    <div class="footer-col">
+                        <h4>About BIA</h4>
+                        <ul>
+                            <li><a href="#manifesto">Programme rules</a></li>
+                            <li><a href="#manifesto">Academy Manifesto</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-col">
+                        <h4>Help</h4>
+                        <ul>
+                            <li><a href="#tiers">FAQs</a></li>
+                            <li><a href="#about">Contact us</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-col">
+                        <h4>Connect with us</h4>
+                        <div class="footer-social-icons">
+                            <a href="#" title="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+                            <a href="#" title="X"><i class="fa-brands fa-x-twitter"></i></a>
+                            <a href="#" title="YouTube"><i class="fa-brands fa-youtube"></i></a>
+                            <a href="#" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                        </div>
+                        <span class="social-caption">Like or follow us to join in the conversation</span>
+                    </div>
+                    <div class="footer-col newsletter-col">
+                        <h4>Stay updated</h4>
+                        <form id="footer-newsletter-form" class="newsletter-form-row">
+                            <input type="email" id="newsletter-email-input" required placeholder="Enter your email address">
+                            <button type="submit" class="btn-subscribe">Subscribe</button>
+                        </form>
+                        <span class="newsletter-caption">Never miss an offer or update from Bradford International Academy!</span>
+                    </div>
+                </div>
+
+                <!-- Horizontal Divider Line -->
+                <hr class="footer-bottom-hr">
+
+                <!-- Final Copyright & UAE details -->
+                <div class="footer-sub-bar">
+                    <div class="footer-copyright-row">
+                        <!-- BIA Gold Emblem -->
+                        <div class="footer-gold-emblem">
+                            <div class="emblem-inner">B</div>
+                        </div>
+                        <span class="copyright-text">© 2010 - 2026 British International Academy. All rights reserved.</span>
+                    </div>
+                    <div class="footer-terms-row">
+                        <a href="#">Terms of Use</a>
+                        <a href="#">Privacy Policy</a>
+                    </div>
+                    <div class="footer-language-row">
+                        <span class="lang-arabic">عربي</span>
+                        <div class="flag-container">
+                            <div class="uae-flag-box">
+                                <div class="uae-red-stripe"></div>
+                                <div class="uae-green-stripe"></div>
+                                <div class="uae-white-stripe"></div>
+                                <div class="uae-black-stripe"></div>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-chevron-down lang-chevron"></i>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+        <!-- Frosted Login Modal Popup Overlay -->
+        <div id="login-modal-overlay" style="display: none; opacity: 0;">
+            <!-- Blueprint structural backdrop grid -->
+            <div class="login-mesh-grid">
+                <div class="mesh-line hor-line h1"></div>
+                <div class="mesh-line hor-line h2"></div>
+                <div class="mesh-line ver-line v1"></div>
+                <div class="mesh-line ver-line v2"></div>
+                <div class="grid-node node-1"></div>
+                <div class="grid-node node-2"></div>
+                <div class="grid-node node-3"></div>
+                <div class="grid-node node-4"></div>
+            </div>
+            
+            <div class="login-split-grid">
+
+                <!-- Column 1: AUTHENTICATION / SIGN IN FORM -->
+                <div class="card login-card-box spotlight-card" id="login-form-view">
+                    <div class="login-header">
+                        <span class="logo-accent-icon"><i class="fa-solid fa-right-to-bracket text-primary"></i></span>
+                        <h2>Access Student Wallet</h2>
+                        <p>Authenticate with your credentials to check points and redeem tuition fee vouchers.</p>
+                    </div>
+                    
+                    <form id="login-form">
+                        <div class="form-group" style="margin-bottom: 1.25rem;">
+                            <label>Registered Email Address</label>
+                            <input type="email" id="login-email" required placeholder="e.g. sarah@email.com">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0.5rem;">
+                            <label>Account Password</label>
+                            <input type="password" id="login-password" required placeholder="••••••••">
+                        </div>
+                        <div style="text-align: right; margin-bottom: 1.5rem;">
+                            <a href="#" class="forgot-link" id="link-forgot-password">Forgot Password?</a>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">
+                            <i class="fa-solid fa-right-to-bracket"></i> Authenticate Account
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Column 1 (Swapped): FORGOT PASSWORD VIEW -->
+                <div class="card login-card-box spotlight-card" id="forgot-password-view" style="display: none; opacity: 0;">
+                    <div class="login-header">
+                        <span class="logo-accent-icon"><i class="fa-solid fa-key text-gold"></i></span>
+                        <h2>Credentials Recovery</h2>
+                        <p>Retrieve password using your registered student details.</p>
+                    </div>
+                    
+                    <form id="recovery-form">
+                        <div class="form-group" style="margin-bottom: 1.25rem;">
+                            <label>Registered Email or Student ID</label>
+                            <input type="text" id="recovery-identifier" required placeholder="e.g. sarah@email.com or BIA-2024-9042">
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;">
+                            <i class="fa-solid fa-key"></i> Retrieve Password
+                        </button>
+                        <div style="text-align: center; margin-bottom: 1.5rem;">
+                            <a href="#" class="forgot-link" id="link-back-login">Back to Sign In</a>
+                        </div>
+                    </form>
+
+                    <!-- Professional Admin Support Help Box -->
+                    <div class="admin-support-box">
+                        <h5><i class="fa-solid fa-headset text-gold"></i> BIA Administration Support</h5>
+                        <p>If you cannot retrieve your credentials, BIA Student Services can verify your account manually. Please email support at <strong>support@bradfordia.com</strong> including:</p>
+                        <ol>
+                            <li>Your original BIA tuition fee payment receipt invoice.</li>
+                            <li>A photographed scan of your student registry ID card.</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <!-- Column 1 (Swapped): RECOVERY RESULT ALERT -->
+                <div class="card login-card-box spotlight-card" id="recovery-result-view" style="display: none; opacity: 0; text-align: center;">
+                    <div class="recovery-success-icon"><i class="fa-solid fa-shield-halved text-emerald"></i></div>
+                    <h3 style="font-family: 'Outfit'; margin-top: 0.75rem;">Account Recovered</h3>
+                    <p class="section-desc" style="margin-bottom: 1.5rem;">The following pre-registered credentials matched your query:</p>
+                    
+                    <div class="recovered-credentials-box">
+                        <div class="credential-row">
+                            <span>Name:</span>
+                            <strong id="lbl-recovered-name">Sarah</strong>
+                        </div>
+                        <div class="credential-row">
+                            <span>Email:</span>
+                            <strong id="lbl-recovered-email">sarah@email.com</strong>
+                        </div>
+                        <div class="credential-row">
+                            <span>Password:</span>
+                            <strong class="text-gold" id="lbl-recovered-pass">student123</strong>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-secondary btn-sm" id="btn-recovery-confirm" style="margin-top: 1.75rem; width: 100%;">
+                        Proceed to Login
+                    </button>
+                </div>
+
+                <!-- Column 2: INTERACTIVE DEMO PROFILES -->
+                <div class="card login-card-box spotlight-card" id="demo-credentials-view">
+                    <div class="login-header">
+                        <span class="logo-accent-icon"><i class="fa-solid fa-user-shield text-gold"></i></span>
+                        <h2>Simulation Profiles</h2>
+                        <p>Select a pre-registered testing profile to automatically populate credentials and explore the platform.</p>
+                    </div>
+                    
+                    <div class="demo-profiles-list">
+                        <!-- Admin Profile Card -->
+                        <div class="demo-profile-item active-glow-item" data-email="admin1@bradfordia.com" data-pass="admin123">
+                            <div class="profile-avatar"><i class="fa-solid fa-user-tie text-gold"></i></div>
+                            <div class="profile-details">
+                                <h4>Dr. Aris Papas</h4>
+                                <p>admin1@bradfordia.com</p>
+                            </div>
+                            <span class="profile-badge admin-badge">ADMIN</span>
+                        </div>
+                        <!-- Student Profile Card -->
+                        <div class="demo-profile-item active-glow-item" data-email="sarah@email.com" data-pass="student123">
+                            <div class="profile-avatar"><i class="fa-solid fa-user-graduate text-primary"></i></div>
+                            <div class="profile-details">
+                                <h4>Sarah Mansoor</h4>
+                                <p>sarah@email.com</p>
+                            </div>
+                            <span class="profile-badge student-badge">STUDENT</span>
+                        </div>
+                    </div>
+
+                    <div class="profile-helper-note">
+                        <i class="fa-solid fa-circle-info text-primary"></i> Clicking a profile card will instantly pre-fill the form on the left.
+                    </div>
+                    <button id="btn-close-login-modal" class="modal-close-btn" style="z-index: 10100;"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+            </div>
+        </div>
+
+    <!-- Global Toast Notification Container -->
+    <div id="bia-toast-container"></div>
+
+    <!-- Background glowing parallax spots -->
+    <div class="parallax-bg glow-spot-1" data-speed="-0.12"></div>
+    <div class="parallax-bg glow-spot-2" data-speed="0.08"></div>
+
+    <!-- Main App Frame -->
+    <div class="app-container" style="opacity: 0; display: none;">
+        <!-- Navigation Header -->
+        <header class="app-header">
+            <div class="header-logo" id="dashboard-logo" style="cursor: pointer;" title="Back to Home Page">
+                <span class="logo-accent">BIA</span>
+                <span class="logo-text">loyalityE</span>
+                <span class="badge-subdomain" id="user-role-badge">Student</span>
+            </div>
+            
+            <nav class="nav-links">
+                <!-- Student Navigation -->
+                <button class="nav-tab student-only active" data-target="overview"><i class="fa-solid fa-chart-pie"></i> Overview</button>
+                <button class="nav-tab student-only" data-target="referrals"><i class="fa-solid fa-user-plus"></i> Refer & Earn</button>
+                <button class="nav-tab student-only" data-target="redeem"><i class="fa-solid fa-gift"></i> Redeem</button>
+                <button class="nav-tab student-only" data-target="ledger"><i class="fa-solid fa-clock-rotate-left"></i> Ledger</button>
+                <button class="nav-tab student-only" data-target="vouchers"><i class="fa-solid fa-ticket"></i> My Vouchers</button>
+                
+                <!-- Admin Navigation -->
+                <button class="nav-tab admin-only" data-target="admin-students"><i class="fa-solid fa-users"></i> Students Directory</button>
+                <button class="nav-tab admin-only" data-target="admin-settings"><i class="fa-solid fa-sliders"></i> Database Rules</button>
+                <button class="nav-tab admin-only" data-target="admin-leads"><i class="fa-solid fa-graduation-cap" style="color: #dfb15b;"></i> Executive Leads</button>
+                <button class="nav-tab admin-only" data-target="admin-ledger"><i class="fa-solid fa-clock-rotate-left"></i> System Ledger</button>
+                <button class="nav-tab admin-only" data-target="admin-traffic"><i class="fa-solid fa-chart-line"></i> Activity Logs</button>
+                <button class="nav-tab admin-only" data-target="admin-engagement"><i class="fa-solid fa-chart-bar"></i> Engagement</button>
+                <button class="nav-tab admin-only" data-target="admin-announcements"><i class="fa-solid fa-bullhorn"></i> Announcements</button>
+                <button class="nav-tab admin-only" data-target="admin-vouchers-mgmt"><i class="fa-solid fa-tags"></i> Vouchers</button>
+
+                <!-- Logout Button -->
+                <button class="nav-tab logout-btn" id="btn-logout"><i class="fa-solid fa-power-off"></i> Exit</button>
+            </nav>
+        </header>
+
+        <!-- MAIN focused content frame -->
+        <main class="focused-content-frame">
+            
+            <!-- OVERVIEW TAB -->
+            <div id="overview" class="tab-content student-only active">
+                <!-- Announcements banner -->
+                <div id="student-announcements-banner" style="margin-bottom:1.25rem; display:flex; flex-direction:column; gap:0.65rem;"></div>
+                <div class="student-hero-banner card glassmorphic spotlight-card">
+                    <div class="student-hero-layout">
+                        <div class="student-info-col">
+                            <div class="avatar-badge"><i class="fa-solid fa-user-graduate"></i></div>
+                            <div class="student-text">
+                                <h3 id="user-name">Sarah Al-Mansoori</h3>
+                                <span class="student-id" id="lbl-student-id">Student ID: BIA-2024-9042</span>
+                                <span class="profile-badge student-badge">STUDENT MEMBER</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Premium Interactive Points Medal with glow ring -->
+                        <div class="student-points-medal-container">
+                            <div class="medal-glow-ring"></div>
+                            <div class="points-medal-outer">
+                                <div class="points-medal-inner">
+                                    <div class="medal-tier-icon"><i class="fa-solid fa-award"></i></div>
+                                    <span class="points-count" id="points-balance">0</span>
+                                    <span class="points-lbl">LOYALTY PTS</span>
+                                </div>
+                            </div>
+                            <div class="medal-tier-badge-label" id="user-tier-badge">
+                                <span id="tier-name">Bronze</span> Tier
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick-scan stats pills -->
+                    <div class="dashboard-quick-stats">
+                        <div class="quick-stat-pill clickable-pill" id="pill-streak" tabindex="0" role="button" aria-label="Go to Streak Attendance">
+                            <i class="fa-solid fa-fire" style="color: #ff6b35;"></i>
+                            <span><strong id="qs-streak">0</strong> Day Streak</span>
+                        </div>
+                        <div class="quick-stat-pill clickable-pill" id="pill-tier" tabindex="0" role="button" aria-label="Go to Tier Progression">
+                            <i class="fa-solid fa-layer-group" style="color: #ffb829;"></i>
+                            <span><strong id="qs-tier">Bronze</strong> Tier</span>
+                        </div>
+                        <div class="quick-stat-pill clickable-pill" id="pill-vouchers" tabindex="0" role="button" aria-label="Go to Redeem Vouchers">
+                            <i class="fa-solid fa-gift" style="color: #8052ff;"></i>
+                            <span><strong id="qs-vouchers">3</strong> Vouchers Available</span>
+                        </div>
+                        <div class="quick-stat-pill clickable-pill" id="pill-pts" tabindex="0" role="button" aria-label="Go to Ledger">
+                            <i class="fa-solid fa-coins" style="color: #15846e;"></i>
+                            <span><strong id="qs-pts">0</strong> pts Balance</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="student-dashboard-grid">
+                    <!-- Column 1: Daily Check-In attendance gamification -->
+                    <div class="card student-widget-card glassmorphic spotlight-card" id="widget-checkin">
+                        <h4><i class="fa-solid fa-calendar-check"></i> Attendance Check-In</h4>
+                        <p class="widget-desc">Check in daily to claim active participation credits and build your academic streak.</p>
+                        
+                        <div class="checkin-streak-box">
+                            <div class="streak-value"><i class="fa-solid fa-fire"></i> <span id="checkin-streak-num">1</span> Day Streak</div>
+                            <span class="streak-label">Keep logging in daily for bonus credits</span>
+                        </div>
+                        
+                        <button class="btn btn-primary btn-full-width" id="btn-daily-checkin">
+                            <i class="fa-solid fa-circle-check"></i> Claim Daily Reward (+15 pts)
+                        </button>
+                        <p class="checkin-status-msg" id="checkin-status-msg"></p>
+                    </div>
+
+                    <!-- Column 2: Tier milestones progression -->
+                    <div class="card student-widget-card glassmorphic spotlight-card" id="widget-progression">
+                        <h4><i class="fa-solid fa-layer-group"></i> Loyalty Tier Progression</h4>
+                        <p class="widget-desc">Ascend through Bradford's tier system to earn tuition multipliers and discount caps.</p>
+                        
+                        <div class="tier-progress-section" style="display: flex; align-items: center; gap: 1rem; margin-top: 1rem; margin-bottom: 1.25rem;">
+                            <!-- SVG Circular Progress Ring -->
+                            <div style="position: relative; width: 80px; height: 80px; flex-shrink: 0;">
+                                <svg width="80" height="80" viewBox="0 0 80 80" style="transform: rotate(-90deg);">
+                                    <circle cx="40" cy="40" r="34" stroke="rgba(255,255,255,0.05)" stroke-width="5" fill="transparent" />
+                                    <circle id="progress-circle-ring" cx="40" cy="40" r="34" stroke="#dfb15b" stroke-width="5" fill="transparent" stroke-linecap="round" stroke-dasharray="213.6" stroke-dashoffset="213.6" style="transition: stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1);" />
+                                </svg>
+                                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                    <span id="progress-circle-percent" style="font-family: 'Outfit'; font-weight: 800; font-size: 0.95rem; color: #fff;">0%</span>
+                                    <span style="font-size: 0.52rem; color: rgba(255,255,255,0.45); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">Done</span>
+                                </div>
+                            </div>
+                            <div style="flex: 1;">
+                                <span id="next-tier-target" style="font-weight: 700; font-size: 0.85rem; color: #dfb15b; display: block; margin-bottom: 0.15rem;">Next: Silver</span>
+                                <p id="progress-help" style="font-size: 0.72rem; color: rgba(255, 255, 255, 0.5); line-height: 1.3; margin: 0;">Loading tier status...</p>
+                                <span id="upsell-text" style="font-size: 0.66rem; color: #4ade80; display: block; margin-top: 0.35rem; font-weight: 600; line-height: 1.2;">On track! Lock in your 5% Platinum discount on next course.</span>
+                            </div>
+                        </div>
+
+                        <div class="minimal-tiers-list">
+                            <div class="minimal-tier-item" id="tier-bronze-card">
+                                <span>Bronze</span><strong id="bronze-mult-lbl">1.0x</strong>
+                            </div>
+                            <div class="minimal-tier-item" id="tier-silver-card">
+                                <span>Silver</span><strong id="silver-mult-lbl">1.1x</strong>
+                            </div>
+                            <div class="minimal-tier-item" id="tier-gold-card">
+                                <span>Gold</span><strong id="gold-mult-lbl">1.2x</strong>
+                            </div>
+                            <div class="minimal-tier-item" id="tier-platinum-card">
+                                <span>Platinum</span><strong id="plat-mult-lbl">1.3x</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column 3: Executive Webinars & LMS Perks (Zero Cost) -->
+                    <div class="card student-widget-card glassmorphic spotlight-card" id="widget-executive-perks">
+                        <h4><i class="fa-solid fa-graduation-cap" style="color: #dfb15b;"></i> Executive Webinars & LMS</h4>
+                        <p class="widget-desc">RSVP to online webinars, unlock video masterclasses, or schedule advisor consultations at zero cost.</p>
+                        
+                        <div class="quest-list">
+                            <!-- Option 1: Executive Roundtable Zoom Webinar -->
+                            <div class="quest-item" style="margin-bottom: 0.75rem;">
+                                <div class="quest-icon-col">
+                                    <div class="quest-icon" style="--qc: #dfb15b; background: rgba(223, 177, 91, 0.1); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #dfb15b;"><i class="fa-solid fa-video"></i></div>
+                                </div>
+                                <div class="quest-meta" style="flex: 1; padding-left: 0.75rem;">
+                                    <strong style="color: #fff; font-size: 0.8rem; display: block;">Executive Round-Table</strong>
+                                    <span style="font-size: 0.68rem; color: rgba(255, 255, 255, 0.45); display: block;">RSVP: Leadership in a Digital Age (Zoom)</span>
+                                </div>
+                                <div class="quest-right">
+                                    <button class="btn btn-secondary btn-sm btn-perk-action" onclick="claimExecutivePerk(this, 'webinar', 'RSVP: BIA Executive Webinar: Leadership in Digital Age')" style="font-size: 0.7rem; padding: 0.35rem 0.65rem; height: auto;">RSVP</button>
+                                </div>
+                            </div>
+                            
+                            <!-- Option 2: LMS Masterclass Access -->
+                            <div class="quest-item" style="margin-bottom: 0.75rem;">
+                                <div class="quest-icon-col">
+                                    <div class="quest-icon" style="--qc: #4ade80; background: rgba(74, 222, 128, 0.1); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #4ade80;"><i class="fa-solid fa-book-open"></i></div>
+                                </div>
+                                <div class="quest-meta" style="flex: 1; padding-left: 0.75rem;">
+                                    <strong style="color: #fff; font-size: 0.8rem; display: block;">Corporate Finance Class</strong>
+                                    <span style="font-size: 0.68rem; color: rgba(255, 255, 255, 0.45); display: block;">Unlock 30-day recorded video access</span>
+                                </div>
+                                <div class="quest-right">
+                                    <button class="btn btn-secondary btn-sm btn-perk-action" onclick="claimExecutivePerk(this, 'masterclass', 'Unlocked LMS Masterclass: Corporate Finance')" style="font-size: 0.7rem; padding: 0.35rem 0.65rem; height: auto;">Unlock</button>
+                                </div>
+                            </div>
+
+                            <!-- Option 3: Advisor Consultation Booking -->
+                            <div class="quest-item">
+                                <div class="quest-icon-col">
+                                    <div class="quest-icon" style="--qc: #60a5fa; background: rgba(96, 165, 250, 0.1); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #60a5fa;"><i class="fa-solid fa-calendar-days"></i></div>
+                                </div>
+                                <div class="quest-meta" style="flex: 1; padding-left: 0.75rem;">
+                                    <strong style="color: #fff; font-size: 0.8rem; display: block;">Admissions Consultation</strong>
+                                    <span style="font-size: 0.68rem; color: rgba(255, 255, 255, 0.45); display: block;">Book 1-on-1 DB/MBA Credit Review</span>
+                                </div>
+                                <div class="quest-right">
+                                    <button class="btn btn-secondary btn-sm btn-perk-action" onclick="claimExecutivePerk(this, 'consultation', 'Requested 1-on-1 DB/MBA Career Consultation')" style="font-size: 0.7rem; padding: 0.35rem 0.65rem; height: auto;">Book</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> <!-- closes student-dashboard-grid -->
+
+                <!-- P2P Transfer & Career pathways section wrapper -->
+                <div class="p2p-upsell-grid" style="display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 1.5rem; margin-top: 1.5rem;">
+                    
+                    <!-- P2P Transfer & Gifting Section -->
+                    <div class="card glassmorphic spotlight-card" style="margin-top: 0; display: flex; flex-direction: column; justify-content: space-between;">
+                        <div>
+                            <h3><i class="fa-solid fa-paper-plane" style="color: #dfb15b;"></i> Peer-to-Peer Points Gifting</h3>
+                            <p class="section-desc" style="margin-bottom: 1.25rem;">Transfer points directly to classmate wallets. To keep the loyalty program sustainable, a <strong>10% service fee (burn tax)</strong> is applied. Transfers are final and cannot carry over tier multiplier bonuses.</p>
+                            
+                            <form id="p2p-transfer-form" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem; align-items: stretch; width: 100%;">
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label>Recipient Student ID</label>
+                                    <div style="position: relative; display: flex; align-items: center;">
+                                        <input type="text" id="p2p-recipient-id" required placeholder="e.g. BIA-2024-9042" style="background: rgba(0, 0, 0, 0.35); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 0.65rem 0.85rem; color: #fff; width: 100%; box-sizing: border-box;">
+                                    </div>
+                                    <span id="p2p-recipient-verify-msg" style="font-size: 0.72rem; display: block; margin-top: 0.3rem; min-height: 15px; color: rgba(255, 255, 255, 0.4);">Enter recipient ID to verify</span>
+                                </div>
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label>Points to Send (Min 50, Max 500)</label>
+                                    <input type="number" id="p2p-amount" required min="50" max="500" placeholder="e.g. 100" style="background: rgba(0, 0, 0, 0.35); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 0.65rem 0.85rem; color: #fff; width: 100%; box-sizing: border-box; height: 38px;">
+                                </div>
+                                <div>
+                                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.68rem; font-weight: 700; height: 38px; display: flex; align-items: center; justify-content: center; gap: 0.4rem;">
+                                        <i class="fa-solid fa-share-nodes"></i> Gift Points
+                                    </button>
+                                </div>
+                            </form>
+                            
+                            <!-- Live calculation preview pill -->
+                            <div id="p2p-calc-preview" style="display: none; margin-top: 1rem; padding: 0.65rem 0.85rem; background: rgba(223, 177, 91, 0.08); border: 1px solid rgba(223, 177, 91, 0.2); border-radius: 8px; font-size: 0.82rem; color: rgba(255, 255, 255, 0.85);">
+                                Recipient will receive: <strong style="color: #dfb15b;" id="p2p-preview-received">0</strong> pts | 
+                                10% system tax: <strong style="color: #ef4444;" id="p2p-preview-tax">0</strong> pts | 
+                                Total deducted from your balance: <strong style="color: #fff;" id="p2p-preview-total">0</strong> pts
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BIA Career Pathways (Upsell / Cross-sell) Section -->
+                    <div class="card glassmorphic spotlight-card" id="widget-career-upgrades" style="margin-top: 0; display: flex; flex-direction: column; justify-content: space-between;">
+                        <div>
+                            <h3 style="margin-top: 0;"><i class="fa-solid fa-circle-arrow-up" style="color: #dfb15b;"></i> BIA Career Pathways</h3>
+                            <p class="section-desc" style="margin-bottom: 1.25rem;">Unlock next-stage credentials, upgrade your programme path, and lock in premium loyalty rewards.</p>
+                            
+                            <div id="upsell-cross-sell-content" style="margin-top: 1rem;">
+                                <p style="color: rgba(255,255,255,0.4); font-size: 0.82rem;">Loading pathway recommendations...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div> <!-- closes overview tab-content -->
+
+            <!-- REFER & EARN TAB -->
+            <div id="referrals" class="tab-content student-only">
+                <div class="minimal-single-column">
+                    <div class="card form-card glassmorphic spotlight-card">
+                        <h3><i class="fa-solid fa-gift" style="color: #dfb15b;"></i> Send an AED 500 Study Grant</h3>
+                        <p class="section-desc">Refer a classmate or friend to Bradford International Alliance. Upon submission, they will instantly receive an email invitation with an <strong>AED 500 Study Grant voucher</strong> on your behalf. Once they enroll and pay their first installment, you get rewarded with <strong>1,000 points (worth AED 250 in tuition credit)</strong>!</p>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Referee Full Name</label>
+                                <input type="text" id="referee-name" placeholder="e.g. John Doe">
+                            </div>
+                            <div class="form-group">
+                                <label>Referee Email</label>
+                                <input type="email" id="referee-email" placeholder="e.g. john@email.com">
+                            </div>
+                            <div class="form-group">
+                                <label>Enrolled Program</label>
+                                <select id="referee-program">
+                                    <option value="Bachelor">Bachelor's Program</option>
+                                    <option value="MBA">MBA Program (Premium)</option>
+                                    <option value="DBA">DBA Program (Premium)</option>
+                                    <option value="Doctorate">Doctorate Program (Premium)</option>
+                                    <option value="Cert">Short Certification</option>
+                                </select>
+                            </div>
+                            <div class="form-group flex-bottom">
+                                <button class="btn btn-primary" id="btn-submit-lead">Create Referral Lead</button>
+                            </div>
+                        </div>
+
+                        <!-- Quick Invite buttons -->
+                        <div style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid rgba(255,255,255,0.06); display: flex; gap: 1rem; align-items: center;">
+                            <span style="font-size: 0.76rem; font-weight: 700; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.05em;">Quick Invite:</span>
+                            <button class="btn btn-secondary btn-sm" id="btn-quick-wa" style="border-color: rgba(37, 211, 102, 0.2); background: rgba(37, 211, 102, 0.05); color: #25d366; display: flex; align-items: center; gap: 0.4rem; font-size: 0.72rem; padding: 0.45rem 0.85rem; border-radius: 6px; font-weight: 700; height: auto;">
+                                <i class="fa-brands fa-whatsapp"></i> Share on WhatsApp
+                            </button>
+                            <button class="btn btn-secondary btn-sm" id="btn-quick-copy" style="border-color: rgba(255,255,255,0.1); background: rgba(255,255,255,0.02); color: #fff; display: flex; align-items: center; gap: 0.4rem; font-size: 0.72rem; padding: 0.45rem 0.85rem; border-radius: 6px; font-weight: 700; height: auto;">
+                                <i class="fa-solid fa-copy"></i> Copy Invite Message
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- LinkedIn Brand Ambassador Card -->
+                    <div class="card glassmorphic spotlight-card" style="margin-top: 1.5rem;">
+                        <h3><i class="fa-brands fa-linkedin" style="color: #0077b5;"></i> Share Bradford Achievements on LinkedIn</h3>
+                        <p class="section-desc">Connect your LinkedIn profile and share your BIA achievements, certificates, or courses to earn an instant <strong>+50 loyalty points</strong>. Plus, get direct enrollment inquiries logged as referral leads automatically!</p>
+                        
+                        <div style="display: flex; gap: 1rem; align-items: center; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                            <div style="background: rgba(0, 119, 181, 0.1); width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #0077b5; font-size: 1.25rem;">
+                                <i class="fa-brands fa-linkedin-in"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <strong style="color: #fff; font-size: 0.88rem; display: block;" id="linkedin-status-title">LinkedIn Account Disconnected</strong>
+                                <span style="font-size: 0.72rem; color: rgba(255, 255, 255, 0.45); display: block;" id="linkedin-status-desc">Authorize BIA to publish achievements automatically.</span>
+                            </div>
+                            <button class="btn btn-secondary btn-sm" id="btn-linkedin-connect" style="font-size: 0.72rem; border-color: rgba(255, 255, 255, 0.1); background: rgba(255,255,255,0.02); color: #fff; display: flex; align-items: center; gap: 0.35rem;">
+                                <i class="fa-solid fa-link"></i> Connect Account
+                            </button>
+                        </div>
+
+                        <!-- Share interface (shown once connected) -->
+                        <div id="linkedin-share-console" style="display: none; margin-top: 1.25rem; border-top: 1px solid rgba(255, 255, 255, 0.06); padding-top: 1.25rem;">
+                            <div class="form-group" style="margin-bottom: 1rem;">
+                                <label>Select Academic Milestone to Share</label>
+                                <select id="linkedin-share-type" style="background: rgba(0, 0, 0, 0.35); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 0.65rem 0.85rem; color: #fff; width: 100%; box-sizing: border-box;">
+                                    <option value="enrollment">My Enrollment at Bradford International Alliance 🎓</option>
+                                    <option value="gpa">Academic Honors: GPA Excellence Milestone 🌟</option>
+                                    <option value="seminar">Attended Bradford Tech Summit 💻</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin-top: 1rem; margin-bottom: 1rem;">
+                                <label>Post Preview</label>
+                                <textarea id="linkedin-post-preview" readonly style="background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 0.75rem; color: rgba(255, 255, 255, 0.8); font-family: inherit; font-size: 0.8rem; min-height: 80px; width: 100%; box-sizing: border-box; resize: none;"></textarea>
+                            </div>
+                            <button class="btn btn-primary" id="btn-linkedin-post-share" style="margin-top: 0.5rem; display: flex; align-items: center; gap: 0.5rem; justify-content: center; width: 100%; font-weight: 700; height: 38px;">
+                                <i class="fa-brands fa-linkedin"></i> Share & Claim +50 Points
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card queue-card glassmorphic spotlight-card" style="margin-top: 1.5rem;">
+                        <h3><i class="fa-solid fa-hourglass-half"></i> Pending Enrollment Verification</h3>
+                        <div class="leads-list-wrapper" id="leads-queue">
+                            <p class="no-data">No active pending referrals found.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REDEEM TAB -->
+            <div id="redeem" class="tab-content student-only">
+                <div class="minimal-single-column">
+                    <!-- Calculator -->
+                    <div class="card form-card glassmorphic spotlight-card">
+                        <h3><i class="fa-solid fa-cash-register"></i> Course Fee Calculator</h3>
+                        <p class="section-desc">Calculate and apply points discount against BIA tuition fees.</p>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Course Fee (AED)</label>
+                                <input type="number" id="course-fee" value="10000" min="500">
+                            </div>
+                            <div class="form-group">
+                                <label>Points to Deduct</label>
+                                <input type="number" id="points-to-redeem" value="1000" min="0" step="100">
+                            </div>
+                            <div class="form-group flex-bottom">
+                                <button class="btn btn-secondary" id="btn-calculate-discount">Calculate Discount</button>
+                            </div>
+                        </div>
+
+                        <div class="redemption-results-box" id="redemption-results" style="display: none;">
+                            <div class="result-row">
+                                <span>Max Discount Cap (<span id="cap-percent-label">30%</span>):</span>
+                                <strong id="max-discount-val">AED 3,000</strong>
+                            </div>
+                            <div class="result-row">
+                                <span>Points Applied:</span>
+                                <strong id="points-applied-val">1,000 pts</strong>
+                            </div>
+                            <div class="result-row accent-row">
+                                <span>Discount Achieved:</span>
+                                <strong class="text-emerald" id="net-discount-val">AED 250</strong>
+                            </div>
+                            <div class="result-row final-row">
+                                <span>Final Tuition Payable:</span>
+                                <strong class="text-gold" id="final-payable-val">AED 9,750</strong>
+                            </div>
+                            <div class="result-action">
+                                <button class="btn btn-success btn-sm" id="btn-confirm-redemption">Confirm & Process</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Partner Rewards Section (Upgraded Visual Grid Catalog) -->
+                    <div class="card form-card glassmorphic spotlight-card" style="margin-top: 1.5rem;" id="dynamic-dashboard-redemption-card">
+                        <h3><i class="fa-solid fa-handshake"></i> BIA Partner Vouchers Redemption</h3>
+                        <p class="section-desc" style="margin-bottom: 1.5rem;">Deduct your points balance to redeem digital vouchers accepted at our partner networks across the UAE.</p>
+                        
+                        <!-- Dynamic Grid Catalog -->
+                        <div class="rewards-catalog-grid" id="dashboard-rewards-catalog">
+                            <!-- Injected dynamically via app.js -->
+                        </div>
+                    </div>
+
+                    <!-- LMS simulator & Expiry -->
+                    <div class="card form-card glassmorphic spotlight-card" style="margin-top: 1.5rem;">
+                        <h3><i class="fa-solid fa-laptop-code"></i> LMS Sync & Expiry Trigger</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Simulate LMS Webhook Action</label>
+                                <select id="lms-course">
+                                    <option value="Financial Accounting Basic" data-points="100">LMS: Complete Financial Basics (+100 pts)</option>
+                                    <option value="Strategic Management Module" data-points="200">LMS: Complete Strategic Management (+200 pts)</option>
+                                    <option value="Academic Seminar Attendance" data-points="50">Seminar: Physical Check-in (+50 pts)</option>
+                                </select>
+                            </div>
+                            <div class="form-group flex-bottom">
+                                <button class="btn btn-secondary btn-sm" id="btn-simulate-lms">Trigger Webhook</button>
+                            </div>
+                        </div>
+                        <div class="cron-box" style="margin-top: 1.25rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+                            <p class="section-desc" style="margin-bottom: 0.5rem;">Trigger a manual expiration sweep check to decay points older than 4 years by 50%:</p>
+                            <button class="btn btn-danger btn-sm" id="btn-trigger-cron">Execute Expiry Sweep</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LEDGER TAB -->
+            <div id="ledger" class="tab-content student-only">
+                <div class="card ledger-card glassmorphic">
+                    <h3><i class="fa-solid fa-clock-rotate-left"></i> Points Transaction Ledger</h3>
+                    <div class="ledger-table-wrapper">
+                        <table class="ledger-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Description</th>
+                                    <th>Points</th>
+                                    <th>Expires At</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ledger-body">
+                                <tr><td colspan="4" class="no-data">Loading ledger...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MY VOUCHERS TAB -->
+            <div id="vouchers" class="tab-content student-only">
+                <div class="card form-card glassmorphic spotlight-card">
+                    <h3><i class="fa-solid fa-ticket"></i> My Tuition Discount Vouchers</h3>
+                    <p class="section-desc" style="margin-bottom: 1.5rem;">Below is the catalogue of BIA Tuition Discount Vouchers you have generated. Present these voucher codes to the accounts department to claim your tuition discounts.</p>
+                    
+                    <div class="vouchers-grid-list" id="student-vouchers-list">
+                        <!-- Injected dynamically via app.js -->
+                        <p class="no-data">Loading vouchers...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADMIN: STUDENT DIRECTORY TAB -->
+            <div id="admin-students" class="tab-content admin-only">
+                <div class="minimal-grid">
+                    <!-- Create Student Account -->
+                    <div class="card form-card glassmorphic spotlight-card">
+                        <h3><i class="fa-solid fa-user-plus"></i> Register a Student Account</h3>
+                        <p class="section-desc">Add a new student profile to BIA so they can earn points and referrals.</p>
+                        
+                        <form id="create-student-form">
+                            <div class="form-group" style="margin-bottom: 1rem;">
+                                <label>Full Name</label>
+                                <input type="text" id="reg-name" required placeholder="e.g. Fatma Al-Dhaheri">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 1rem;">
+                                <label>Registered Email</label>
+                                <input type="email" id="reg-email" required placeholder="e.g. fatma@email.com">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 1rem;">
+                                <label>Student ID (e.g., BIA-YYYY-XXXX)</label>
+                                <input type="text" id="reg-student-id" required placeholder="e.g. BIA-2024-1024">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 1rem;">
+                                <label>BIA Programme Enrolled</label>
+                                <select id="reg-programme" required style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); color: #fff; font-family: inherit; padding: 0.75rem; border-radius: 8px; width: 100%; outline: none; font-size: 0.88rem;">
+                                    <option value="MBA">MBA</option>
+                                    <option value="DBA">DBA</option>
+                                    <option value="Digital Marketing">Digital Marketing</option>
+                                    <option value="Leadership in Practice">Leadership in Practice</option>
+                                    <option value="Finance & Accounting">Finance & Accounting</option>
+                                    <option value="Project Management">Project Management</option>
+                                    <option value="General">General / Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 1.25rem;">
+                                <label>Account Password</label>
+                                <input type="password" id="reg-password" required placeholder="••••••••">
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">
+                                <i class="fa-solid fa-circle-check"></i> Enroll Student Account
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Registered Students Directory -->
+                    <div class="card directory-card glassmorphic spotlight-card">
+                        <h3><i class="fa-solid fa-users"></i> BIA Student Directory</h3>
+                        <p class="section-desc">Manage enrolled student accounts, view wallets, and apply manual points adjustments.</p>
+                        
+                        <!-- Directory Quick Search Input -->
+                        <div class="search-box-wrapper" style="margin: 1.25rem 0 1.5rem 0; position: relative; display: flex; align-items: center; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; background: rgba(0, 0, 0, 0.35); padding: 0 0.85rem; transition: border-color 0.25s ease, box-shadow 0.25s ease;">
+                            <i class="fa-solid fa-magnifying-glass" style="color: rgba(255, 255, 255, 0.4); font-size: 0.85rem; margin-right: 0.65rem;"></i>
+                            <input type="text" id="admin-student-search-input" placeholder="Quick search student by name, ID, or email..." style="background: transparent; border: none; outline: none; padding: 0.65rem 0; font-family: inherit; font-size: 0.85rem; color: #ffffff; flex: 1; width: 100%;">
+                        </div>
+                        
+                        <div class="ledger-table-wrapper" style="max-height: 380px;">
+                            <table class="ledger-table">
+                                <thead>
+                                    <tr>
+                                        <th>Student Details</th>
+                                        <th>Tier</th>
+                                        <th>Points</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="student-directory-body">
+                                    <tr><td colspan="4" class="no-data">Loading student directory...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Programme & Bulk Points Management -->
+                    <div style="grid-column: 1 / -1;">
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.5rem; margin-top:1.5rem;">
+                            <!-- Bulk Points Award -->
+                            <div class="card form-card glassmorphic spotlight-card">
+                                <h3><i class="fa-solid fa-bolt" style="color:#dfb15b;"></i> Bulk Points Award</h3>
+                                <p class="section-desc" style="margin-bottom:1.25rem;">Award points to an entire programme cohort at once.</p>
+                                <form id="bulk-points-form">
+                                    <div class="form-group" style="margin-bottom:1rem;">
+                                        <label>Target Programme</label>
+                                        <select id="bulk-programme" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); color:#fff; font-family:inherit; padding:0.75rem; border-radius:8px; width:100%; outline:none; font-size:0.88rem;">
+                                            <option value="MBA">MBA</option>
+                                            <option value="DBA">DBA</option>
+                                            <option value="Digital Marketing">Digital Marketing</option>
+                                            <option value="Leadership in Practice">Leadership in Practice</option>
+                                            <option value="Finance & Accounting">Finance & Accounting</option>
+                                            <option value="Project Management">Project Management</option>
+                                            <option value="General">General / Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group" style="margin-bottom:1rem;">
+                                        <label>Points to Award</label>
+                                        <input type="number" id="bulk-points-amount" min="1" placeholder="e.g. 500" required>
+                                    </div>
+                                    <div class="form-group" style="margin-bottom:1.5rem;">
+                                        <label>Reason / Note</label>
+                                        <input type="text" id="bulk-points-reason" placeholder="e.g. Term 1 completion bonus">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary" style="width:100%;">
+                                        <i class="fa-solid fa-bolt"></i> Award to Cohort
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- Programme Overview -->
+                            <div class="card glassmorphic spotlight-card">
+                                <h3><i class="fa-solid fa-graduation-cap" style="color:#dfb15b;"></i> Programme Overview</h3>
+                                <p class="section-desc" style="margin-bottom:1.25rem;">Enrolment and points summary per programme.</p>
+                                <div id="programme-overview-body" style="display:flex; flex-direction:column; gap:0.65rem;">
+                                    <p style="color:rgba(255,255,255,0.4); font-size:0.82rem;">Loading...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADMIN CONFIG TAB (DYNAMIC SETTINGS) -->
+            <div id="admin-settings" class="tab-content admin-only">
+                <!-- Analytics Widgets Row -->
+                <div class="admin-analytics-grid" style="margin-bottom: 2rem; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                    <div class="admin-stat-card glassmorphic">
+                        <span class="admin-stat-lbl">System Points Liability</span>
+                        <strong class="admin-stat-val text-gold" id="metric-points-liability">— pts</strong>
+                        <p class="admin-stat-desc">Total outstanding student balance</p>
+                    </div>
+                    <div class="admin-stat-card glassmorphic">
+                        <span class="admin-stat-lbl">Tuition Discount Redeemed</span>
+                        <strong class="admin-stat-val text-emerald" id="metric-tuition-redeemed">AED —</strong>
+                        <p class="admin-stat-desc">Total claimed voucher values</p>
+                    </div>
+                    <div class="admin-stat-card glassmorphic">
+                        <span class="admin-stat-lbl">Pathway Conversion Rate</span>
+                        <strong class="admin-stat-val text-blue" id="metric-conversion-rate">—%</strong>
+                        <p class="admin-stat-desc" id="metric-revenue-estimate">AED — est. revenue</p>
+                    </div>
+                </div>
+
+                <!-- Rules Settings Card -->
+                <div class="card settings-card glassmorphic">
+                    <h3><i class="fa-solid fa-sliders"></i> Database Rules Configuration</h3>
+                    <p class="section-desc">Manage values directly inside the database settings. Adjust parameters below to dynamically update loyalty points multipliers, conversion ratios, and tier caps across the entire system without editing any code.</p>
+                    
+                    <form id="admin-settings-form">
+                        <div class="settings-grid" id="admin-settings-container">
+                            <!-- Populated dynamically -->
+                        </div>
+                        <div class="settings-actions" style="margin-top: 2rem; text-align: right;">
+                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Save Rules to Database</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Add New Collaborator Card -->
+                <div class="card settings-card glassmorphic spotlight-card" style="margin-top: 2rem;">
+                    <h3><i class="fa-solid fa-circle-plus"></i> Register New Collaborator Program</h3>
+                    <p class="section-desc">Add a new partner company to the BIA Loyalty network. Registering a partner creates a dedicated marketing segment on the public portal and configures redemption routes immediately.</p>
+                    
+                    <form id="admin-new-partner-form">
+                        <div class="settings-grid">
+                            <div class="settings-input-group">
+                                <label>Collaborator Brand Name</label>
+                                <p>Public name of the partner (e.g. Shukran, Dunkin, Esaad)</p>
+                                <input type="text" id="partner-form-name" required placeholder="e.g. Dunkin Rewards">
+                            </div>
+                            
+                            <div class="settings-input-group">
+                                <label>Marketing Segment Title</label>
+                                <p>Header title for the marketing block</p>
+                                <input type="text" id="partner-form-title" required placeholder="e.g. BIA × Dunkin Collaboration">
+                            </div>
+
+                            <div class="settings-input-group" style="grid-column: span 2;">
+                                <label>Description Subtitle</label>
+                                <p>Long-form description explaining the partnership details to students</p>
+                                <textarea id="partner-form-subtitle" required style="background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.75rem; color: var(--text-main); font-family: inherit; font-size: 1rem; min-height: 100px; width: 100%; box-sizing: border-box;"></textarea>
+                            </div>
+
+                            <div class="settings-input-group">
+                                <label>Banner Image Asset</label>
+                                <p>Attach a banner image from your device</p>
+                                <input type="file" id="partner-form-image" accept="image/*" required style="background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.6rem; color: var(--text-main); font-family: inherit; font-size: 0.9rem; width: 100%; box-sizing: border-box;">
+                            </div>
+
+                            <div class="settings-input-group">
+                                <label>Brand Color Theme</label>
+                                <p>Vibrant hex code for branding circles</p>
+                                <input type="color" id="partner-form-color" value="#EB4C42" style="height: 45px; padding: 2px; width: 100%;">
+                            </div>
+
+                            <!-- Rewards Definition Block -->
+                            <div style="grid-column: span 2; margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 1.5rem;">
+                                <h4 style="font-family: 'Outfit'; margin-bottom: 0.5rem; color: var(--text-main);"><i class="fa-solid fa-gift text-gold" style="color: #ffb829;"></i> Partner Vouchers (Exactly 3 Rewards)</h4>
+                            </div>
+
+                            <!-- Reward 1 -->
+                            <div class="settings-input-group">
+                                <label>Reward 1: Name</label>
+                                <input type="text" id="reward-1-name" required placeholder="e.g. Free Coffee Combo">
+                            </div>
+                            <div class="settings-input-group">
+                                <label>Reward 1: Cost (Points) & Cash Value</label>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <input type="number" id="reward-1-cost" required placeholder="Points" style="width: 50%;">
+                                    <input type="text" id="reward-1-cash" required placeholder="e.g. AED 15" style="width: 50%;">
+                                </div>
+                            </div>
+
+                            <!-- Reward 2 -->
+                            <div class="settings-input-group">
+                                <label>Reward 2: Name</label>
+                                <input type="text" id="reward-2-name" required placeholder="e.g. AED 50 Gift Card">
+                            </div>
+                            <div class="settings-input-group">
+                                <label>Reward 2: Cost (Points) & Cash Value</label>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <input type="number" id="reward-2-cost" required placeholder="Points" style="width: 50%;">
+                                    <input type="text" id="reward-2-cash" required placeholder="e.g. AED 50" style="width: 50%;">
+                                </div>
+                            </div>
+
+                            <!-- Reward 3 -->
+                            <div class="settings-input-group">
+                                <label>Reward 3: Name</label>
+                                <input type="text" id="reward-3-name" required placeholder="e.g. Premium Travel Voucher">
+                            </div>
+                            <div class="settings-input-group">
+                                <label>Reward 3: Cost (Points) & Cash Value</label>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <input type="number" id="reward-3-cost" required placeholder="Points" style="width: 50%;">
+                                    <input type="text" id="reward-3-cash" required placeholder="e.g. AED 100" style="width: 50%;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="settings-actions" style="margin-top: 2rem; text-align: right;">
+                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Register Collaborator</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Add Campus Events Card -->
+                <div class="card settings-card glassmorphic spotlight-card" style="margin-top: 2rem;">
+                    <h3><i class="fa-solid fa-calendar-plus"></i> Publish New Campus Event</h3>
+                    <p class="section-desc">Add an active learning event, seminar, or workshop. Once published, it will dynamically appear on the public landing page with custom points rewards.</p>
+                    
+                    <form id="admin-new-event-form">
+                        <div class="settings-grid">
+                            <div class="settings-input-group">
+                                <label>Event Title</label>
+                                <input type="text" id="event-form-title" required placeholder="e.g. Skillshare Workshop Series">
+                            </div>
+                            <div class="settings-input-group">
+                                <label>Points Reward</label>
+                                <input type="number" id="event-form-points" required placeholder="e.g. 150">
+                            </div>
+                            <div class="settings-input-group" style="grid-column: span 2;">
+                                <label>Event Description</label>
+                                <textarea id="event-form-desc" required placeholder="e.g. Join BIA student mentors in peer-led software skill sharing modules on campus." style="background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.75rem; color: var(--text-main); font-family: inherit; font-size: 1rem; min-height: 80px; width: 100%; box-sizing: border-box;"></textarea>
+                            </div>
+                            <div class="settings-input-group" style="grid-column: span 2;">
+                                <label>Event Banner Image</label>
+                                <p>Attach a promotional banner image from your device</p>
+                                <input type="file" id="event-form-image" accept="image/*" required style="background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.6rem; color: var(--text-main); font-family: inherit; font-size: 0.9rem; width: 100%; box-sizing: border-box;">
+                            </div>
+                        </div>
+                        <div class="settings-actions" style="margin-top: 2rem; text-align: right;">
+                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-bullhorn"></i> Publish Event</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Existing Events Management Card -->
+                <div class="card settings-card glassmorphic spotlight-card" style="margin-top: 2rem;">
+                    <h3><i class="fa-solid fa-list-check"></i> Manage Active Events</h3>
+                    <p class="section-desc">View and delete currently active campus events displayed on the landing page.</p>
+                    <div id="admin-events-list" style="margin-top: 1.5rem;">
+                        <!-- Dynamically populated events list with delete buttons -->
+                    </div>
+                </div>
+
+                <!-- System Operations & Security Card -->
+                <div class="card settings-card glassmorphic spotlight-card" style="margin-top: 2rem; border-color: rgba(239, 68, 68, 0.25) !important;">
+                    <h3><i class="fa-solid fa-triangle-exclamation" style="color: #ef4444;"></i> Administrative System Operations</h3>
+                    <p class="section-desc">Critical system commands to reinitialize database state, clear traffic logs, or manage IP bans. <strong>Caution:</strong> Database reset will restore the default simulated student profiles and remove all manual logs.</p>
+                    
+                    <div style="display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap;">
+                        <button class="btn btn-secondary" onclick="resetDatabaseState(this)" style="background: rgba(239, 68, 68, 0.08); border-color: rgba(239, 68, 68, 0.25); color: #ef4444; font-weight: 700; display: flex; align-items: center; gap: 0.4rem;">
+                            <i class="fa-solid fa-rotate"></i> Reset Database State
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADMIN: SYSTEM LEDGER TAB -->
+            <div id="admin-ledger" class="tab-content admin-only">
+                <div class="card ledger-card glassmorphic spotlight-card">
+                    <h3><i class="fa-solid fa-clock-rotate-left"></i> System Points Audit Ledger</h3>
+                    <p class="section-desc">Consolidated history of all referral credits, course completions, deductions, manual adjustments, and decayed points across BIA.</p>
+                    
+                    <div class="ledger-table-wrapper">
+                        <table class="ledger-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Student Member</th>
+                                    <th>Description</th>
+                                    <th>Points Change</th>
+                                    <th>Expiry Check</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-ledger-body">
+                                <tr><td colspan="5" class="no-data">Loading audit ledger...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADMIN: EXECUTIVE LEADS TAB -->
+            <div id="admin-leads" class="tab-content admin-only">
+                <div class="card ledger-card glassmorphic spotlight-card">
+                    <h3><i class="fa-solid fa-graduation-cap"></i> Executive Seminar & Upsell Leads</h3>
+                    <p class="section-desc">Real-time tracker of student interest signals, including webinar reservations, consultation bookings, and masterclass access requests.</p>
+                    
+                    <div class="ledger-table-wrapper">
+                        <table class="ledger-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Student Name</th>
+                                    <th>Student ID / Email</th>
+                                    <th>Interaction Request Details</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-leads-body">
+                                <tr><td colspan="6" class="no-data">Loading executive leads...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADMIN: ACTIVITY & AUDIT LOG TAB -->
+            <div id="admin-traffic" class="tab-content admin-only">
+                <div class="minimal-grid" style="grid-template-columns: 1fr;">
+
+                    <!-- Stats bar -->
+                    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:1.5rem;">
+                        <div class="card glassmorphic" style="padding:1rem; text-align:center; border-radius:10px;">
+                            <span style="font-size:0.62rem; color:rgba(255,255,255,0.4); text-transform:uppercase; display:block;">Total Log Entries</span>
+                            <h3 id="stat-total-hits" style="margin:0.25rem 0 0 0; font-family:'Outfit'; color:#fff; font-size:1.5rem;">—</h3>
+                        </div>
+                        <div class="card glassmorphic" style="padding:1rem; text-align:center; border-radius:10px;">
+                            <span style="font-size:0.62rem; color:rgba(255,255,255,0.4); text-transform:uppercase; display:block;">Active Sessions</span>
+                            <h3 id="stat-active-sessions" style="margin:0.25rem 0 0 0; font-family:'Outfit'; color:#4ade80; font-size:1.5rem;">—</h3>
+                        </div>
+                        <div class="card glassmorphic" style="padding:1rem; text-align:center; border-radius:10px;">
+                            <span style="font-size:0.62rem; color:rgba(255,255,255,0.4); text-transform:uppercase; display:block;">Unique Students</span>
+                            <h3 id="stat-unique-students" style="margin:0.25rem 0 0 0; font-family:'Outfit'; color:#dfb15b; font-size:1.5rem;">—</h3>
+                        </div>
+                        <div class="card glassmorphic" style="padding:1rem; text-align:center; border-radius:10px;">
+                            <span style="font-size:0.62rem; color:rgba(255,255,255,0.4); text-transform:uppercase; display:block;">Portal Status</span>
+                            <h3 id="stat-security" style="margin:0.25rem 0 0 0; font-family:'Outfit'; color:#4ade80; font-size:1rem;">Live</h3>
+                        </div>
+                    </div>
+
+                    <!-- Activity log table -->
+                    <div class="card glassmorphic spotlight-card">
+                        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; flex-wrap:wrap; gap:0.75rem;">
+                            <div>
+                                <h3 style="margin:0;"><i class="fa-solid fa-list-ul"></i> Live Activity & Audit Log</h3>
+                                <p class="section-desc" style="margin:0.25rem 0 0 0;">Real-time record of student logins, actions, and admin operations.</p>
+                            </div>
+                            <button onclick="loadTrafficDashboard()" style="display:flex; align-items:center; gap:0.4rem; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); color:rgba(255,255,255,0.6); padding:0.45rem 0.9rem; border-radius:6px; cursor:pointer; font-size:0.75rem; font-family:inherit; transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='rgba(255,255,255,0.04)'">
+                                <i class="fa-solid fa-rotate"></i> Refresh
+                            </button>
+                        </div>
+                        <div style="margin-bottom:1rem;">
+                            <div style="position:relative;">
+                                <i class="fa-solid fa-magnifying-glass" style="position:absolute; left:0.85rem; top:50%; transform:translateY(-50%); color:rgba(255,255,255,0.3); font-size:0.8rem;"></i>
+                                <input type="text" id="traffic-search-input" placeholder="Search by student, IP address, or activity..." style="width:100%; box-sizing:border-box; padding:0.65rem 0.75rem 0.65rem 2.25rem; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:8px; color:#fff; font-family:inherit; font-size:0.82rem; outline:none;">
+                            </div>
+                        </div>
+                        <div class="table-scroll-container">
+                            <table class="ledger-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Student / User</th>
+                                        <th>IP Address</th>
+                                        <th>Activity Log</th>
+                                        <th>Browser / User Agent</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="traffic-logs-body">
+                                    <tr><td colspan="5" class="no-data">Loading activity logs...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ADMIN: ENGAGEMENT REPORT TAB -->
+            <div id="admin-engagement" class="tab-content admin-only">
+                <div class="minimal-grid" style="grid-template-columns:1fr;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
+                        <div>
+                            <h2 style="margin:0; font-family:'Outfit'; color:#fff;"><i class="fa-solid fa-chart-bar" style="color:#dfb15b;"></i> Student Engagement Report</h2>
+                            <p style="margin:0.35rem 0 0 0; color:rgba(255,255,255,0.45); font-size:0.85rem;">Track student activity, identify at-risk members, and act on engagement gaps.</p>
+                        </div>
+                        <button onclick="loadEngagementReport()" style="display:flex; align-items:center; gap:0.4rem; background:rgba(223,177,91,0.08); border:1px solid rgba(223,177,91,0.2); color:#dfb15b; padding:0.55rem 1.1rem; border-radius:8px; cursor:pointer; font-size:0.78rem; font-family:inherit; font-weight:700;">
+                            <i class="fa-solid fa-rotate"></i> Refresh Report
+                        </button>
+                    </div>
+
+                    <!-- Status summary cards -->
+                    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-bottom:1.5rem;">
+                        <div class="card glassmorphic" style="padding:1.25rem; border-radius:12px; border-left:3px solid #4ade80;">
+                            <span style="font-size:0.62rem; color:rgba(255,255,255,0.4); text-transform:uppercase; display:block; margin-bottom:0.3rem;">Active (Last 7 days)</span>
+                            <h2 id="eng-active-count" style="margin:0; font-family:'Outfit'; color:#4ade80; font-size:2rem;">—</h2>
+                        </div>
+                        <div class="card glassmorphic" style="padding:1.25rem; border-radius:12px; border-left:3px solid #dfb15b;">
+                            <span style="font-size:0.62rem; color:rgba(255,255,255,0.4); text-transform:uppercase; display:block; margin-bottom:0.3rem;">At Risk (8–30 days)</span>
+                            <h2 id="eng-atrisk-count" style="margin:0; font-family:'Outfit'; color:#dfb15b; font-size:2rem;">—</h2>
+                        </div>
+                        <div class="card glassmorphic" style="padding:1.25rem; border-radius:12px; border-left:3px solid #ef4444;">
+                            <span style="font-size:0.62rem; color:rgba(255,255,255,0.4); text-transform:uppercase; display:block; margin-bottom:0.3rem;">Inactive (30+ days)</span>
+                            <h2 id="eng-inactive-count" style="margin:0; font-family:'Outfit'; color:#ef4444; font-size:2rem;">—</h2>
+                        </div>
+                    </div>
+
+                    <!-- Engagement table -->
+                    <div class="card glassmorphic spotlight-card">
+                        <h3 style="margin-top:0;"><i class="fa-solid fa-users"></i> Student Activity Breakdown</h3>
+                        <div class="table-scroll-container">
+                            <table class="ledger-table">
+                                <thead>
+                                    <tr>
+                                        <th>Student</th>
+                                        <th>Programme</th>
+                                        <th>Tier</th>
+                                        <th>Points</th>
+                                        <th>Referrals</th>
+                                        <th>Last Seen</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="engagement-table-body">
+                                    <tr><td colspan="7" class="no-data">Loading engagement data...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div style="margin-top:1rem; display:flex; justify-content:flex-end;">
+                            <button onclick="exportStudentsCSV()" style="display:flex; align-items:center; gap:0.4rem; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); color:rgba(255,255,255,0.65); padding:0.5rem 1rem; border-radius:8px; cursor:pointer; font-size:0.75rem; font-family:inherit; font-weight:700; transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.09)'" onmouseout="this.style.background='rgba(255,255,255,0.04)'">
+                                <i class="fa-solid fa-file-csv"></i> Export as CSV
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADMIN: ANNOUNCEMENTS TAB -->
+            <div id="admin-announcements" class="tab-content admin-only">
+                <div class="minimal-grid" style="grid-template-columns: 380px 1fr; align-items:start;">
+
+                    <!-- Create announcement form -->
+                    <div class="card form-card glassmorphic spotlight-card">
+                        <h3><i class="fa-solid fa-bullhorn" style="color:#dfb15b;"></i> Post Announcement</h3>
+                        <p class="section-desc" style="margin-bottom:1.25rem;">Broadcast a message to all student dashboards immediately.</p>
+                        <form id="announcement-form">
+                            <div class="form-group" style="margin-bottom:1rem;">
+                                <label>Announcement Title</label>
+                                <input type="text" id="ann-title" placeholder="e.g. Term 2 Registration Open" required>
+                            </div>
+                            <div class="form-group" style="margin-bottom:1rem;">
+                                <label>Message Body</label>
+                                <textarea id="ann-body" rows="4" placeholder="Write your message to students..." required style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); color:#fff; font-family:inherit; padding:0.75rem; border-radius:8px; width:100%; outline:none; font-size:0.88rem; resize:vertical; box-sizing:border-box;"></textarea>
+                            </div>
+                            <div class="form-group" style="margin-bottom:1rem;">
+                                <label>Type</label>
+                                <select id="ann-type" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); color:#fff; font-family:inherit; padding:0.75rem; border-radius:8px; width:100%; outline:none; font-size:0.88rem;">
+                                    <option value="info">ℹ️ Information</option>
+                                    <option value="success">✅ Good News</option>
+                                    <option value="warning">⚠️ Important Notice</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin-bottom:1.5rem;">
+                                <label>Expires On (optional — leave blank for permanent)</label>
+                                <input type="date" id="ann-expires" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); color:#fff; font-family:inherit; padding:0.75rem; border-radius:8px; width:100%; outline:none; font-size:0.88rem; box-sizing:border-box;">
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width:100%;">
+                                <i class="fa-solid fa-paper-plane"></i> Publish Announcement
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Active announcements list -->
+                    <div class="card glassmorphic spotlight-card">
+                        <h3><i class="fa-solid fa-inbox"></i> Active Announcements</h3>
+                        <p class="section-desc" style="margin-bottom:1.25rem;">These are currently visible on all student dashboards.</p>
+                        <div id="announcements-list" style="display:flex; flex-direction:column; gap:0.75rem;">
+                            <p style="color:rgba(255,255,255,0.4); font-size:0.82rem;">Loading announcements...</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ADMIN: VOUCHER MANAGEMENT TAB -->
+            <div id="admin-vouchers-mgmt" class="tab-content admin-only">
+                <div class="minimal-grid" style="grid-template-columns: 1fr;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
+                        <div>
+                            <h2 style="margin:0; font-family:'Outfit'; color:#fff;"><i class="fa-solid fa-tags" style="color:#dfb15b;"></i> Voucher Management</h2>
+                            <p style="margin:0.35rem 0 0 0; color:rgba(255,255,255,0.45); font-size:0.85rem;">See all vouchers claimed across the platform. Monitor usage and identify patterns.</p>
+                        </div>
+                        <button onclick="loadAdminVoucherReport()" style="display:flex; align-items:center; gap:0.4rem; background:rgba(223,177,91,0.08); border:1px solid rgba(223,177,91,0.2); color:#dfb15b; padding:0.55rem 1.1rem; border-radius:8px; cursor:pointer; font-size:0.78rem; font-family:inherit; font-weight:700;">
+                            <i class="fa-solid fa-rotate"></i> Refresh
+                        </button>
+                    </div>
+
+                    <!-- Summary cards -->
+                    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-bottom:1.5rem;">
+                        <div class="card glassmorphic" style="padding:1.25rem; border-radius:12px;">
+                            <span style="font-size:0.62rem; color:rgba(255,255,255,0.4); text-transform:uppercase; display:block; margin-bottom:0.3rem;">Total Vouchers Claimed</span>
+                            <h2 id="voucher-stat-total" style="margin:0; font-family:'Outfit'; color:#fff; font-size:2rem;">—</h2>
+                        </div>
+                        <div class="card glassmorphic" style="padding:1.25rem; border-radius:12px;">
+                            <span style="font-size:0.62rem; color:rgba(255,255,255,0.4); text-transform:uppercase; display:block; margin-bottom:0.3rem;">Total Value Issued (AED)</span>
+                            <h2 id="voucher-stat-value" style="margin:0; font-family:'Outfit'; color:#dfb15b; font-size:2rem;">—</h2>
+                        </div>
+                        <div class="card glassmorphic" style="padding:1.25rem; border-radius:12px;">
+                            <span style="font-size:0.62rem; color:rgba(255,255,255,0.4); text-transform:uppercase; display:block; margin-bottom:0.3rem;">Avg. Discount per Voucher</span>
+                            <h2 id="voucher-stat-avg" style="margin:0; font-family:'Outfit'; color:#4ade80; font-size:2rem;">—</h2>
+                        </div>
+                    </div>
+
+                    <!-- All claimed vouchers table -->
+                    <div class="card glassmorphic spotlight-card">
+                        <h3 style="margin-top:0;"><i class="fa-solid fa-receipt"></i> All Claimed Vouchers</h3>
+                        <div class="table-scroll-container">
+                            <table class="ledger-table">
+                                <thead>
+                                    <tr>
+                                        <th>Voucher Code</th>
+                                        <th>Student</th>
+                                        <th>Discount (AED)</th>
+                                        <th>Points Used</th>
+                                        <th>Status</th>
+                                        <th>Claimed On</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-vouchers-body">
+                                    <tr><td colspan="7" class="no-data">Loading vouchers...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div style="margin-top:1rem; display:flex; justify-content:flex-end;">
+                            <button onclick="exportVouchersCSV()" style="display:flex; align-items:center; gap:0.4rem; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); color:rgba(255,255,255,0.65); padding:0.5rem 1rem; border-radius:8px; cursor:pointer; font-size:0.75rem; font-family:inherit; font-weight:700;">
+                                <i class="fa-solid fa-file-csv"></i> Export as CSV
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+    <!-- SCHEDULED MAINTENANCE FULLSCREEN OVERLAY -->
+    <div id="maintenance-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(10, 11, 14, 0.99); z-index: 10000; align-items: center; justify-content: center; flex-direction: column;">
+        <div class="card glassmorphic spotlight-card" style="max-width: 500px; text-align: center; padding: 3rem 2rem; border: 1px solid rgba(223, 177, 91, 0.15);">
+            <i class="fa-solid fa-screwdriver-wrench" style="font-size: 3.5rem; color: #dfb15b; margin-bottom: 1.5rem; animation: pulse 2s infinite;"></i>
+            <h2 style="font-family: 'Outfit'; color: #fff; margin-bottom: 0.75rem;">System Scheduled Maintenance</h2>
+            <p style="color: rgba(255, 255, 255, 0.6); line-height: 1.6; font-size: 0.9rem; margin-bottom: 1.5rem;">
+                Bradford International Alliance is currently upgrading academic directories and processing modules. The loyalty engine will be online shortly.
+            </p>
+            
+            <!-- Live Countdown Timer -->
+            <div id="maint-countdown-container" style="display: none; margin-bottom: 1.75rem; background: rgba(223, 177, 91, 0.04); padding: 0.75rem 1.5rem; border-radius: 8px; border: 1px solid rgba(223, 177, 91, 0.12); flex-direction: column; align-items: center; width: 100%; box-sizing: border-box;">
+                <span style="font-size: 0.7rem; color: rgba(255,255,255,0.4); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Estimated Time Remaining</span>
+                <span id="maint-countdown-timer" style="font-family: 'Outfit'; font-size: 1.75rem; font-weight: 700; color: #dfb15b;">00:00</span>
+            </div>
+
+            <button class="btn btn-secondary" onclick="window.location.reload()" style="border-color: rgba(255,255,255,0.15); width: 100%; margin-bottom: 0.75rem;">
+                <i class="fa-solid fa-rotate"></i> Try Re-connecting
+            </button>
+            <button class="btn btn-secondary" id="btn-maintenance-logout" style="background: rgba(255,255,255,0.03); color: rgba(255,255,255,0.5); border: none; font-size: 0.78rem; text-decoration: underline; cursor: pointer;">
+                Return to Login Page
+            </button>
+        </div>
+    </div>
+    </div>
+
+    <!-- Log Entry Detail Modal -->
+    <div id="log-detail-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(10,11,14,0.5); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); z-index:19000; align-items:center; justify-content:flex-end;">
+        <div id="log-detail-panel" class="card glassmorphic" style="height:100vh; width:min(440px, 100vw); overflow-y:auto; border-radius:0; border-right:none; border-top:none; border-bottom:none; border-left:1px solid rgba(223,177,91,0.12); padding:2rem 1.75rem; box-sizing:border-box; background:#0a0b0e; scrollbar-width:thin; scrollbar-color:rgba(223,177,91,0.2) transparent;">
+            <div id="log-detail-content"></div>
+        </div>
+    </div>
+
+    <!-- Security Insights Modal -->
+    <div id="security-insights-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(10, 11, 14, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 20000; align-items: center; justify-content: center;">
+        <div class="card glassmorphic spotlight-card" style="max-width: 580px; width: 90%; padding: 2.25rem; border: 1px solid rgba(223, 177, 91, 0.15); border-radius: 16px; position: relative; background: #0c0d12; box-shadow: 0 20px 50px rgba(0,0,0,0.6);">
+            <button onclick="closeSecurityInsights()" style="position: absolute; top: 1.25rem; right: 1.25rem; background: none; border: none; color: rgba(255,255,255,0.4); cursor: pointer; font-size: 1.25rem; transition: color 0.15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.4)'">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div id="security-insights-content" style="color: #fff; font-family: 'Inter', sans-serif;">
+                <!-- Dynamic content injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Manual Adjustments Modal overlay -->
+    <div id="adjust-points-modal">
+        <div class="card adjust-card glassmorphic spotlight-card">
+            <h3><i class="fa-solid fa-calculator"></i> Adjust Points Wallet</h3>
+            <p id="adjust-modal-desc" class="section-desc">Deduct or credit points manually for student.</p>
+            
+            <form id="adjust-points-form">
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label>Adjustment Amount (use negative numbers to deduct)</label>
+                    <input type="number" id="adjust-amount" required placeholder="e.g. +500 or -250">
+                </div>
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <label>Audit Reason (Dispute, Goodwill Credit, Admin Correction)</label>
+                    <input type="text" id="adjust-reason" required placeholder="e.g. Goodwill credit for enrollment delay">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeAdjustmentModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Adjustment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Beautiful Glass Custom Redemption Modal -->
+    <div class="custom-modal-overlay" id="redemption-modal" style="display: none; opacity: 0;">
+        <div class="custom-modal-card glassmorphic spotlight-card">
+            <button class="modal-close-btn" id="redemption-modal-close"><i class="fa-solid fa-xmark"></i></button>
+            <div class="modal-header">
+                <div class="modal-icon-badge" id="redemption-modal-icon"><i class="fa-solid fa-gift"></i></div>
+                <h3 id="redemption-modal-title">Confirm Voucher Redemption</h3>
+            </div>
+            <div class="modal-body">
+                <div class="redemption-summary-box">
+                    <div class="summary-row">
+                        <span>Partner Network:</span>
+                        <strong id="redemption-partner-name">-</strong>
+                    </div>
+                    <div class="summary-row">
+                        <span>Reward Selected:</span>
+                        <strong id="redemption-reward-name">-</strong>
+                    </div>
+                    <div class="summary-row highlight">
+                        <span>Points Required:</span>
+                        <strong id="redemption-points-cost" class="text-gold">-</strong>
+                    </div>
+                    <div class="summary-row">
+                        <span>Equivalent Value:</span>
+                        <strong id="redemption-cash-value" class="text-emerald">-</strong>
+                    </div>
+                </div>
+                
+                <p class="modal-notice" id="redemption-modal-notice-text">Are you sure you want to deduct these points from your wallet balance to generate your voucher?</p>
+                
+                <!-- Success Code Box (Hidden until success) -->
+                <div class="success-voucher-box" id="redemption-success-box" style="display: none;">
+                    <span class="success-label">🎉 VOUCHER GENERATED SUCCESSFULLY</span>
+                    <div class="voucher-code-wrapper">
+                        <span class="voucher-code-text" id="generated-voucher-code">BIA-VOUCHER-XXXX</span>
+                        <button class="btn-copy-code" id="btn-copy-voucher-code" title="Copy Code"><i class="fa-solid fa-copy"></i></button>
+                    </div>
+                    <span class="voucher-instructions" id="redemption-voucher-instructions-text">Show this code at check-out to redeem.</span>
+                </div>
+            </div>
+            <div class="modal-footer" id="redemption-modal-footer">
+                <button class="btn btn-secondary" id="btn-redemption-cancel">Cancel</button>
+                <button class="btn btn-primary" id="btn-redemption-confirm">Deduct & Redeem</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Spotlight Overview Modal -->
+    <div class="custom-modal-overlay" id="student-detail-modal" style="display: none; opacity: 0; align-items: center; justify-content: center; z-index: 9999;">
+        <div class="custom-modal-card glassmorphic spotlight-card" style="max-width: 900px; width: 95%; padding: 1.75rem !important;">
+            <button class="modal-close-btn" id="student-detail-modal-close"><i class="fa-solid fa-xmark"></i></button>
+            
+            <div style="display: grid; grid-template-columns: 220px 1.1fr 1fr; gap: 1.5rem; margin-top: 0.5rem;">
+                <!-- Column 1: Profile Info Card -->
+                <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 1.25rem 1rem; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+                        <div style="width: 76px; height: 76px; border-radius: 50%; background: linear-gradient(135deg, #dfb15b, #966f28); display: flex; align-items: center; justify-content: center; font-size: 2.2rem; color: #000; font-weight: 700; margin-bottom: 0.75rem; box-shadow: 0 0 20px rgba(223, 177, 91, 0.3);" id="sd-avatar-letter">
+                            S
+                        </div>
+                        <h3 id="sd-name" style="font-size: 1.1rem; font-weight: 700; margin: 0; color: #ffffff; line-height: 1.2;">Sarah Al-Mansoori</h3>
+                        <input type="text" id="sd-name-input" style="display: none; font-size: 0.95rem; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 0.35rem 0.65rem; border-radius: 6px; width: 100%; box-sizing: border-box; text-align: center; margin-bottom: 0.35rem; font-family: inherit;">
+                        
+                        <p id="sd-email" style="font-size: 0.7rem; color: rgba(255, 255, 255, 0.5); word-break: break-all; margin: 0.25rem 0 0.5rem 0; width: 100%;">sarah@email.com</p>
+                        <input type="email" id="sd-email-input" style="display: none; font-size: 0.75rem; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 0.35rem 0.65rem; border-radius: 6px; width: 100%; box-sizing: border-box; text-align: center; margin-bottom: 0.5rem; font-family: inherit;">
+                        
+                        <span id="sd-tier-badge" class="tier-badge bronze" style="font-size: 0.65rem; font-weight: 700; letter-spacing: 0.05em; padding: 0.2rem 0.6rem; border-radius: 4px; margin-bottom: 0.75rem;">BRONZE</span>
+                    </div>
+                    
+                    <div style="width: 100%; border-top: 1px solid rgba(255, 255, 255, 0.06); padding-top: 0.75rem; text-align: left; font-size: 0.72rem; color: rgba(255, 255, 255, 0.4);">
+                        <p style="margin: 0.25rem 0; display: flex; align-items: center; justify-content: space-between;">
+                            <strong>Student ID:</strong> 
+                            <span id="sd-id" style="color: #efece3;">BIA-2024-9042</span>
+                            <input type="text" id="sd-id-input" style="display: none; font-size: 0.75rem; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 0.2rem 0.45rem; border-radius: 4px; width: 110px; text-align: right; box-sizing: border-box; font-family: inherit;">
+                        </p>
+                        <p style="margin: 0.25rem 0;"><strong>Status:</strong> <span id="sd-status-label" style="color: #4ade80; float: right; font-weight: 700;">Enrolled</span></p>
+                        <p style="margin: 0.25rem 0;"><strong>Role:</strong> <span style="color: #efece3; float: right;">Student</span></p>
+                        
+                        <button class="btn btn-secondary btn-sm" id="btn-sd-toggle-status" style="width: 100%; margin-top: 0.75rem; border-color: rgba(255, 255, 255, 0.15); padding: 0.35rem; font-size: 0.7rem; font-weight: 700; color: #ef4444; background: rgba(239, 68, 68, 0.05);">
+                            <i class="fa-solid fa-ban"></i> Suspend Wallet
+                        </button>
+                        
+                        <div id="sd-tier-override-section" style="margin-top: 0.75rem; width: 100%;">
+                            <label style="font-size: 0.65rem; color: rgba(255,255,255,0.4); text-transform: uppercase; font-weight: 700; display: block; margin-bottom: 0.25rem;">Override Member Tier</label>
+                            <select id="sd-tier-override-select" style="background: rgba(0, 0, 0, 0.35); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff; padding: 0.35rem 0.5rem; border-radius: 6px; width: 100%; font-size: 0.72rem; outline: none; font-family: inherit;">
+                                <option value="Bronze">Bronze</option>
+                                <option value="Silver">Silver</option>
+                                <option value="Gold">Gold</option>
+                                <option value="Platinum">Platinum</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Column 2: Dashboard Stats & Activity Logs -->
+                <div style="display: flex; flex-direction: column; gap: 1rem; border-right: 1px solid rgba(255, 255, 255, 0.06); padding-right: 1rem;">
+                    <div>
+                        <h4 style="font-size: 0.78rem; font-weight: 700; color: #dfb15b; text-transform: uppercase; margin: 0 0 0.4rem 0; letter-spacing: 0.05em;">Loyalty Points Balance</h4>
+                        <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); padding: 0.75rem; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <span style="font-size: 1.45rem; font-weight: 800; font-family: 'Outfit'; color: #ffffff;" id="sd-points-balance">1,250 pts</span>
+                                <p style="font-size: 0.7rem; color: rgba(255, 255, 255, 0.5); margin: 0.15rem 0 0 0;">Value: <strong style="color: #dfb15b;" id="sd-points-value">AED 312.50</strong> tuition discount</p>
+                            </div>
+                            <div style="text-align: right;">
+                                <span style="font-size: 0.65rem; color: rgba(255, 255, 255, 0.4); display: block;">MULTIPLIER</span>
+                                <span style="font-size: 0.85rem; font-weight: 700; color: #dfb15b;" id="sd-multiplier">1.2x multiplier</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hardcoded / calculated Academy Indicators -->
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.6rem;">
+                        <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); padding: 0.5rem; border-radius: 8px; text-align: center;">
+                            <span style="font-size: 0.6rem; color: rgba(255, 255, 255, 0.4); text-transform: uppercase; display: block; margin-bottom: 0.15rem;">Streaks</span>
+                            <span style="font-size: 0.95rem; font-weight: 700; color: #ffffff;" id="sd-streak">5 days</span>
+                        </div>
+                        <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); padding: 0.5rem; border-radius: 8px; text-align: center;">
+                            <span style="font-size: 0.6rem; color: rgba(255, 255, 255, 0.4); text-transform: uppercase; display: block; margin-bottom: 0.15rem;">GPA Average</span>
+                            <span style="font-size: 0.95rem; font-weight: 700; color: #ffffff;" id="sd-gpa">3.85 / A</span>
+                        </div>
+                    </div>
+
+                    <!-- Audit logs (Hardcoded vibe) -->
+                    <div>
+                        <h4 style="font-size: 0.78rem; font-weight: 700; color: rgba(255, 255, 255, 0.5); text-transform: uppercase; margin: 0 0 0.35rem 0; letter-spacing: 0.05em;">Recent Activity & Audit Logs</h4>
+                        <div style="background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 0.5rem; max-height: 100px; overflow-y: auto; font-size: 0.7rem;" id="sd-activity-log">
+                            <!-- Populated on click -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Column 3: Administrative Access Quick Controls -->
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div>
+                        <h4 style="font-size: 0.78rem; font-weight: 700; color: #dfb15b; text-transform: uppercase; margin: 0 0 0.5rem 0; letter-spacing: 0.05em;">One-Click Point Presets</h4>
+                        <div style="display: flex; flex-direction: column; gap: 0.4rem;" id="sd-presets-container">
+                            <!-- Populated dynamically to pass correct user_id -->
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 style="font-size: 0.78rem; font-weight: 700; color: #dfb15b; text-transform: uppercase; margin: 0 0 0.4rem 0; letter-spacing: 0.05em;">Tuition Vouchers Audit</h4>
+                        <div style="background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 0.5rem; max-height: 150px; overflow-y: auto;" id="sd-vouchers-audit-list">
+                            <!-- Populated on click -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer" style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.06); display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn btn-primary" id="btn-sd-adjust" style="background: #dfb15b; color: #000; border: none; font-weight: 700;">
+                        <i class="fa-solid fa-calculator"></i> Adjust Points
+                    </button>
+                    <button class="btn btn-secondary" id="btn-sd-edit-mode" style="background: rgba(255,255,255,0.05); color: #fff; border-color: rgba(255,255,255,0.15); font-weight: 700; height: auto; padding: 0.5rem 1rem;">
+                        <i class="fa-solid fa-user-pen"></i> Edit Profile
+                    </button>
+                    <button class="btn btn-primary" id="btn-sd-save-profile" style="display: none; background: #25d366; color: #fff; border: none; font-weight: 700; height: auto; padding: 0.5rem 1rem;">
+                        <i class="fa-solid fa-save"></i> Save Changes
+                    </button>
+                    <a class="btn btn-secondary" id="btn-sd-email" href="mailto:student@email.com" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">
+                        <i class="fa-solid fa-envelope" style="margin-right: 0.5rem;"></i> Send Email
+                    </a>
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn btn-danger" id="btn-sd-delete" style="background: #ef4444; border: none; font-weight: 700; color: #fff; height: auto; padding: 0.5rem 1rem;">
+                        <i class="fa-solid fa-trash"></i> Delete Account
+                    </button>
+                    <button class="btn btn-secondary" id="btn-sd-close">Close Details</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Premium BIA Tuition Fee Voucher Modal -->
+    <div class="custom-modal-overlay" id="tuition-voucher-modal" style="display: none; opacity: 0;">
+        <div class="custom-modal-card glassmorphic spotlight-card voucher-modal-width">
+            <button class="modal-close-btn" id="tuition-voucher-modal-close"><i class="fa-solid fa-xmark"></i></button>
+            <div class="tuition-certificate-wrapper" id="tuition-certificate-print-area">
+                <div class="tuition-cert-container">
+                    <!-- Elegant Border accents -->
+                    <div class="cert-border-accent border-top-left"></div>
+                    <div class="cert-border-accent border-top-right"></div>
+                    <div class="cert-border-accent border-bottom-left"></div>
+                    <div class="cert-border-accent border-bottom-right"></div>
+                    
+                    <!-- Certificate Header -->
+                    <div class="cert-header">
+                        <div class="cert-badge-gold">
+                            <i class="fa-solid fa-award"></i>
+                        </div>
+                        <h3>BRITISH INTERNATIONAL ACADEMY</h3>
+                        <span class="cert-sub">OFFICIAL TUITION DISCOUNT CERTIFICATE</span>
+                    </div>
+                    
+                    <!-- Certificate Body -->
+                    <div class="cert-body">
+                        <p class="cert-txt-light">This discount voucher is generated and issued to</p>
+                        <h4 class="cert-student-name" id="voucher-cert-student-name">-</h4>
+                        <p class="cert-student-id">Student ID: <span id="voucher-cert-student-id">-</span></p>
+                        
+                        <div class="cert-amount-box">
+                            <span class="cert-amount-label">TUITION DISCOUNT VALUE</span>
+                            <h2 class="cert-amount-value" id="voucher-cert-amount">-</h2>
+                            <p class="cert-points-cost">Equivalent to <span id="voucher-cert-points">-</span> Loyalty points redeemed</p>
+                        </div>
+                        
+                        <div class="cert-code-box">
+                            <span class="code-label">OFFICIAL VOUCHER REDEMPTION CODE</span>
+                            <div class="code-value-row">
+                                <span class="code-value" id="voucher-cert-code">-</span>
+                                <button class="btn-copy-cert-code" id="btn-copy-cert-code" title="Copy Code"><i class="fa-solid fa-copy"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Certificate Footer -->
+                    <div class="cert-footer">
+                        <div class="cert-sign-col">
+                            <div class="cert-signature-mock">BIA Registrar</div>
+                            <span>Office of the Registrar</span>
+                        </div>
+                        <div class="cert-meta-col">
+                            <p>Status: <strong class="text-emerald" id="voucher-cert-status">UNUSED</strong></p>
+                            <p>Date Issued: <span id="voucher-cert-date">-</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer no-print">
+                <button class="btn btn-secondary" id="btn-tuition-voucher-print"><i class="fa-solid fa-print"></i> Print Voucher</button>
+                <button class="btn btn-primary" id="btn-tuition-voucher-close-action">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Announcements Trigger & Sidebar Drawer Panel -->
+    <div id="landing-announcements-trigger" class="floating-ann-badge" title="View Campus Broadcasts">
+        <i class="fa-solid fa-bullhorn"></i>
+        <span class="ann-count-badge" id="ann-badge-count" style="display: none;">0</span>
+    </div>
+
+    <div id="landing-announcements-drawer" class="ann-drawer">
+        <div class="ann-drawer-header">
+            <h4><i class="fa-solid fa-bullhorn" style="color: #dfb15b;"></i> Campus Broadcasts</h4>
+            <button id="btn-close-ann-drawer" class="drawer-close-btn"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="ann-drawer-body" id="landing-announcements-container-drawer">
+            <!-- Announcements populated dynamically -->
+        </div>
+    </div>
+
+    <!-- GSAP Animations CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="app.js?v=1.3.8"></script>
+</body>
+</html>

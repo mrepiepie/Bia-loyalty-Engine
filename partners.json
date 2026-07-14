@@ -1,0 +1,95 @@
+[
+    {
+        "id": "adnoc",
+        "name": "ADNOC REWARDS",
+        "badge": "OFFICIAL COLLABORATION",
+        "title": "BIA × ADNOC Rewards",
+        "subtitle": "Empowering your academic journey by turning educational effort directly into travel freedom. In partnership with ADNOC, BIA students can convert points balances into digital vouchers accepted at all ADNOC fuel and Oasis stations across the UAE.",
+        "disclosure": "Redemption rates are calculated dynamically based on real-time partner value. Enjoy premium redemption benefits directly from your student dashboard.",
+        "image": "images/adnoc_students.png",
+        "logoColor": "#005A9C",
+        "rewards": [
+            {
+                "name": "Oasis Cafe Voucher",
+                "cost": 110,
+                "cash": "AED 25 Value",
+                "icon": "fa-mug-hot",
+                "image": "images/adnoc_cafe_voucher.png"
+            },
+            {
+                "name": "Campus Fuel Assist",
+                "cost": 220,
+                "cash": "AED 50 Value",
+                "icon": "fa-gas-pump",
+                "image": "images/adnoc_fuel_voucher.png"
+            },
+            {
+                "name": "Premium Fuel Voucher",
+                "cost": 430,
+                "cash": "AED 100 Value",
+                "icon": "fa-car-side",
+                "image": "images/adnoc_premium_voucher.png"
+            }
+        ]
+    },
+    {
+        "id": "shukran",
+        "name": "SHUKRAN REWARDS",
+        "badge": "PREMIUM PARTNER",
+        "title": "BIA × Shukran Shopping",
+        "subtitle": "Redeem your academic credits at over 50 retail brands including Centrepoint, Max, Splash, and Shoemart across the UAE.",
+        "disclosure": "Vouchers are instant and valid at all participating Landmark Group locations.",
+        "image": "images/shukran_students.png",
+        "logoColor": "#ffb829",
+        "rewards": [
+            {
+                "name": "Shopping Gift Card",
+                "cost": 200,
+                "cash": "AED 50 Value",
+                "icon": "fa-bag-shopping"
+            },
+            {
+                "name": "Elite Retail Voucher",
+                "cost": 380,
+                "cash": "AED 100 Value",
+                "icon": "fa-gem"
+            }
+        ]
+    },
+    {
+        "id": "amazon",
+        "name": "AMAZON UAE",
+        "badge": "GLOBAL BRAND",
+        "title": "BIA × Amazon Gift Cards",
+        "subtitle": "Convert your hard-earned academic credits into Amazon UAE gift cards to purchase books, electronics, and study gear.",
+        "disclosure": "Digital gift cards are sent via email instantly after redemption confirmation.",
+        "image": "images/adnoc_students.png",
+        "logoColor": "#ff9900",
+        "rewards": [
+            {
+                "name": "Amazon.ae Gift Card",
+                "cost": 400,
+                "cash": "AED 100 Value",
+                "icon": "fa-amazon"
+            }
+        ]
+    },
+    {
+        "id": "maf",
+        "name": "MAF GIFT CARDS",
+        "badge": "ENTERTAINMENT",
+        "title": "BIA × MAF Mall Vouchers",
+        "subtitle": "Get MAF Share Vouchers valid across Mall of the Emirates, City Centre malls, VOX Cinemas, and Carrefour.",
+        "disclosure": "Applicable across all MAF retail, leisure, and entertainment portfolios.",
+        "image": "images/shukran_students.png",
+        "logoColor": "#8052ff",
+        "rewards": [
+            {
+                "name": "MAF Share Gift Card",
+                "cost": 200,
+                "cash": "AED 50 Value",
+                "icon": "fa-film"
+            }
+        ]
+    }
+]
