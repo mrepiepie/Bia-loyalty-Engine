@@ -10,6 +10,9 @@ backend/node_modules/
 backend/data/
 backend/*.db
 backend/*.db-journal
+data/
+*.db
+*.db-journal
 
 # Environment
 .env
