@@ -14,6 +14,18 @@ app.use(express.json({ limit: '15mb' }));
 app.use(express.urlencoded({ limit: '15mb', extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Database boot synchronization middleware
+app.use(async (req, res, next) => {
+    if (!dbInitialized && dbInitPromise) {
+        try {
+            await dbInitPromise;
+        } catch (err) {
+            console.error('Database sync middleware error:', err);
+        }
+    }
+    next();
+});
+
 // IP Blacklist Middleware
 app.use(async (req, res, next) => {
     // Skip static assets, auth requests, or admin page itself to avoid lockouts
@@ -45,11 +57,14 @@ if (!isVercel && !fs.existsSync(dbDir)) {
 
 // Initialize SQLite database (persisted to file-based database)
 const dbPath = path.join(dbDir, 'loyalty.db');
+let dbInitialized = false;
+let dbInitPromise = null;
+
 const db = new sqlite3.Database(dbPath, (err) => {
     if (err) console.error('Error opening DB:', err.message);
     else {
         console.log(`Connected to the persisted SQLite database at ${dbPath}`);
-        initializeDatabase();
+        dbInitPromise = initializeDatabase();
     }
 });
 
@@ -74,8 +89,8 @@ const allQuery = (sql, params = []) => new Promise((resolve, reject) => {
 });
 
 // Setup Database Tables & Seed data
-function initializeDatabase() {
-    db.serialize(async () => {
+async function initializeDatabase() {
+    try {
         await runQuery(`CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL, description TEXT)`);
         await runQuery(`CREATE TABLE IF NOT EXISTS users (
             user_id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, email TEXT UNIQUE NOT NULL, password TEXT NOT NULL,
@@ -142,13 +157,11 @@ function initializeDatabase() {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
 
-        // ip_blacklist kept for compatibility but no longer used actively
         await runQuery(`CREATE TABLE IF NOT EXISTS ip_blacklist (
             ip_address TEXT PRIMARY KEY,
             reason TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
-
 
         const defaultSettings = [
             ['point_aed_value', '0.25', 'Cash equivalent value of 1 point in AED'],
@@ -171,9 +184,9 @@ function initializeDatabase() {
             ['welcome_points', '200', 'Points awarded to a newly enrolled student']
         ];
 
-        const stmt = db.prepare(`INSERT OR IGNORE INTO settings (key, value, description) VALUES (?, ?, ?)`);
-        defaultSettings.forEach(s => stmt.run(s));
-        stmt.finalize();
+        for (const s of defaultSettings) {
+            await runQuery(`INSERT OR IGNORE INTO settings (key, value, description) VALUES (?, ?, ?)`, s);
+        }
 
         // Run migrations for existing databases to change referral counts to points thresholds
         await runQuery(`UPDATE settings SET value = '1000', description = 'Points balance required to reach Silver' WHERE key = 'silver_threshold' AND value = '3'`);
@@ -185,21 +198,25 @@ function initializeDatabase() {
         await runQuery(`INSERT OR IGNORE INTO users (user_id, name, email, password, role, student_id, referral_code, current_tier, referral_count, points_balance, programme) VALUES (1, 'Sarah Al-Mansoori', 'sarah@email.com', 'student123', 'student', 'BIA-2024-9042', 'SARAH-9042', 'Bronze', 0, 0, 'MBA')`);
         await runQuery(`INSERT OR IGNORE INTO users (user_id, name, email, password, role, student_id, referral_code, current_tier, referral_count, points_balance, programme) VALUES (2, 'Omar Al-Rashidi', 'omar@email.com', 'student123', 'student', 'BIA-2024-1138', 'OMAR-1138', 'Bronze', 0, 0, 'Digital Marketing')`);
         await runQuery(`INSERT OR IGNORE INTO users (user_id, name, email, password, role, student_id, referral_code, current_tier, referral_count, points_balance, programme) VALUES (3, 'Layla Hassan', 'layla@email.com', 'student123', 'student', 'BIA-2024-5521', 'LAYLA-5521', 'Bronze', 0, 0, 'Leadership in Practice')`);
-        // Seed a welcome announcement
-        await runQuery(`INSERT OR IGNORE INTO announcements (announcement_id, title, body, type) VALUES (1, 'Welcome to BIA LoyaltyE!', 'Your points wallet is now active. Refer a friend to earn your first 1,000 points.', 'info')`);
         
-        // Seed mock executive leads for testing
+        await runQuery(`INSERT OR IGNORE INTO announcements (announcement_id, title, body, type) VALUES (1, 'Welcome to BIA LoyaltyE!', 'Your points wallet is now active. Refer a friend to earn your first 1,000 points.', 'info')`);
         await runQuery(`INSERT OR IGNORE INTO executive_leads (lead_id, user_id, type, details, status) VALUES (1, 1, 'consultation', 'Requested 1-on-1 DB/MBA Career Consultation', 'Pending')`);
         await runQuery(`INSERT OR IGNORE INTO executive_leads (lead_id, user_id, type, details, status) VALUES (2, 1, 'webinar', 'RSVP: BIA Executive Webinar: Leadership in Digital Age', 'Pending')`);
 
-        // Seed mock traffic logs for testing
-        await runQuery(`INSERT INTO traffic_logs (user_id, ip_address, activity, user_agent, created_at) VALUES (1, '92.98.12.24', 'User Authentication Successful', 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15', '${new Date(Date.now() - 5 * 60000).toISOString()}')`);
-        await runQuery(`INSERT INTO traffic_logs (user_id, ip_address, activity, user_agent, created_at) VALUES (1, '92.98.12.24', 'Generated Tuition Voucher: BIA-VOU-5902', 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15', '${new Date(Date.now() - 4 * 60000).toISOString()}')`);
-        await runQuery(`INSERT INTO traffic_logs (user_id, ip_address, activity, user_agent, created_at) VALUES (101, '185.112.90.15', 'Accessed Administration Dashboard', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_2_1) AppleWebKit/537.36', '${new Date(Date.now() - 2 * 60000).toISOString()}')`);
-        await runQuery(`INSERT INTO traffic_logs (user_id, ip_address, activity, user_agent, created_at) VALUES (1, '92.98.12.24', 'RSVP: BIA Executive Webinar: Leadership in Digital Age', 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15', '${new Date(Date.now() - 1 * 60000).toISOString()}')`);
+        // Check if logs are already seeded to prevent duplicates
+        const logCheck = await getQuery(`SELECT COUNT(*) as count FROM traffic_logs`);
+        if (logCheck.count === 0) {
+            await runQuery(`INSERT INTO traffic_logs (user_id, ip_address, activity, user_agent, created_at) VALUES (1, '92.98.12.24', 'User Authentication Successful', 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15', '${new Date(Date.now() - 5 * 60000).toISOString()}')`);
+            await runQuery(`INSERT INTO traffic_logs (user_id, ip_address, activity, user_agent, created_at) VALUES (1, '92.98.12.24', 'Generated Tuition Voucher: BIA-VOU-5902', 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15', '${new Date(Date.now() - 4 * 60000).toISOString()}')`);
+            await runQuery(`INSERT INTO traffic_logs (user_id, ip_address, activity, user_agent, created_at) VALUES (101, '185.112.90.15', 'Accessed Administration Dashboard', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_2_1) AppleWebKit/537.36', '${new Date(Date.now() - 2 * 60000).toISOString()}')`);
+            await runQuery(`INSERT INTO traffic_logs (user_id, ip_address, activity, user_agent, created_at) VALUES (1, '92.98.12.24', 'RSVP: BIA Executive Webinar: Leadership in Digital Age', 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15', '${new Date(Date.now() - 1 * 60000).toISOString()}')`);
+        }
         
-        console.log('Database tables initialized and pre-populated.');
-    });
+        console.log('Database tables initialized and pre-populated successfully.');
+        dbInitialized = true;
+    } catch (err) {
+        console.error('Critical database initialization error:', err);
+    }
 }
 
 // Helper to fetch dynamic settings from DB
