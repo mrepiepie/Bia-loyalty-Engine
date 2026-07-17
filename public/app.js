@@ -262,12 +262,11 @@ function setupPixelGridBackground() {
     }
     
     function getRandomColor() {
-        const isDark = document.body.classList.contains('dark-theme');
         const colors = [
             'rgba(128, 82, 255, ', // Electric Iris
             'rgba(255, 184, 41, ', // Saffron Spark
             'rgba(21, 132, 110, ', // Deep Emerald
-            isDark ? 'rgba(255, 255, 255, ' : 'rgba(29, 28, 22, ' // White or Charcoal
+            'adaptive'             // Dynamic adaptive color (white or charcoal)
         ];
         return colors[Math.floor(Math.random() * colors.length)];
     }
@@ -342,7 +341,13 @@ function setupPixelGridBackground() {
             ctx.save();
             ctx.translate(p.x, p.y);
             ctx.rotate(p.angle);
-            ctx.fillStyle = `${p.color}${activeOpacity})`;
+            
+            let finalColorPrefix = p.color;
+            if (p.color === 'adaptive') {
+                const isDark = document.body.classList.contains('dark-theme');
+                finalColorPrefix = isDark ? 'rgba(255, 255, 255, ' : 'rgba(29, 28, 22, ';
+            }
+            ctx.fillStyle = `${finalColorPrefix}${activeOpacity})`;
             
             // Draw tiny triangles
             ctx.beginPath();
