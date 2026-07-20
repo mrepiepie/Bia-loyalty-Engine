@@ -356,15 +356,71 @@ app.post('/api/admin/adjust-points', async (req, res) => {
 
         if (isDeduction) {
             await deductPoints(user_id, absPoints);
-            await runQuery(`INSERT INTO points_ledger (user_id, points_change, event_type, description, points_remaining, expires_at) VALUES (?, ?, 'Adjustment', ?, 0, NULL)`, [user_id, points_change, `Admin Adjustment: ${description}`]);
+            var ledgerResult = await runQuery(`INSERT INTO points_ledger (user_id, points_change, event_type, description, points_remaining, expires_at) VALUES (?, ?, 'Adjustment', ?, 0, NULL)`, [user_id, points_change, `Admin Adjustment: ${description}`]);
         } else {
-            await runQuery(`INSERT INTO points_ledger (user_id, points_change, event_type, description, points_remaining, expires_at) VALUES (?, ?, 'Adjustment', ?, ?, ?)`, [user_id, points_change, `Admin Adjustment: ${description}`, points_change, expiry.toISOString()]);
+            var ledgerResult = await runQuery(`INSERT INTO points_ledger (user_id, points_change, event_type, description, points_remaining, expires_at) VALUES (?, ?, 'Adjustment', ?, ?, ?)`, [user_id, points_change, `Admin Adjustment: ${description}`, points_change, expiry.toISOString()]);
         }
 
         await runQuery(`UPDATE users SET points_balance = points_balance + ? WHERE user_id = ?`, [points_change, user_id]);
         await updateUserTier(user_id);
-        res.json({ success: true, message: 'Points adjusted successfully' });
+        res.json({ success: true, message: 'Points adjusted successfully', ledger_id: ledgerResult.lastID });
     } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Revert one exact adjustment. Removing the ledger row makes repeat requests safe.
+app.post('/api/admin/adjust-points/:ledgerId/undo', async (req, res) => {
+    const ledgerId = Number(req.params.ledgerId);
+    if (!Number.isInteger(ledgerId) || ledgerId <= 0) {
+        return res.status(400).json({ error: 'Invalid adjustment id.' });
+    }
+
+    try {
+        await runQuery('BEGIN IMMEDIATE TRANSACTION');
+        const entry = await getQuery(
+            `SELECT ledger_id, user_id, points_change FROM points_ledger
+             WHERE ledger_id = ? AND event_type = 'Adjustment'`,
+            [ledgerId]
+        );
+        if (!entry) {
+            await runQuery('ROLLBACK');
+            return res.status(409).json({ error: 'This adjustment has already been undone or no longer exists.' });
+        }
+
+        const user = await getQuery(`SELECT points_balance FROM users WHERE user_id = ?`, [entry.user_id]);
+        if (!user) {
+            await runQuery('ROLLBACK');
+            return res.status(404).json({ error: 'Student not found.' });
+        }
+        if (entry.points_change > 0 && user.points_balance < entry.points_change) {
+            await runQuery('ROLLBACK');
+            return res.status(409).json({ error: 'The awarded points have already been spent and cannot be undone.' });
+        }
+
+        await runQuery(`DELETE FROM points_ledger WHERE ledger_id = ?`, [ledgerId]);
+
+        // Undoing a deduction must also return its spendable FIFO points.
+        if (entry.points_change < 0) {
+            const expiry = new Date();
+            expiry.setFullYear(expiry.getFullYear() + 4);
+            await runQuery(
+                `INSERT INTO points_ledger (user_id, points_change, event_type, description, points_remaining, expires_at)
+                 VALUES (?, 0, 'Adjustment Undo', ?, ?, ?)`,
+                [entry.user_id, `Restored points from undone adjustment #${ledgerId}`, Math.abs(entry.points_change), expiry.toISOString()]
+            );
+        }
+
+        const balance = await getQuery(
+            `SELECT COALESCE(SUM(points_change), 0) AS total FROM points_ledger WHERE user_id = ?`,
+            [entry.user_id]
+        );
+        await runQuery(`UPDATE users SET points_balance = ? WHERE user_id = ?`, [balance.total, entry.user_id]);
+        await updateUserTier(entry.user_id);
+        await runQuery('COMMIT');
+        res.json({ success: true, user_id: entry.user_id, new_balance: balance.total });
+    } catch (err) {
+        try { await runQuery('ROLLBACK'); } catch (_) { /* no active transaction */ }
+        res.status(500).json({ error: err.message });
+    }
 });
 
 app.get('/api/settings', async (req, res) => {
