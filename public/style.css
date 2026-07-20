@@ -6846,14 +6846,11 @@ body:not(.dark-theme) .query-card-wrapper {
   max-width: 380px;
   margin: 0 auto;
   overflow: hidden;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.01);
-  border: 1px solid rgba(255, 255, 255, 0.03);
 }
 
 body:not(.dark-theme) .query-visual-container {
-  background: rgba(0, 0, 0, 0.01) !important;
-  border: 1px solid rgba(0, 0, 0, 0.04) !important;
+  background: transparent !important;
+  border: none !important;
 }
 
 /* Floating Tag Design */
