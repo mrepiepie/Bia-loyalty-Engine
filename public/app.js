@@ -520,6 +520,62 @@ function setupM3Buttons() {
     });
 }
 
+function setupLandingParticles() {
+    const canvas = document.getElementById('bug-particles-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const container = canvas.parentElement;
+    if (!container) return;
+    
+    let width = canvas.width = container.offsetWidth;
+    let height = canvas.height = container.offsetHeight;
+    
+    window.addEventListener('resize', () => {
+        if (!container) return;
+        width = canvas.width = container.offsetWidth;
+        height = canvas.height = container.offsetHeight;
+    });
+    
+    const particles = [];
+    for (let i = 0; i < 40; i++) {
+        particles.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            size: Math.random() * 1.5 + 0.5,
+            alpha: Math.random() * 0.4 + 0.1,
+            dx: (Math.random() - 0.5) * 0.25,
+            dy: (Math.random() - 0.5) * 0.25
+        });
+    }
+    
+    function animate() {
+        ctx.clearRect(0, 0, width, height);
+        
+        // Render particles
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+        // Light mode override
+        if (!document.body.classList.contains('dark-theme')) {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+        }
+        
+        particles.forEach(p => {
+            p.x += p.dx;
+            p.y += p.dy;
+            
+            if (p.x < 0) p.x = width;
+            if (p.x > width) p.x = 0;
+            if (p.y < 0) p.y = height;
+            if (p.y > height) p.y = 0;
+            
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
+        });
+        requestAnimationFrame(animate);
+    }
+    animate();
+}
+
 // ----------------------------------------------------
 // SCREEN PRELOADER INTRO TIMER & REVEAL
 // ----------------------------------------------------
@@ -2260,6 +2316,7 @@ function bootApplication() {
     setupScrollReveals();
     setupMagneticButtons();
     setupM3Buttons();
+    setupLandingParticles();
     setup3DGlobe();
     setupSpotlightCards();
     setupBenefitsCarousel();

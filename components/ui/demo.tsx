@@ -1,208 +1,182 @@
-import React, { useState } from "react";
-import { Button, SplitButton } from "@/components/ui/material-design-3-button";
-import { Plus, ChevronDown, Send, MoreVertical, LayoutGrid, Volume2 } from "lucide-react";
+"use client";
 
-const VARIANTS = ["default", "secondary", "elevated", "outline", "ghost", "destructive"] as const;
-const SIZES = ["sm", "default", "lg", "xl", "2xl"] as const;
+import * as React from "react";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
+import { DIcons } from "dicons";
+import { useAnimate } from "framer-motion";
 
-const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+import { Button, buttonVariants } from "@/components/ui/button";
 
-export default function M3ExpressiveDemo() {
-  const [tab, setTab] = useState<"variants" | "sizes" | "advanced">("variants");
+import { HighlighterItem, HighlightGroup, Particles } from "@/components/ui/highlighter";
 
+export function Connect() {
+  const [scope, animate] = useAnimate();
+
+  React.useEffect(() => {
+    animate(
+      [
+        ["#pointer", { left: 200, top: 60 }, { duration: 0 }],
+        ["#javascript", { opacity: 1 }, { duration: 0.3 }],
+        [
+          "#pointer",
+          { left: 50, top: 102 },
+          { at: "+0.5", duration: 0.5, ease: "easeInOut" },
+        ],
+        ["#javascript", { opacity: 0.4 }, { at: "-0.3", duration: 0.1 }],
+        ["#react-js", { opacity: 1 }, { duration: 0.3 }],
+        [
+          "#pointer",
+          { left: 224, top: 170 },
+          { at: "+0.5", duration: 0.5, ease: "easeInOut" },
+        ],
+        ["#react-js", { opacity: 0.4 }, { at: "-0.3", duration: 0.1 }],
+        ["#typescript", { opacity: 1 }, { duration: 0.3 }],
+        [
+          "#pointer",
+          { left: 88, top: 198 },
+          { at: "+0.5", duration: 0.5, ease: "easeInOut" },
+        ],
+        ["#typescript", { opacity: 0.4 }, { at: "-0.3", duration: 0.1 }],
+        ["#next-js", { opacity: 1 }, { duration: 0.3 }],
+        [
+          "#pointer",
+          { left: 200, top: 60 },
+          { at: "+0.5", duration: 0.5, ease: "easeInOut" },
+        ],
+        ["#next-js", { opacity: 0.5 }, { at: "-0.3", duration: 0.1 }],
+      ],
+      {
+        repeat: Number.POSITIVE_INFINITY,
+      },
+    );
+  }, [animate]);
   return (
-    <div className="min-h-screen w-full bg-background p-8 md:p-12 font-sans text-foreground flex justify-center">
-      <div className="w-full max-w-5xl">
-        {/* Header */}
-        <div className="mb-10">
-          <h1 className="text-3xl font-medium tracking-tight mb-2">
-            Material 3 Expressive Button
-          </h1>
-          <p className="text-muted-foreground text-sm flex items-center gap-2">
-            Click or hold — shapes snap inward then spring back.
-            <span className="flex items-center gap-1 bg-primary/10 text-primary px-2 py-0.5 rounded-full text-xs font-medium ml-2">
-              <Volume2 className="w-3 h-3" /> Audio on XL sizes
-            </span>
-          </p>
-        </div>
+    <section className="relative mx-auto mb-20 mt-6 max-w-5xl  ">
+      <HighlightGroup className="group h-full">
+        <div
+          className="group/item h-full md:col-span-6 lg:col-span-12"
+          data-aos="fade-down"
+        >
+          <HighlighterItem className="rounded-3xl p-6">
+            <div className="relative z-20 h-full overflow-hidden rounded-3xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-black">
+              <Particles
+                className="absolute inset-0 -z-10 opacity-10 transition-opacity duration-1000 ease-in-out group-hover/item:opacity-100"
+                quantity={200}
+                color={"#555555"}
+                vy={-0.2}
+              />
+              <div className="flex justify-center">
+                <div className="flex h-full flex-col justify-center gap-10 p-4 md:h-[300px] md:flex-row">
+                  <div
+                    className="relative mx-auto h-[270px] w-[300px] md:h-[270px] md:w-[300px]"
+                    ref={scope}
+                  >
+                    <DIcons.Designali className="absolute left-1/2 top-1/2 h-6 w-6 -translate-x-1/2 -translate-y-1/2" />
+                    <div
+                      id="next-js"
+                      className="absolute bottom-12 left-14 rounded-3xl border border-slate-400 bg-slate-200 px-2 py-1.5 text-xs opacity-50 dark:border-slate-600 dark:bg-slate-800"
+                    >
+                      UI-UX
+                    </div>
+                    <div
+                      id="react-js"
+                      className="absolute left-2 top-20 rounded-3xl border border-slate-400 bg-slate-200 px-2 py-1.5 text-xs opacity-50 dark:border-slate-600 dark:bg-slate-800"
+                    >
+                      Graphic Design
+                    </div>
+                    <div
+                      id="typescript"
+                      className="absolute bottom-20 right-1 rounded-3xl border border-slate-400 bg-slate-200 px-2 py-1.5 text-xs opacity-50 dark:border-slate-600 dark:bg-slate-800"
+                    >
+                      Web Application
+                    </div>
+                    <div
+                      id="javascript"
+                      className="absolute right-12 top-10 rounded-3xl border border-slate-400 bg-slate-200 px-2 py-1.5 text-xs opacity-50 dark:border-slate-600 dark:bg-slate-800"
+                    >
+                      Branding
+                    </div>
 
-        {/* Tabs */}
-        <div className="flex flex-wrap gap-2 mb-10">
-          {(["variants", "sizes", "advanced"] as const).map((t) => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={`
-                px-5 py-2 rounded-full text-sm font-medium transition-all duration-200
-                ${tab === t 
-                  ? "bg-primary text-primary-foreground shadow-sm" 
-                  : "bg-transparent border border-border text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
-                }
-              `}
-            >
-              {cap(t)}
-            </button>
-          ))}
-        </div>
+                    <div id="pointer" className="absolute">
+                      <svg
+                        width="16.8"
+                        height="18.2"
+                        viewBox="0 0 12 13"
+                        className="fill-red-500"
+                        stroke="white"
+                        strokeWidth="1"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          clipRule="evenodd"
+                          d="M12 5.50676L0 0L2.83818 13L6.30623 7.86537L12 5.50676V5.50676Z"
+                        />
+                      </svg>
+                      <span className="bg-ali relative -top-1 left-3 rounded-3xl px-2 py-1 text-xs text-white">
+                        Ali
+                      </span>
+                    </div>
+                  </div>
 
-        {/* TAB 1: VARIANTS */}
-        {tab === "variants" && (
-          <div className="flex flex-col gap-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {[
-              {
-                label: "Text Only",
-                render: (v: any) => (
-                  <Button key={v} variant={v}>
-                    {cap(v)}
-                  </Button>
-                ),
-              },
-              {
-                label: "Leading Icon",
-                render: (v: any) => (
-                  <Button key={v} variant={v}>
-                    <Plus className="w-4 h-4 shrink-0" />
-                    {cap(v)}
-                  </Button>
-                ),
-              },
-              {
-                label: "Disabled State",
-                render: (v: any) => (
-                  <Button key={v} variant={v} disabled>
-                    {cap(v)}
-                  </Button>
-                ),
-              },
-            ].map(({ label, render }) => (
-              <div key={label}>
-                <span className="block text-[11px] font-semibold text-muted-foreground tracking-widest uppercase mb-4">
-                  {label}
-                </span>
-                <div className="flex flex-wrap gap-4 items-center">
-                  {VARIANTS.map(render)}
+                  <div className="-mt-20 flex h-full flex-col justify-center p-2 md:-mt-4 md:ml-10 md:w-[400px]">
+                    <div className="flex flex-col items-center">
+                      <h3 className="mt-6   pb-1 font-bold ">
+                        <span className="text-2xl md:text-4xl">
+                          Any questions about Design?
+                        </span>
+                      </h3>
+                    </div>
+                    <p className="mb-4 text-slate-400">
+                      Feel free to reach out to me!
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      <Link
+                        href={"https://cal.com/aliimam/designali"}
+                        target="_blank"
+                      >
+                        <Button>Book a call</Button>
+                      </Link>
+                      <Link
+                        href="mailto:contact@designali.in"
+                        target="_blank"
+                        className={cn(
+                          buttonVariants({
+                            variant: "outline",
+                            size: "icon",
+                          }),
+                        )}
+                      >
+                        <span className="flex items-center gap-1">
+                          <DIcons.Mail strokeWidth={1} className="h-5 w-5" />
+                        </span>
+                      </Link>
+                      <Link
+                        href="https://wa.me/917678432186"
+                        target="_blank"
+                        className={cn(
+                          buttonVariants({
+                            variant: "outline",
+                            size: "icon",
+                          }),
+                        )}
+                      >
+                        <span className="flex items-center gap-1">
+                          <DIcons.WhatsApp
+                            strokeWidth={1}
+                            className="h-4 w-4"
+                          />
+                        </span>
+                      </Link>
+                    </div>
+                  </div>
                 </div>
               </div>
-            ))}
-          </div>
-        )}
-
-        {/* TAB 2: SIZES */}
-        {tab === "sizes" && (
-          <div className="flex flex-col gap-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {SIZES.map((s) => (
-              <div key={s}>
-                <span className="block text-[11px] font-semibold text-muted-foreground tracking-widest uppercase mb-4">
-                  Size: {s}
-                </span>
-                <div className="flex flex-wrap gap-4 items-end">
-                  {VARIANTS.map((v) => (
-                    <Button key={`${v}-${s}`} variant={v} size={s}>
-                      {cap(v)}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* TAB 3: ADVANCED (SPLIT & ICONS) */}
-        {tab === "advanced" && (
-          <div className="flex flex-col gap-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            
-            {/* Split Buttons */}
-            <div>
-              <span className="block text-[11px] font-semibold text-muted-foreground tracking-widest uppercase mb-4">
-                Connected Groups (Split Buttons)
-              </span>
-              <div className="flex flex-wrap gap-8 items-center">
-                <SplitButton>
-                  <Button variant="default" size="sm">
-                    <Send className="w-4 h-4 shrink-0" /> Publish Now
-                  </Button>
-                  <Button variant="default" size="icon-sm">
-                    <ChevronDown className="w-4 h-4" />
-                  </Button>
-                </SplitButton>
-
-                <SplitButton>
-                  <Button variant="secondary" size="default">
-                    Schedule Post
-                  </Button>
-                  <Button variant="secondary" size="icon">
-                    <MoreVertical className="w-4 h-4" />
-                  </Button>
-                </SplitButton>
-
-                <SplitButton>
-                  <Button variant="outline" size="lg">
-                    Save Draft
-                  </Button>
-                  <Button variant="outline" size="icon-lg">
-                    <ChevronDown className="w-5 h-5" />
-                  </Button>
-                </SplitButton>
-                
-                <SplitButton>
-                  <Button variant="elevated" size="xl">
-                    Deploy
-                  </Button>
-                  <Button variant="elevated" size="icon-xl">
-                    <Send className="w-6 h-6" />
-                  </Button>
-                </SplitButton>
-              </div>
             </div>
-
-            {/* Expressive Icons */}
-            <div>
-              <span className="block text-[11px] font-semibold text-muted-foreground tracking-widest uppercase mb-4">
-                Expressive Icon Scale
-              </span>
-              <div className="flex flex-wrap gap-6 items-end">
-                <Button variant="secondary" size="icon-sm">
-                  <LayoutGrid className="w-4 h-4" />
-                </Button>
-                <Button variant="default" size="icon">
-                  <LayoutGrid className="w-5 h-5" />
-                </Button>
-                <Button variant="elevated" size="icon-lg">
-                  <LayoutGrid className="w-6 h-6" />
-                </Button>
-                <Button variant="outline" size="icon-xl">
-                  <LayoutGrid className="w-8 h-8" />
-                </Button>
-                <Button variant="default" size="icon-2xl">
-                  <LayoutGrid className="w-10 h-10" />
-                </Button>
-              </div>
-            </div>
-
-          </div>
-        )}
-
-        {/* Mechanics Info Box */}
-        <div className="mt-16 p-6 bg-secondary/30 rounded-2xl border border-border/50 text-sm text-foreground/80 leading-relaxed shadow-sm">
-          <strong className="block text-foreground font-medium mb-2">
-            Engineered Mechanics
-          </strong>
-          <ul className="space-y-2 list-disc list-inside marker:text-primary">
-            <li>
-              <strong>Press:</strong> Tailwind variants instantly transition corner radii and scale to compressed physical bounds.
-            </li>
-            <li>
-              <strong>Release:</strong> A custom <code className="bg-secondary px-1.5 py-0.5 rounded text-[11px] font-mono text-primary">cubic-bezier(0.2, 0.8, 0.2, 1.2)</code> handles the spring-back overshoot.
-            </li>
-            <li>
-              <strong>Split Physics:</strong> The <code className="bg-secondary px-1.5 py-0.5 rounded text-[11px] font-mono text-primary">SplitButton</code> component safely overrides nested styles, ensuring outer corners morph expressively while inner connections remain perfectly sharp.
-            </li>
-            <li>
-              <strong>Auditory Feedback:</strong> A procedurally generated Web Audio sine wave plays on <code className="bg-secondary px-1.5 py-0.5 rounded text-[11px] font-mono text-primary">xl</code> and <code className="bg-secondary px-1.5 py-0.5 rounded text-[11px] font-mono text-primary">2xl</code> sizes to emulate mechanical switch actuation.
-            </li>
-          </ul>
+          </HighlighterItem>
         </div>
-      </div>
-    </div>
+      </HighlightGroup>
+    </section>
   );
 }

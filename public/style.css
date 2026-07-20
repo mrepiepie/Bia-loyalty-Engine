@@ -6787,3 +6787,125 @@ body:not(.dark-theme) .btn-primary.btn-m3 .m3-ripple {
   }
 }
 
+/* ══════════════════════════════════════════════════
+   QUERY SUPPORT CARD WITH HIGHLIGHTER PARTICLES
+   ══════════════════════════════════════════════════ */
+.query-card-wrapper {
+  width: 100%;
+  max-width: 960px;
+  position: relative;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  padding: 3rem 2rem;
+  transition: border-color 0.3s ease, background 0.3s ease;
+}
+
+body:not(.dark-theme) .query-card-wrapper {
+  background: rgba(0, 0, 0, 0.015) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+.query-card-inner {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  gap: 3rem;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .query-card-inner {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
+
+.query-visual-container {
+  position: relative;
+  height: 260px;
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto;
+  overflow: hidden;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+body:not(.dark-theme) .query-visual-container {
+  background: rgba(0, 0, 0, 0.01) !important;
+  border: 1px solid rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Floating Tag Design */
+.query-floating-tag {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.45rem 0.95rem;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+body:not(.dark-theme) .query-floating-tag {
+  background: rgba(0, 0, 0, 0.02) !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  color: var(--text-muted) !important;
+}
+
+.btn-query-round {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.02);
+  color: #fff;
+}
+
+body:not(.dark-theme) .btn-query-round {
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  background: rgba(0, 0, 0, 0.01) !important;
+  color: var(--text-main) !important;
+}
+
+/* Looping Mouse Pointer Animation */
+#pointer-bug {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  z-index: 10;
+  animation: pointer-bug-move 9s infinite ease-in-out;
+  pointer-events: none;
+}
+
+@keyframes pointer-bug-move {
+  0%, 100% { left: 160px; top: 50px; }
+  25% { left: 35px; top: 100px; }
+  50% { left: 200px; top: 160px; }
+  75% { left: 75px; top: 180px; }
+}
+
+@keyframes highlight-tag-1 {
+  0%, 100% { opacity: 1; transform: scale(1.05); background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.15); }
+  25%, 50%, 75% { opacity: 0.4; transform: scale(1); }
+}
+
+@keyframes highlight-tag-2 {
+  25% { opacity: 1; transform: scale(1.05); background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.15); }
+  0%, 50%, 75%, 100% { opacity: 0.4; transform: scale(1); }
+}
+
+@keyframes highlight-tag-3 {
+  50% { opacity: 1; transform: scale(1.05); background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.15); }
+  0%, 25%, 75%, 100% { opacity: 0.4; transform: scale(1); }
+}
+
+@keyframes highlight-tag-4 {
+  75% { opacity: 1; transform: scale(1.05); background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.15); }
+  0%, 25%, 50%, 100% { opacity: 0.4; transform: scale(1); }
+}
+

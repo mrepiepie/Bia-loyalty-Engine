@@ -523,6 +523,77 @@
             </div>
         </section>
 
+        <!-- Facing any issues or bugs query section -->
+        <section class="landing-query-section" style="padding: 4rem 1.5rem; display: flex; justify-content: center; align-items: center; background: transparent;">
+            <div class="query-card-wrapper">
+                
+                <!-- Dynamic Canvas Particles -->
+                <canvas id="bug-particles-canvas" style="position: absolute; inset: 0; pointer-events: none; z-index: 1; width: 100%; height: 100%;"></canvas>
+                
+                <div class="query-card-inner">
+                    
+                    <!-- Left Side: Dynamic visual with orbiting tags and looping cursor pointer -->
+                    <div class="query-visual-container">
+                        
+                        <!-- Core Bug Icon -->
+                        <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); color: #dfb15b; font-size: 2.2rem; opacity: 0.85;">
+                            <i class="fa-solid fa-bug-slash"></i>
+                        </div>
+                        
+                        <!-- Dynamic orbiting bug categories tag cloud -->
+                        <div id="query-tag-1" class="query-floating-tag" style="left: 20px; top: 40px; animation: highlight-tag-1 8s infinite ease-in-out;">
+                            UI/UX Bugs
+                        </div>
+                        
+                        <div id="query-tag-2" class="query-floating-tag" style="right: 28px; top: 52px; animation: highlight-tag-2 8s infinite ease-in-out;">
+                            API Issues
+                        </div>
+                        
+                        <div id="query-tag-3" class="query-floating-tag" style="left: 32px; bottom: 52px; animation: highlight-tag-3 8s infinite ease-in-out;">
+                            Auth Rig
+                        </div>
+                        
+                        <div id="query-tag-4" class="query-floating-tag" style="right: 40px; bottom: 40px; animation: highlight-tag-4 8s infinite ease-in-out;">
+                            Points Error
+                        </div>
+                        
+                        <!-- Looping Mouse Pointer -->
+                        <div id="pointer-bug">
+                            <svg width="14" height="15" viewBox="0 0 12 13" fill="#ef4444" stroke="white" stroke-width="1.2" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M12 5.50676L0 0L2.83818 13L6.30623 7.86537L12 5.50676V5.50676Z"/>
+                            </svg>
+                            <span style="position: absolute; left: 12px; top: -4px; background: #ef4444; color: #fff; font-size: 0.58rem; font-weight: 700; padding: 0.08rem 0.35rem; border-radius: 6px; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.25);">Sanji</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Side: Details text and CTA buttons -->
+                    <div style="text-align: left; padding: 0 1rem; z-index: 2;">
+                        <h2 style="font-family: 'Outfit'; color: var(--text-main); font-size: 2.2rem; font-weight: 700; margin: 0 0 0.5rem 0;">Facing any issues or bugs?</h2>
+                        <p style="color: var(--text-muted); font-size: 1.05rem; font-weight: 400; margin: 0 0 1.75rem 0;">Feel free to reach out to me</p>
+                        
+                        <div style="display: flex; gap: 0.85rem; align-items: center; flex-wrap: wrap;">
+                            <a href="mailto:support@bradfordia.com?subject=BIA%20Loyalty%20Engine%20Query" style="text-decoration: none;">
+                                <button class="btn btn-primary btn-m3" style="padding: 0.75rem 1.6rem; font-size: 0.88rem; font-weight: 700; border-radius: 20px; display: inline-flex; align-items: center; gap: 0.45rem; cursor: pointer;">
+                                    <i class="fa-solid fa-paper-plane"></i> Tell your query
+                                </button>
+                            </a>
+                            <a href="mailto:support@bradfordia.com?subject=BIA%20Loyalty%20Engine%20Query" style="text-decoration: none;">
+                                <button class="btn btn-secondary btn-m3 btn-query-round" style="width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                                    <i class="fa-solid fa-envelope" style="font-size: 0.95rem;"></i>
+                                </button>
+                            </a>
+                            <a href="https://wa.me/971500000000" target="_blank" style="text-decoration: none;">
+                                <button class="btn btn-secondary btn-m3 btn-query-round" style="border: 1px solid rgba(37,211,102,0.25); background: rgba(37,211,102,0.05); color: #25d366; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                                    <i class="fa-brands fa-whatsapp" style="font-size: 1.15rem;"></i>
+                                </button>
+                            </a>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </section>
+
         <!-- Giant Bottom Title section -->
         <div class="landing-bottom-bar">
             <div class="bottom-headline-wrapper">
