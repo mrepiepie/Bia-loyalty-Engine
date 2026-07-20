@@ -7,7 +7,6 @@ const sqlite3 = require('sqlite3').verbose();
 const PARTNERS_FILE = path.join(__dirname, 'partners.json');
 
 const app = express();
-const PORT = 3000;
 
 app.use(cors());
 app.use(express.json({ limit: '15mb' }));
@@ -1377,4 +1376,12 @@ app.delete('/api/events/:id', async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.listen(PORT, () => console.log(`BIA Loyalty Server running at http://localhost:${PORT}`));
+const PORT = process.env.PORT || 3000;
+
+// Export for Vercel serverless
+module.exports = app;
+
+// Start server locally when not in Vercel
+if (!process.env.VERCEL && !process.env.NOW_BUILDER) {
+    app.listen(PORT, () => console.log(`BIA Loyalty Server running at http://localhost:${PORT}`));
+}

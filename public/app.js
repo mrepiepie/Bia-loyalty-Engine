@@ -2324,6 +2324,7 @@ function bootApplication() {
     setup3DTilts();
     setupTeamScrollAnimation();
     loadDynamicPartners();
+    setupLogoCarousel();
     setupLogoAnimation();
     setupCustomSelects();
     setupQuickStatsPillsNavigation();
@@ -3276,6 +3277,76 @@ function setupLogoAnimation() {
 // DYNAMIC COLLABORATOR PARTNERSHIP ENGINE
 // ----------------------------------------------------
 let appPartners = [];
+
+function setupLogoCarousel() {
+    const container = document.getElementById('logo-carousel-root');
+    if (!container) return;
+    
+    const allLogos = [
+        { name: "ADNOC", icon: "fa-gas-pump" },
+        { name: "SHUKRAN", icon: "fa-gift" },
+        { name: "IKEA", icon: "fa-couch" },
+        { name: "TOYOTA", icon: "fa-car" },
+        { name: "VISA", icon: "fa-credit-card" },
+        { name: "EBAY", icon: "fa-cart-shopping" },
+        { name: "BOSE", icon: "fa-headphones" },
+        { name: "H&M", icon: "fa-shirt" }
+    ];
+    
+    const columnCount = 4;
+    const columns = Array.from({ length: columnCount }, () => []);
+    
+    // Shuffle and distribute logos
+    const shuffled = [...allLogos].sort(() => Math.random() - 0.5);
+    shuffled.forEach((logo, index) => {
+        columns[index % columnCount].push(logo);
+    });
+    
+    // Pad columns to equal length
+    const maxLen = Math.max(...columns.map(c => c.length));
+    columns.forEach(col => {
+        while (col.length < maxLen) {
+            col.push(shuffled[Math.floor(Math.random() * shuffled.length)]);
+        }
+    });
+    
+    // Render columns
+    container.innerHTML = '';
+    columns.forEach((colLogos, colIdx) => {
+        const colEl = document.createElement('div');
+        colEl.className = 'logo-carousel-col';
+        
+        colLogos.forEach((logo, logoIdx) => {
+            const item = document.createElement('div');
+            item.className = `logo-carousel-item ${logoIdx === 0 ? 'active' : ''}`;
+            item.innerHTML = `<i class="fa-solid ${logo.icon}"></i><span>${logo.name}</span>`;
+            colEl.appendChild(item);
+        });
+        
+        container.appendChild(colEl);
+        
+        // Set up cycling loop per column with staggered start delays
+        let currentIdx = 0;
+        setInterval(() => {
+            const items = colEl.querySelectorAll('.logo-carousel-item');
+            if (items.length === 0) return;
+            
+            const prevItem = items[currentIdx];
+            prevItem.classList.remove('active');
+            prevItem.classList.add('exit');
+            
+            currentIdx = (currentIdx + 1) % items.length;
+            const nextItem = items[currentIdx];
+            nextItem.classList.remove('exit');
+            nextItem.classList.add('active');
+            
+            // Clean up exit class after transition completes
+            setTimeout(() => {
+                prevItem.classList.remove('exit');
+            }, 500);
+        }, 2000 + colIdx * 250); // Stagger interval delay by 250ms per column
+    });
+}
 
 async function loadDynamicPartners() {
     try {
