@@ -6465,6 +6465,54 @@ body:not(.dark-theme) .clickable-pill:hover {
 /* ══════════════════════════════════════════════════
    NEON GRADIENT & CORNER BOX TEXT ANIMATION STYLES
    ══════════════════════════════════════════════════ */
+.landing-hero-boxed-container {
+  position: relative;
+  padding: 2.2rem 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+  margin-bottom: 2.5rem;
+  transition: all 0.3s ease;
+}
+
+body:not(.dark-theme) .landing-hero-boxed-container {
+  background: rgba(0, 0, 0, 0.02) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+}
+
+body:not(.dark-theme) .landing-hero-boxed-container i {
+  color: var(--primary) !important;
+  opacity: 0.5 !important;
+}
+
+/* Light theme gradient overrides for readability and high contrast */
+body:not(.dark-theme) .from-gradient-1-start {
+  --tw-gradient-from: #4f46e5; /* Deep Indigo */
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(79, 70, 229, 0));
+}
+body:not(.dark-theme) .to-gradient-1-end {
+  --tw-gradient-to: #0ea5e9; /* Sky Blue */
+}
+
+body:not(.dark-theme) .from-gradient-2-start {
+  --tw-gradient-from: #db2777; /* Rose Crimson */
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(219, 39, 119, 0));
+}
+body:not(.dark-theme) .to-gradient-2-end {
+  --tw-gradient-to: #ea580c; /* Sunset Orange */
+}
+
+body:not(.dark-theme) .from-gradient-3-start {
+  --tw-gradient-from: #b45309; /* Bronze Gold */
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(180, 83, 9, 0));
+}
+body:not(.dark-theme) .to-gradient-3-end {
+  --tw-gradient-to: #15803d; /* Forest Emerald */
+}
+
 .hero-subtitle.split-done {
   opacity: 1 !important;
 }
