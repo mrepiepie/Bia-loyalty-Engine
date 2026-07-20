@@ -3282,149 +3282,165 @@ function setupLogoCarousel() {
     const container = document.getElementById('logo-carousel-root');
     if (!container) return;
 
-    // Each brand: name + inline SVG path or icon HTML
+    // ── Partner Brand SVGs (BIA ecosystem) ──────────────────────────────────
     const allLogos = [
         {
-            name: 'ADNOC',
-            svg: `<svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" width="48" height="48">
-                <circle cx="30" cy="30" r="28" fill="#005A9C"/>
-                <path d="M30 8 C42 20 42 40 30 52 C18 40 18 20 30 8Z" fill="#E30613"/>
-                <polygon points="30,16 34,26 45,26 36,33 39,44 30,37 21,44 24,33 15,26 26,26" fill="#FFFFFF"/>
+            name: 'ADNOC', id: 1,
+            svg: `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" width="80" height="80">
+                <circle cx="60" cy="60" r="56" fill="#005B9A"/>
+                <path d="M60 14 C80 34 80 86 60 106 C40 86 40 34 60 14Z" fill="#DC2626"/>
+                <circle cx="60" cy="60" r="24" fill="#005B9A" stroke="#fff" stroke-width="3"/>
+                <text x="60" y="66" text-anchor="middle" font-family="Arial Black" font-weight="900" font-size="16" fill="#FFFFFF">A</text>
             </svg>`
         },
         {
-            name: 'VISA',
-            svg: `<svg viewBox="0 0 80 28" fill="none" xmlns="http://www.w3.org/2000/svg" width="64" height="24">
-                <text x="0" y="24" font-family="Arial Black, sans-serif" font-weight="900" font-size="26" fill="#1A1F71">VISA</text>
+            name: 'VISA', id: 2,
+            svg: `<svg viewBox="0 0 160 52" xmlns="http://www.w3.org/2000/svg" width="110" height="36">
+                <text x="0" y="44" font-family="Arial Black,sans-serif" font-weight="900" font-size="48" fill="#1A1F71" letter-spacing="-2">VISA</text>
             </svg>`
         },
         {
-            name: 'IKEA',
-            svg: `<svg viewBox="0 0 80 28" fill="none" xmlns="http://www.w3.org/2000/svg" width="64" height="24">
-                <rect width="80" height="28" rx="4" fill="#0058A3"/>
-                <text x="8" y="21" font-family="Arial Black, sans-serif" font-weight="900" font-size="18" fill="#FFDB00">IKEA</text>
+            name: 'TOYOTA', id: 3,
+            svg: `<svg viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg" width="90" height="60">
+                <ellipse cx="60" cy="40" rx="56" ry="24" stroke="#EB0A1E" stroke-width="5" fill="none"/>
+                <ellipse cx="60" cy="40" rx="32" ry="16" stroke="#EB0A1E" stroke-width="5" fill="none"/>
+                <ellipse cx="60" cy="40" rx="11" ry="24" stroke="#EB0A1E" stroke-width="5" fill="none"/>
             </svg>`
         },
         {
-            name: 'TOYOTA',
-            svg: `<svg viewBox="0 0 60 40" fill="none" xmlns="http://www.w3.org/2000/svg" width="56" height="36">
-                <ellipse cx="30" cy="20" rx="28" ry="13" stroke="#EB0A1E" stroke-width="4" fill="none"/>
-                <ellipse cx="30" cy="20" rx="16" ry="8" stroke="#EB0A1E" stroke-width="4" fill="none"/>
-                <ellipse cx="30" cy="20" rx="6" ry="13" stroke="#EB0A1E" stroke-width="4" fill="none"/>
+            name: 'IKEA', id: 4,
+            svg: `<svg viewBox="0 0 140 56" xmlns="http://www.w3.org/2000/svg" width="110" height="44">
+                <rect width="140" height="56" rx="6" fill="#003399"/>
+                <text x="70" y="40" text-anchor="middle" font-family="Arial Black,sans-serif" font-weight="900" font-size="32" fill="#FFCC00">IKEA</text>
             </svg>`
         },
         {
-            name: 'SHUKRAN',
-            svg: `<svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" width="48" height="48">
-                <circle cx="30" cy="30" r="28" fill="#C8102E"/>
-                <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="9" fill="#FFFFFF" letter-spacing="0.5">SHUKRAN</text>
-                <polygon points="30,10 33,22 46,22 36,30 39,42 30,34 21,42 24,30 14,22 27,22" fill="#FFD700" opacity="0.9"/>
-            </svg>`
-        },
-        {
-            name: 'EBAY',
-            svg: `<svg viewBox="0 0 80 30" fill="none" xmlns="http://www.w3.org/2000/svg" width="68" height="28">
-                <text x="0" y="24" font-family="Arial Black, sans-serif" font-weight="900" font-size="24">
+            name: 'EBAY', id: 5,
+            svg: `<svg viewBox="0 0 148 60" xmlns="http://www.w3.org/2000/svg" width="110" height="44">
+                <text x="0" y="50" font-family="Arial Black,sans-serif" font-weight="900" font-size="56">
                     <tspan fill="#E53238">e</tspan><tspan fill="#0064D2">b</tspan><tspan fill="#F5AF02">a</tspan><tspan fill="#86B817">y</tspan>
                 </text>
             </svg>`
         },
         {
-            name: 'BOSE',
-            svg: `<svg viewBox="0 0 72 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="60" height="22">
-                <text x="0" y="20" font-family="Arial Black, sans-serif" font-weight="900" font-size="20" fill="#dfb15b" letter-spacing="2">BOSE</text>
+            name: 'BOSE', id: 6,
+            svg: `<svg viewBox="0 0 130 40" xmlns="http://www.w3.org/2000/svg" width="110" height="34">
+                <text x="0" y="34" font-family="Arial Black,sans-serif" font-weight="900" font-size="38" fill="#dfb15b" letter-spacing="3">BOSE</text>
             </svg>`
         },
         {
-            name: 'H&M',
-            svg: `<svg viewBox="0 0 56 28" fill="none" xmlns="http://www.w3.org/2000/svg" width="52" height="28">
-                <rect width="56" height="28" rx="4" fill="#E50010"/>
-                <text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-family="Arial Black, sans-serif" font-weight="900" font-size="16" fill="#FFFFFF">H&amp;M</text>
+            name: 'H&M', id: 7,
+            svg: `<svg viewBox="0 0 120 56" xmlns="http://www.w3.org/2000/svg" width="100" height="46">
+                <rect width="120" height="56" rx="6" fill="#E50010"/>
+                <text x="60" y="40" text-anchor="middle" font-family="Arial Black,sans-serif" font-weight="900" font-size="28" fill="#FFFFFF">H&amp;M</text>
+            </svg>`
+        },
+        {
+            name: 'SHUKRAN', id: 8,
+            svg: `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" width="76" height="76">
+                <circle cx="60" cy="60" r="56" fill="#C8102E"/>
+                <polygon points="60,18 68,46 98,46 74,64 82,92 60,74 38,92 46,64 22,46 52,46" fill="#FFD700"/>
+                <text x="60" y="108" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="9" fill="#FFFFFF" letter-spacing="0.8">SHUKRAN</text>
             </svg>`
         },
     ];
 
+    // ── Replicate React template logic exactly ───────────────────────────────
+    // shuffleArray
+    const shuffled = [...allLogos].sort(() => Math.random() - 0.5);
+
     const columnCount = 4;
 
-    // Distribute logos round-robin to columns
-    const colLogos = Array.from({ length: columnCount }, () => []);
-    const shuffled = [...allLogos].sort(() => Math.random() - 0.5);
-    shuffled.forEach((logo, i) => colLogos[i % columnCount].push(logo));
-    // Ensure every column has at least 2 logos
-    colLogos.forEach((col, ci) => {
-        if (col.length < 2) col.push(shuffled[(ci + 2) % shuffled.length]);
+    // distributeLogos
+    const columns = Array.from({ length: columnCount }, () => []);
+    shuffled.forEach((logo, i) => columns[i % columnCount].push(logo));
+    const maxLen = Math.max(...columns.map(c => c.length));
+    columns.forEach(col => {
+        while (col.length < maxLen) col.push(shuffled[Math.floor(Math.random() * shuffled.length)]);
     });
 
     container.innerHTML = '';
 
-    colLogos.forEach((logos, colIdx) => {
+    // Build column slots
+    const colStates = columns.map((logos, colIdx) => {
         const col = document.createElement('div');
         col.className = 'logo-carousel-col';
 
-        // Single slot: one visible item at a time
         const slot = document.createElement('div');
         slot.className = 'logo-slot';
         col.appendChild(slot);
         container.appendChild(col);
 
-        let idx = 0;
-
-        function showLogo(logo, entering) {
-            const item = document.createElement('div');
-            item.className = 'logo-slot-item';
-            item.innerHTML = `
-                <div class="logo-slot-svg">${logo.svg}</div>
-                <span class="logo-slot-name">${logo.name}</span>
-            `;
-
-            if (entering) {
-                item.style.opacity = '0';
-                item.style.transform = 'translateY(14px)';
-                item.style.filter = 'blur(4px)';
-            }
-
-            slot.appendChild(item);
-
-            if (entering) {
-                // Force reflow then animate in
-                requestAnimationFrame(() => {
-                    requestAnimationFrame(() => {
-                        item.style.transition = 'opacity 0.45s ease, transform 0.45s cubic-bezier(0.19,1,0.22,1), filter 0.4s ease';
-                        item.style.opacity = '0.85';
-                        item.style.transform = 'translateY(0)';
-                        item.style.filter = 'blur(0)';
-                    });
-                });
-            }
-
-            return item;
-        }
-
-        // Show first logo immediately (no enter animation)
-        let currentItem = showLogo(logos[0], false);
-        currentItem.style.opacity = '0.85';
-
-        // Cycle every 2.5s, stagger columns by 400ms each
-        setTimeout(() => {
-            setInterval(() => {
-                const prevItem = currentItem;
-
-                // Animate out
-                prevItem.style.transition = 'opacity 0.3s ease, transform 0.3s ease, filter 0.3s ease';
-                prevItem.style.opacity = '0';
-                prevItem.style.transform = 'translateY(-12px)';
-                prevItem.style.filter = 'blur(4px)';
-
-                // After exit, swap
-                setTimeout(() => {
-                    prevItem.remove();
-                    idx = (idx + 1) % logos.length;
-                    currentItem = showLogo(logos[idx], true);
-                }, 320);
-
-            }, 2500);
-        }, colIdx * 420);
+        return { slot, logos, prevIndex: -1, currentItem: null };
     });
+
+    // Create a logo DOM item (hidden by default — JS animates it in)
+    function createItem(logo) {
+        const item = document.createElement('div');
+        item.className = 'logo-slot-item';
+        item.innerHTML = `<div class="logo-slot-svg">${logo.svg}</div><span class="logo-slot-name">${logo.name}</span>`;
+        // Start state: y+10%, blur(8px), opacity:0  →  matches template initial
+        item.style.cssText = 'position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.5rem;opacity:0;transform:translateY(10%);filter:blur(8px);';
+        return item;
+    }
+
+    // Seed first item visible immediately (no animation)
+    colStates.forEach(({ slot, logos }) => {
+        const item = createItem(logos[0]);
+        slot.appendChild(item);
+        // Instantly show first logo — matches React's initial mount
+        item.style.opacity = '1';
+        item.style.transform = 'translateY(0)';
+        item.style.filter = 'blur(0px)';
+    });
+    colStates.forEach(s => {
+        s.currentItem = s.slot.querySelector('.logo-slot-item');
+        s.prevIndex = 0;
+    });
+
+    // ── Shared ticker: exactly matches React's setInterval(updateTime, 100) ──
+    const cycleInterval = 2000; // ms per logo — same as template
+    let currentTime = 0;
+
+    setInterval(() => {
+        currentTime += 100;
+
+        colStates.forEach((state, colIdx) => {
+            const columnDelay = colIdx * 200; // same as template: index * 200
+            const adjustedTime = (currentTime + columnDelay) % (cycleInterval * state.logos.length);
+            const newIndex = Math.floor(adjustedTime / cycleInterval);
+
+            if (newIndex === state.prevIndex) return;
+            state.prevIndex = newIndex;
+
+            // ── EXIT: y → -20%, opacity → 0, blur(6px) [tween ease-in 0.3s] ──
+            const exiting = state.currentItem;
+            if (exiting) {
+                exiting.style.transition = 'opacity 0.3s ease-in, transform 0.3s ease-in, filter 0.3s ease-in';
+                exiting.style.opacity = '0';
+                exiting.style.transform = 'translateY(-20%)';
+                exiting.style.filter = 'blur(6px)';
+                setTimeout(() => exiting.remove(), 340);
+            }
+
+            // ── ENTER: spring cubic-bezier simulates stiffness:300, damping:20, bounce:0.2 ──
+            const entering = createItem(state.logos[newIndex]);
+            state.slot.appendChild(entering);
+            state.currentItem = entering;
+
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    entering.style.transition =
+                        'opacity 0.5s ease,' +
+                        'transform 0.5s cubic-bezier(0.34,1.56,0.64,1),' +
+                        'filter 0.5s ease';
+                    entering.style.opacity = '1';
+                    entering.style.transform = 'translateY(0)';
+                    entering.style.filter = 'blur(0px)';
+                });
+            });
+        });
+    }, 100);
 }
 
 async function loadDynamicPartners() {
