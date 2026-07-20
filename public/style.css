@@ -6802,11 +6802,13 @@ body:not(.dark-theme) .btn-primary.btn-m3 .m3-ripple {
   transition: border-color 0.3s ease, background 0.3s ease;
 }
 
-.query-card-wrapper h2 {
+.query-card-wrapper h2,
+.query-card-wrapper .query-heading-text {
   color: #ffffff !important;
 }
 
-body:not(.dark-theme) .query-card-wrapper h2 {
+body:not(.dark-theme) .query-card-wrapper h2,
+body:not(.dark-theme) .query-card-wrapper .query-heading-text {
   color: #111111 !important;
 }
 
