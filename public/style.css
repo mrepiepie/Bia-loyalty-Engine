@@ -6608,45 +6608,37 @@ body:not(.dark-theme) .to-gradient-3-end {
   user-select: none;
 }
 
-.bg-gradient-to-r {
-  background-image: linear-gradient(to right, var(--tw-gradient-stops));
-}
-
-/* Neon-style gradients */
 .from-gradient-1-start {
-  --tw-gradient-from: #39ff14; /* Neon green */
-  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(57, 255, 20, 0));
-}
-
-.to-gradient-1-end {
-  --tw-gradient-to: #00ffff; /* Neon cyan */
+  background-image: linear-gradient(to right, #39ff14, #00ffff) !important;
 }
 
 .from-gradient-2-start {
-  --tw-gradient-from: #ff073a; /* Neon red-pink */
-  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(255, 7, 58, 0));
-}
-
-.to-gradient-2-end {
-  --tw-gradient-to: #ff6ec7; /* Neon magenta */
+  background-image: linear-gradient(to right, #ff073a, #ff6ec7) !important;
 }
 
 .from-gradient-3-start {
-  --tw-gradient-from: #faff00; /* Neon yellow */
-  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(250, 255, 0, 0));
+  background-image: linear-gradient(to right, #faff00, #00f0ff) !important;
 }
 
-.to-gradient-3-end {
-  --tw-gradient-to: #00f0ff; /* Electric blue */
+body:not(.dark-theme) .from-gradient-1-start {
+  background-image: linear-gradient(to right, #4f46e5, #0ea5e9) !important;
+}
+
+body:not(.dark-theme) .from-gradient-2-start {
+  background-image: linear-gradient(to right, #db2777, #ea580c) !important;
+}
+
+body:not(.dark-theme) .from-gradient-3-start {
+  background-image: linear-gradient(to right, #b45309, #15803d) !important;
 }
 
 .bg-clip-text {
-  -webkit-background-clip: text;
-  background-clip: text;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
 }
 
 .text-transparent {
-  color: transparent;
+  color: transparent !important;
 }
 
 .before\:absolute::before {
