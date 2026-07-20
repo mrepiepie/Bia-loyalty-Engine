@@ -6925,86 +6925,87 @@ body:not(.dark-theme) .btn-query-round {
 }
 
 /* ══════════════════════════════════════════════════
-   VERTICAL LOGO COLUMN CAROUSEL MARQUEE REPLACEMENT
+   VERTICAL LOGO COLUMN CAROUSEL — SLOT SWAP ENGINE
    ══════════════════════════════════════════════════ */
 .logo-carousel-columns {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 2rem;
+  gap: 1.25rem;
   margin: 2rem auto;
-  max-width: 900px;
-  min-height: 120px;
+  max-width: 860px;
+  min-height: 130px;
   flex-wrap: wrap;
 }
 
 .logo-carousel-col {
-  position: relative;
-  width: 150px;
-  height: 110px;
-  overflow: hidden;
+  width: 180px;
+  height: 120px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   display: flex;
-  justify-content: center;
   align-items: center;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.01);
-  border: 1px solid rgba(255, 255, 255, 0.03);
-  transition: border 0.3s ease, background 0.3s ease;
+  justify-content: center;
+  overflow: hidden;
+  transition: border-color 0.3s ease, background 0.3s ease;
+}
+
+.logo-carousel-col:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 body:not(.dark-theme) .logo-carousel-col {
-  background: rgba(0, 0, 0, 0.01) !important;
-  border: 1px solid rgba(0, 0, 0, 0.04) !important;
+  background: rgba(0, 0, 0, 0.015) !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
 }
 
-.logo-carousel-item {
-  position: absolute;
-  inset: 0;
+/* The single visible slot wrapper */
+.logo-slot {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* Each swapped item */
+.logo-slot-item {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  gap: 0.4rem;
-  color: rgba(255, 255, 255, 0.4);
-  transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.19, 1, 0.22, 1), filter 0.5s ease;
-  transform: translateY(15px);
-  opacity: 0;
-  filter: blur(6px);
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.5rem;
 }
 
-.logo-carousel-item.active {
-  transform: translateY(0);
-  opacity: 0.8;
-  filter: blur(0);
+.logo-slot-svg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
 }
 
-.logo-carousel-item.exit {
-  transform: translateY(-15px);
-  opacity: 0;
-  filter: blur(4px);
+.logo-slot-svg svg {
+  max-width: 100%;
+  height: auto;
 }
 
-.logo-carousel-item i {
-  font-size: 1.8rem;
-  color: #dfb15b;
-}
-
-body:not(.dark-theme) .logo-carousel-item i {
-  color: #c49642 !important;
-}
-
-.logo-carousel-item span {
-  font-size: 0.72rem;
+.logo-slot-name {
+  font-size: 0.65rem;
   font-weight: 800;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   font-family: 'Outfit', sans-serif;
-  opacity: 0.85;
+  color: rgba(255, 255, 255, 0.5);
   line-height: 1;
-  color: rgba(255, 255, 255, 0.75);
+  text-align: center;
 }
 
-body:not(.dark-theme) .logo-carousel-item {
-  color: rgba(0, 0, 0, 0.6) !important;
+body:not(.dark-theme) .logo-slot-name {
+  color: rgba(0, 0, 0, 0.45) !important;
 }
 

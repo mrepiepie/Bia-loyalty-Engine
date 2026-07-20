@@ -3281,70 +3281,149 @@ let appPartners = [];
 function setupLogoCarousel() {
     const container = document.getElementById('logo-carousel-root');
     if (!container) return;
-    
+
+    // Each brand: name + inline SVG path or icon HTML
     const allLogos = [
-        { name: "ADNOC", icon: "fa-gas-pump" },
-        { name: "SHUKRAN", icon: "fa-gift" },
-        { name: "IKEA", icon: "fa-couch" },
-        { name: "TOYOTA", icon: "fa-car" },
-        { name: "VISA", icon: "fa-credit-card" },
-        { name: "EBAY", icon: "fa-cart-shopping" },
-        { name: "BOSE", icon: "fa-headphones" },
-        { name: "H&M", icon: "fa-shirt" }
+        {
+            name: 'ADNOC',
+            svg: `<svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" width="48" height="48">
+                <circle cx="30" cy="30" r="28" fill="#005A9C"/>
+                <path d="M30 8 C42 20 42 40 30 52 C18 40 18 20 30 8Z" fill="#E30613"/>
+                <polygon points="30,16 34,26 45,26 36,33 39,44 30,37 21,44 24,33 15,26 26,26" fill="#FFFFFF"/>
+            </svg>`
+        },
+        {
+            name: 'VISA',
+            svg: `<svg viewBox="0 0 80 28" fill="none" xmlns="http://www.w3.org/2000/svg" width="64" height="24">
+                <text x="0" y="24" font-family="Arial Black, sans-serif" font-weight="900" font-size="26" fill="#1A1F71">VISA</text>
+            </svg>`
+        },
+        {
+            name: 'IKEA',
+            svg: `<svg viewBox="0 0 80 28" fill="none" xmlns="http://www.w3.org/2000/svg" width="64" height="24">
+                <rect width="80" height="28" rx="4" fill="#0058A3"/>
+                <text x="8" y="21" font-family="Arial Black, sans-serif" font-weight="900" font-size="18" fill="#FFDB00">IKEA</text>
+            </svg>`
+        },
+        {
+            name: 'TOYOTA',
+            svg: `<svg viewBox="0 0 60 40" fill="none" xmlns="http://www.w3.org/2000/svg" width="56" height="36">
+                <ellipse cx="30" cy="20" rx="28" ry="13" stroke="#EB0A1E" stroke-width="4" fill="none"/>
+                <ellipse cx="30" cy="20" rx="16" ry="8" stroke="#EB0A1E" stroke-width="4" fill="none"/>
+                <ellipse cx="30" cy="20" rx="6" ry="13" stroke="#EB0A1E" stroke-width="4" fill="none"/>
+            </svg>`
+        },
+        {
+            name: 'SHUKRAN',
+            svg: `<svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" width="48" height="48">
+                <circle cx="30" cy="30" r="28" fill="#C8102E"/>
+                <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="9" fill="#FFFFFF" letter-spacing="0.5">SHUKRAN</text>
+                <polygon points="30,10 33,22 46,22 36,30 39,42 30,34 21,42 24,30 14,22 27,22" fill="#FFD700" opacity="0.9"/>
+            </svg>`
+        },
+        {
+            name: 'EBAY',
+            svg: `<svg viewBox="0 0 80 30" fill="none" xmlns="http://www.w3.org/2000/svg" width="68" height="28">
+                <text x="0" y="24" font-family="Arial Black, sans-serif" font-weight="900" font-size="24">
+                    <tspan fill="#E53238">e</tspan><tspan fill="#0064D2">b</tspan><tspan fill="#F5AF02">a</tspan><tspan fill="#86B817">y</tspan>
+                </text>
+            </svg>`
+        },
+        {
+            name: 'BOSE',
+            svg: `<svg viewBox="0 0 72 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="60" height="22">
+                <text x="0" y="20" font-family="Arial Black, sans-serif" font-weight="900" font-size="20" fill="#dfb15b" letter-spacing="2">BOSE</text>
+            </svg>`
+        },
+        {
+            name: 'H&M',
+            svg: `<svg viewBox="0 0 56 28" fill="none" xmlns="http://www.w3.org/2000/svg" width="52" height="28">
+                <rect width="56" height="28" rx="4" fill="#E50010"/>
+                <text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-family="Arial Black, sans-serif" font-weight="900" font-size="16" fill="#FFFFFF">H&amp;M</text>
+            </svg>`
+        },
     ];
-    
+
     const columnCount = 4;
-    const columns = Array.from({ length: columnCount }, () => []);
-    
-    // Shuffle and distribute logos
+
+    // Distribute logos round-robin to columns
+    const colLogos = Array.from({ length: columnCount }, () => []);
     const shuffled = [...allLogos].sort(() => Math.random() - 0.5);
-    shuffled.forEach((logo, index) => {
-        columns[index % columnCount].push(logo);
+    shuffled.forEach((logo, i) => colLogos[i % columnCount].push(logo));
+    // Ensure every column has at least 2 logos
+    colLogos.forEach((col, ci) => {
+        if (col.length < 2) col.push(shuffled[(ci + 2) % shuffled.length]);
     });
-    
-    // Pad columns to equal length
-    const maxLen = Math.max(...columns.map(c => c.length));
-    columns.forEach(col => {
-        while (col.length < maxLen) {
-            col.push(shuffled[Math.floor(Math.random() * shuffled.length)]);
-        }
-    });
-    
-    // Render columns
+
     container.innerHTML = '';
-    columns.forEach((colLogos, colIdx) => {
-        const colEl = document.createElement('div');
-        colEl.className = 'logo-carousel-col';
-        
-        colLogos.forEach((logo, logoIdx) => {
+
+    colLogos.forEach((logos, colIdx) => {
+        const col = document.createElement('div');
+        col.className = 'logo-carousel-col';
+
+        // Single slot: one visible item at a time
+        const slot = document.createElement('div');
+        slot.className = 'logo-slot';
+        col.appendChild(slot);
+        container.appendChild(col);
+
+        let idx = 0;
+
+        function showLogo(logo, entering) {
             const item = document.createElement('div');
-            item.className = `logo-carousel-item ${logoIdx === 0 ? 'active' : ''}`;
-            item.innerHTML = `<i class="fa-solid ${logo.icon}"></i><span>${logo.name}</span>`;
-            colEl.appendChild(item);
-        });
-        
-        container.appendChild(colEl);
-        
-        // Set up cycling loop per column with staggered start delays
-        let currentIdx = 0;
-        setInterval(() => {
-            const items = colEl.querySelectorAll('.logo-carousel-item');
-            if (items.length === 0) return;
-            
-            const prevItem = items[currentIdx];
-            prevItem.classList.remove('active');
-            prevItem.classList.add('exit');
-            
-            currentIdx = (currentIdx + 1) % items.length;
-            const nextItem = items[currentIdx];
-            nextItem.classList.remove('exit');
-            nextItem.classList.add('active');
-            
-            // Clean up exit class after transition completes
-            setTimeout(() => {
-                prevItem.classList.remove('exit');
-            }, 500);
-        }, 2000 + colIdx * 250); // Stagger interval delay by 250ms per column
+            item.className = 'logo-slot-item';
+            item.innerHTML = `
+                <div class="logo-slot-svg">${logo.svg}</div>
+                <span class="logo-slot-name">${logo.name}</span>
+            `;
+
+            if (entering) {
+                item.style.opacity = '0';
+                item.style.transform = 'translateY(14px)';
+                item.style.filter = 'blur(4px)';
+            }
+
+            slot.appendChild(item);
+
+            if (entering) {
+                // Force reflow then animate in
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        item.style.transition = 'opacity 0.45s ease, transform 0.45s cubic-bezier(0.19,1,0.22,1), filter 0.4s ease';
+                        item.style.opacity = '0.85';
+                        item.style.transform = 'translateY(0)';
+                        item.style.filter = 'blur(0)';
+                    });
+                });
+            }
+
+            return item;
+        }
+
+        // Show first logo immediately (no enter animation)
+        let currentItem = showLogo(logos[0], false);
+        currentItem.style.opacity = '0.85';
+
+        // Cycle every 2.5s, stagger columns by 400ms each
+        setTimeout(() => {
+            setInterval(() => {
+                const prevItem = currentItem;
+
+                // Animate out
+                prevItem.style.transition = 'opacity 0.3s ease, transform 0.3s ease, filter 0.3s ease';
+                prevItem.style.opacity = '0';
+                prevItem.style.transform = 'translateY(-12px)';
+                prevItem.style.filter = 'blur(4px)';
+
+                // After exit, swap
+                setTimeout(() => {
+                    prevItem.remove();
+                    idx = (idx + 1) % logos.length;
+                    currentItem = showLogo(logos[idx], true);
+                }, 320);
+
+            }, 2500);
+        }, colIdx * 420);
     });
 }
 
