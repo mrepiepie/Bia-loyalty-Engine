@@ -4086,6 +4086,14 @@ textarea:focus {
     max-width: 360px;
     pointer-events: auto;
     cursor: default;
+    position: relative;
+    overflow: hidden;
+    transition: opacity 0.28s ease, transform 0.28s ease;
+}
+
+.bia-toast-leaving {
+    opacity: 0;
+    transform: translateX(60px) scale(0.9);
 }
 
 .bia-toast-icon {
@@ -4121,6 +4129,55 @@ textarea:focus {
     font-size: 0.78rem;
     color: rgba(236, 235, 227, 0.6);
     line-height: 1.4;
+}
+
+.bia-toast-action {
+    align-self: center;
+    border: 1px solid rgba(255, 184, 41, 0.45);
+    border-radius: 8px;
+    background: rgba(255, 184, 41, 0.12);
+    color: #ffca62;
+    cursor: pointer;
+    flex-shrink: 0;
+    font: inherit;
+    font-size: 0.76rem;
+    font-weight: 800;
+    padding: 0.45rem 0.7rem;
+    transition: background 0.18s ease, border-color 0.18s ease, opacity 0.18s ease;
+}
+
+.bia-toast-action:hover {
+    background: rgba(255, 184, 41, 0.22);
+    border-color: #ffb829;
+}
+
+.bia-toast-action:focus-visible {
+    outline: 2px solid #ffb829;
+    outline-offset: 2px;
+}
+
+.bia-toast-action:disabled {
+    cursor: wait;
+    opacity: 0.65;
+}
+
+.bia-toast-progress {
+    animation: bia-toast-countdown 2s linear forwards;
+    background: linear-gradient(90deg, #ffb829, #dfb15b);
+    bottom: 0;
+    height: 3px;
+    left: 0;
+    position: absolute;
+    transform-origin: left;
+    width: 100%;
+}
+
+@keyframes bia-toast-countdown {
+    to { transform: scaleX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .bia-toast-progress { animation: none; }
 }
 
 /* ══════════════════════════════════════════
@@ -7008,4 +7065,3 @@ body:not(.dark-theme) .logo-carousel-col {
 body:not(.dark-theme) .logo-slot-name {
   color: rgba(0, 0, 0, 0.45) !important;
 }
-
