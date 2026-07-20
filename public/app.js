@@ -453,6 +453,73 @@ function setupMagneticButtons() {
     });
 }
 
+// --- DYNAMIC AUDIO GENERATOR (M3 Auditory feedback) ---
+function playTactilePopSound() {
+    try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        
+        const ctx = new AudioContext();
+        const osc = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+
+        osc.connect(gainNode);
+        gainNode.connect(ctx.destination);
+
+        osc.type = "sine";
+        const now = ctx.currentTime;
+        
+        osc.frequency.setValueAtTime(600, now);
+        osc.frequency.exponentialRampToValueAtTime(100, now + 0.05);
+
+        gainNode.gain.setValueAtTime(0.12, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+
+        osc.start(now);
+        osc.stop(now + 0.05);
+    } catch (e) {}
+}
+
+function setupM3Buttons() {
+    // Bind all buttons with .btn-m3 class
+    const m3Buttons = document.querySelectorAll('.btn-m3');
+    
+    m3Buttons.forEach(btn => {
+        // Pointerdown listener for tactile ripple
+        btn.addEventListener('pointerdown', (e) => {
+            if (btn.hasAttribute('disabled')) return;
+            
+            // Audio pop for large/prominent CTAs
+            if (btn.classList.contains('btn-lg') || btn.classList.contains('btn-xl') || btn.id === 'btn-hero-login') {
+                playTactilePopSound();
+            }
+            
+            const circle = document.createElement("span");
+            const diameter = Math.max(btn.clientWidth, btn.clientHeight);
+            const radius = diameter / 2;
+
+            circle.style.width = circle.style.height = `${diameter}px`;
+            
+            const rect = btn.getBoundingClientRect();
+            circle.style.left = `${e.clientX - rect.left - radius}px`;
+            circle.style.top = `${e.clientY - rect.top - radius}px`;
+            
+            circle.classList.add("m3-ripple");
+            
+            // Clear any lingering ripples
+            const oldRipples = btn.querySelectorAll('.m3-ripple');
+            oldRipples.forEach(r => r.remove());
+            
+            btn.appendChild(circle);
+            
+            // Remove ripple span after animation completes
+            setTimeout(() => {
+                circle.remove();
+            }, 600);
+        });
+    });
+}
+
 // ----------------------------------------------------
 // SCREEN PRELOADER INTRO TIMER & REVEAL
 // ----------------------------------------------------
@@ -2192,6 +2259,7 @@ function bootApplication() {
     setupProximityBoxes();
     setupScrollReveals();
     setupMagneticButtons();
+    setupM3Buttons();
     setup3DGlobe();
     setupSpotlightCards();
     setupBenefitsCarousel();

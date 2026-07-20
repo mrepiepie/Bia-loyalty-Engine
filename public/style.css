@@ -6741,3 +6741,49 @@ body:not(.dark-theme) .from-gradient-3-start {
   content: attr(data-content);
 }
 
+/* ══════════════════════════════════════════════════
+   MATERIAL DESIGN 3 EXPRESSIVE BUTTON PHYSICAL EFFECTS
+   ══════════════════════════════════════════════════ */
+.btn-m3 {
+  position: relative;
+  overflow: hidden;
+  transition: border-radius 0.4s cubic-bezier(0.2, 0.8, 0.2, 1.2), transform 0.2s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.3s ease !important;
+}
+
+.btn-m3:active {
+  border-radius: 8px !important;
+  transform: scale(0.94) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Ripple Element */
+.m3-ripple {
+  position: absolute;
+  border-radius: 50%;
+  transform: scale(0);
+  background: rgba(255, 255, 255, 0.25);
+  pointer-events: none;
+  animation: m3-ripple-animation 0.5s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+}
+
+/* Light mode adjustments for contrast */
+body:not(.dark-theme) .btn-m3 .m3-ripple {
+  background: rgba(0, 0, 0, 0.12) !important;
+}
+
+/* For primary buttons in light mode that have dark text */
+body:not(.dark-theme) .btn-primary.btn-m3 .m3-ripple {
+  background: rgba(255, 255, 255, 0.3) !important;
+}
+
+@keyframes m3-ripple-animation {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(3.5);
+    opacity: 0;
+  }
+}
+
