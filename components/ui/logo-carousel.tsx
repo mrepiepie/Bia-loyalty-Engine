@@ -55,10 +55,11 @@ const LogoColumn: React.FC<LogoColumnProps> = React.memo(
     const adjustedTime = (currentTime + columnDelay) % (cycleInterval * logos.length)
     const currentIndex = Math.floor(adjustedTime / cycleInterval)
     const CurrentLogo = useMemo(() => logos[currentIndex].img, [logos, currentIndex])
+    const currentName = logos[currentIndex].name
 
     return (
       <motion.div
-        className="relative h-14 w-24 overflow-hidden md:h-24 md:w-48"
+        className="relative h-20 w-28 overflow-hidden md:h-32 md:w-48"
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{
@@ -70,7 +71,7 @@ const LogoColumn: React.FC<LogoColumnProps> = React.memo(
         <AnimatePresence mode="wait">
           <motion.div
             key={`${logos[currentIndex].id}-${currentIndex}`}
-            className="absolute inset-0 flex items-center justify-center"
+            className="absolute inset-0 flex flex-col items-center justify-center gap-1.5"
             initial={{ y: "10%", opacity: 0, filter: "blur(8px)" }}
             animate={{
               y: "0%",
@@ -96,7 +97,10 @@ const LogoColumn: React.FC<LogoColumnProps> = React.memo(
               },
             }}
           >
-            <CurrentLogo className="h-20 w-20 max-h-[80%] max-w-[80%] object-contain md:h-32 md:w-32" />
+            <CurrentLogo className="h-10 w-10 max-h-[55%] max-w-[55%] object-contain md:h-14 md:w-14" />
+            <span className="text-[0.62rem] font-bold tracking-widest uppercase text-center opacity-50 leading-none">
+              {currentName}
+            </span>
           </motion.div>
         </AnimatePresence>
       </motion.div>

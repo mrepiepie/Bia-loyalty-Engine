@@ -6941,7 +6941,7 @@ body:not(.dark-theme) .btn-query-round {
 .logo-carousel-col {
   position: relative;
   width: 150px;
-  height: 90px;
+  height: 110px;
   overflow: hidden;
   display: flex;
   justify-content: center;
@@ -6994,11 +6994,14 @@ body:not(.dark-theme) .logo-carousel-item i {
 }
 
 .logo-carousel-item span {
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   font-family: 'Outfit', sans-serif;
+  opacity: 0.85;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.75);
 }
 
 body:not(.dark-theme) .logo-carousel-item {
