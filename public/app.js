@@ -1209,8 +1209,94 @@ function renderProfile(oldPoints) {
     // Render dynamic career recommendation widgets (upsell/cross-sell)
     renderCareerUpgrades();
 
+    // Render milestones badges
+    renderMilestones();
+
     // Load student announcements banner
     loadStudentAnnouncements();
+}
+
+function renderMilestones() {
+    const user = appState.userProfile;
+    const referrals = appState.referrals || [];
+    const ledger = appState.ledger || [];
+    
+    // 1. Welcome Pioneer: Always active since they have successfully logged in/registered
+    unlockMilestoneBadge('badge-welcome', 'Welcome Pioneer');
+    
+    // 2. First Referral: Check if they have at least one referral
+    if (referrals.length > 0) {
+        unlockMilestoneBadge('badge-first-ref', 'First Referral');
+    } else {
+        lockMilestoneBadge('badge-first-ref', 'First Referral');
+    }
+    
+    // 3. Loyalty Champion: Unlocks if points_balance >= 1000 (Silver tier minimum)
+    if (user.points_balance >= 1000) {
+        unlockMilestoneBadge('badge-champion', 'Loyalty Champion');
+    } else {
+        lockMilestoneBadge('badge-champion', 'Loyalty Champion');
+    }
+    
+    // 4. Voucher Pioneer: Unlocks if they have a ledger entry containing 'voucher' or 'claim'
+    const claimedVoucher = ledger.some(e => 
+        (e.event_type && e.event_type.toLowerCase().includes('voucher')) || 
+        (e.description && e.description.toLowerCase().includes('voucher')) ||
+        (e.description && e.description.toLowerCase().includes('claim'))
+    );
+    if (claimedVoucher) {
+        unlockMilestoneBadge('badge-voucher', 'Voucher Pioneer');
+    } else {
+        lockMilestoneBadge('badge-voucher', 'Voucher Pioneer');
+    }
+}
+
+function unlockMilestoneBadge(badgeId, title) {
+    const el = document.getElementById(badgeId);
+    if (!el) return;
+    el.style.background = 'rgba(223, 177, 91, 0.08)';
+    el.style.borderColor = 'rgba(223, 177, 91, 0.35)';
+    
+    const icon = el.querySelector('.badge-icon');
+    if (icon) {
+        icon.style.filter = 'none';
+        icon.style.opacity = '1';
+    }
+    
+    const text = el.querySelector('.badge-title');
+    if (text) {
+        text.style.color = 'var(--text-main)';
+    }
+    
+    const status = el.querySelector('.badge-status');
+    if (status) {
+        status.textContent = 'Unlocked';
+        status.style.color = '#4ade80';
+    }
+}
+
+function lockMilestoneBadge(badgeId, title) {
+    const el = document.getElementById(badgeId);
+    if (!el) return;
+    el.style.background = 'rgba(255, 255, 255, 0.02)';
+    el.style.borderColor = 'rgba(255, 255, 255, 0.05)';
+    
+    const icon = el.querySelector('.badge-icon');
+    if (icon) {
+        icon.style.filter = 'grayscale(1)';
+        icon.style.opacity = '0.35';
+    }
+    
+    const text = el.querySelector('.badge-title');
+    if (text) {
+        text.style.color = 'var(--text-muted)';
+    }
+    
+    const status = el.querySelector('.badge-status');
+    if (status) {
+        status.textContent = 'Locked';
+        status.style.color = 'rgba(255, 255, 255, 0.35)';
+    }
 }
 
 function renderReferralsQueue() {
@@ -1530,17 +1616,46 @@ async function loadProgrammeOverview() {
             return;
         }
         const maxCount = Math.max(...programmes.map(p => p.student_count), 1);
-        container.innerHTML = programmes.map(p => `
-            <div style="padding:0.75rem; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:8px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
-                    <span style="font-size:0.82rem; font-weight:600; color:#fff;">${p.programme}</span>
-                    <span style="font-size:0.72rem; color:#dfb15b; font-weight:700;">${p.student_count} student${p.student_count !== 1 ? 's' : ''}</span>
+        const totalEnrolled = programmes.reduce((sum, p) => sum + p.student_count, 0);
+
+        // HSL program color map
+        const programColors = {
+            'MBA': '#8052ff', // Electric Iris
+            'DBA': '#dfb15b', // Saffron Gold
+            'Digital Marketing': '#15846e', // Deep Emerald
+            'Leadership in Practice': '#ff6b35', // Fire Orange
+            'Finance & Accounting': '#4ade80', // Mint Green
+            'Project Management': '#0077b5', // LinkedIn Blue
+            'General': '#86868b' // Cool Gray
+        };
+
+        container.innerHTML = programmes.map(p => {
+            const color = programColors[p.programme] || '#dfb15b';
+            const percentage = totalEnrolled > 0 ? Math.round((p.student_count / totalEnrolled) * 100) : 0;
+            const barWidth = Math.round((p.student_count / maxCount) * 100);
+
+            return `
+                <div style="padding:0.95rem; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:10px; transition: background 0.3s ease;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                        <div style="display:flex; align-items:center; gap:0.5rem;">
+                            <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${color};"></span>
+                            <span style="font-size:0.85rem; font-weight:700; color:var(--text-main);">${p.programme}</span>
+                        </div>
+                        <div style="text-align:right;">
+                            <span style="font-size:0.8rem; color:${color}; font-weight:800; display:block;">${p.student_count} student${p.student_count !== 1 ? 's' : ''}</span>
+                            <span style="font-size:0.62rem; color:var(--text-muted); font-weight:500;">${percentage}% share</span>
+                        </div>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.04); height:6px; border-radius:3px; overflow:hidden; margin-bottom:0.4rem;">
+                        <div style="background:${color}; width:${barWidth}%; height:100%; border-radius:3px; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);"></div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:0.65rem; color:var(--text-muted);">${formatNumber(p.total_points || 0)} total points issued</span>
+                        <span style="font-size:0.65rem; color:var(--text-muted); font-weight:700;">Avg: ${p.student_count > 0 ? formatNumber(Math.round(p.total_points / p.student_count)) : 0} pts/student</span>
+                    </div>
                 </div>
-                <div style="background:rgba(255,255,255,0.05); height:5px; border-radius:3px;">
-                    <div style="background:#dfb15b; width:${Math.round((p.student_count / maxCount) * 100)}%; height:100%; border-radius:3px;"></div>
-                </div>
-                <span style="font-size:0.65rem; color:rgba(255,255,255,0.35);">${formatNumber(p.total_points || 0)} total points issued</span>
-            </div>`).join('');
+            `;
+        }).join('');
     } catch {
         container.innerHTML = '<p style="color:rgba(255,255,255,0.4);font-size:0.8rem;">Could not load programme data.</p>';
     }
@@ -1898,6 +2013,7 @@ function closeAdjustmentModal() {
     document.getElementById('adjust-reason').value = '';
     document.getElementById('adjust-points-modal').style.display = 'none';
 }
+window.closeAdjustmentModal = closeAdjustmentModal;
 
 document.getElementById('adjust-points-form').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -4732,6 +4848,36 @@ const setupP2PTransferListeners = () => {
         });
     }
 
+    // 4.5. Native Browser Web Share
+    const shareBtn = document.getElementById('btn-quick-share');
+    if (shareBtn) {
+        // Show share button if native Web Share is supported
+        if (navigator.share) {
+            shareBtn.style.display = 'flex';
+        }
+        shareBtn.addEventListener('click', async () => {
+            if (!appState.currentUser) return;
+            const refCode = appState.currentUser.referral_code || 'SARAH-9042';
+            const title = "BIA Scholarship Invitation";
+            const text = `Hi! Registering at Bradford International Alliance gets you an AED 500 scholarship grant instantly! Use my referral code: ${refCode} to claim it.`;
+            const url = "https://bradfordia.com/enroll";
+
+            try {
+                await navigator.share({
+                    title: title,
+                    text: text,
+                    url: url
+                });
+                showToast('Shared! 🎉', 'Referral link shared successfully.', 'success');
+            } catch (err) {
+                // AbortError is normal when user cancels the native popup
+                if (err.name !== 'AbortError') {
+                    showToast('Sharing Failed', 'Failed to share referral link.', 'error');
+                }
+            }
+        });
+    }
+
     // 5. Clipboard Quick Invite Copy
     const copyBtn = document.getElementById('btn-quick-copy');
     if (copyBtn) {
@@ -4889,6 +5035,7 @@ async function loadTrafficDashboard() {
         if (!logsRes.ok) throw new Error('Failed to load traffic history.');
         const logs = await logsRes.json();
 
+        window._trafficLogsRaw = logs;
         tbodyRenderTrafficLogs(logs);
         
         // Load blacklist list
@@ -4947,20 +5094,44 @@ async function loadTrafficDashboard() {
         logsBody.innerHTML = `<tr><td colspan="5" class="no-data" style="color: #ef4444;">Error: ${err.message}</td></tr>`;
     }
 }
+window.loadTrafficDashboard = loadTrafficDashboard;
+
+let currentLogFilter = 'all';
 
 function tbodyRenderTrafficLogs(logs) {
     const logsBody = document.getElementById('traffic-logs-body');
     if (!logsBody) return;
 
-    if (logs.length === 0) {
+    if (!logs || logs.length === 0) {
         logsBody.innerHTML = '<tr><td colspan="5" class="no-data">No traffic records in database.</td></tr>';
         return;
     }
 
-    // Keep a reference so the detail panel can access it
-    window._trafficLogs = logs;
+    // Filter logs based on active filter tab
+    let filteredLogs = logs;
+    if (currentLogFilter === 'auth') {
+        filteredLogs = logs.filter(l => 
+            (l.activity && (l.activity.toLowerCase().includes('login') || l.activity.toLowerCase().includes('auth') || l.activity.toLowerCase().includes('logout')))
+        );
+    } else if (currentLogFilter === 'points') {
+        filteredLogs = logs.filter(l => 
+            (l.activity && (l.activity.toLowerCase().includes('point') || l.activity.toLowerCase().includes('ledger') || l.activity.toLowerCase().includes('adjust') || l.activity.toLowerCase().includes('check-in') || l.activity.toLowerCase().includes('gift')))
+        );
+    } else if (currentLogFilter === 'voucher') {
+        filteredLogs = logs.filter(l => 
+            (l.activity && (l.activity.toLowerCase().includes('voucher') || l.activity.toLowerCase().includes('claim')))
+        );
+    }
 
-    logsBody.innerHTML = logs.map((log, idx) => {
+    if (filteredLogs.length === 0) {
+        logsBody.innerHTML = '<tr><td colspan="5" class="no-data">No logs match this filter category.</td></tr>';
+        return;
+    }
+
+    // Keep a reference so the detail panel can access it
+    window._trafficLogs = filteredLogs;
+
+    logsBody.innerHTML = filteredLogs.map((log, idx) => {
         const name = log.user_name ? `${log.user_name} (${log.role.toUpperCase()})` : 'Anonymous Guest';
         const dateStr = cleanDate(log.created_at);
         const uaStr = log.user_agent || 'Unknown';
@@ -5353,6 +5524,30 @@ const setupTrafficListeners = () => {
             }
         });
     }
+
+    // Setup Activity Logs filter pills click events
+    document.querySelectorAll('.log-filter-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            document.querySelectorAll('.log-filter-btn').forEach(b => {
+                b.classList.remove('active');
+                b.style.background = 'rgba(255,255,255,0.02)';
+                b.style.borderColor = 'rgba(255,255,255,0.06)';
+                b.style.color = 'rgba(255,255,255,0.5)';
+            });
+            btn.classList.add('active');
+            btn.style.background = 'rgba(255,255,255,0.06)';
+            btn.style.borderColor = 'rgba(255,255,255,0.15)';
+            btn.style.color = '#fff';
+            
+            currentLogFilter = btn.getAttribute('data-filter');
+            // Re-render traffic logs based on cached logs list
+            if (window._trafficLogsRaw) {
+                tbodyRenderTrafficLogs(window._trafficLogsRaw);
+            } else {
+                loadTrafficDashboard();
+            }
+        });
+    });
 
     const search = document.getElementById('traffic-search-input');
     if (search) {

@@ -860,6 +860,39 @@
                         </div>
                     </div>
                 </div>
+                <!-- Student Milestone Achievements -->
+                <div class="card glassmorphic spotlight-card" style="margin-bottom: 1.5rem; padding: 1.25rem;">
+                    <h4 style="margin-top: 0; margin-bottom: 0.5rem; font-family: 'Outfit'; font-size: 0.95rem; color: var(--text-main); font-weight: 700; display: flex; align-items: center; gap: 0.4rem;">
+                        <i class="fa-solid fa-trophy" style="color: #ffb829;"></i> Student Milestone Achievements
+                    </h4>
+                    <p style="font-size: 0.76rem; color: var(--text-muted); margin-bottom: 1rem;">Complete portal goals to unlock exclusive digital badges and tier progress.</p>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.75rem;">
+                        <!-- Badge 1 -->
+                        <div class="milestone-badge-item" id="badge-welcome" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0.75rem; border-radius: 10px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); text-align: center; transition: all 0.3s ease;">
+                            <div class="badge-icon" style="font-size: 1.75rem; margin-bottom: 0.4rem; filter: grayscale(1); opacity: 0.35; transition: all 0.3s ease;"><i class="fa-solid fa-rocket" style="color: #8052ff;"></i></div>
+                            <span class="badge-title" style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); display: block; transition: color 0.3s ease;">Welcome Pioneer</span>
+                            <span class="badge-status" style="font-size: 0.58rem; color: rgba(255, 255, 255, 0.35); text-transform: uppercase; margin-top: 0.1rem; font-weight: 700; transition: color 0.3s ease;">Locked</span>
+                        </div>
+                        <!-- Badge 2 -->
+                        <div class="milestone-badge-item" id="badge-first-ref" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0.75rem; border-radius: 10px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); text-align: center; transition: all 0.3s ease;">
+                            <div class="badge-icon" style="font-size: 1.75rem; margin-bottom: 0.4rem; filter: grayscale(1); opacity: 0.35; transition: all 0.3s ease;"><i class="fa-solid fa-user-plus" style="color: #ff6b35;"></i></div>
+                            <span class="badge-title" style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); display: block; transition: color 0.3s ease;">First Referral</span>
+                            <span class="badge-status" style="font-size: 0.58rem; color: rgba(255, 255, 255, 0.35); text-transform: uppercase; margin-top: 0.1rem; font-weight: 700; transition: color 0.3s ease;">Locked</span>
+                        </div>
+                        <!-- Badge 3 -->
+                        <div class="milestone-badge-item" id="badge-champion" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0.75rem; border-radius: 10px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); text-align: center; transition: all 0.3s ease;">
+                            <div class="badge-icon" style="font-size: 1.75rem; margin-bottom: 0.4rem; filter: grayscale(1); opacity: 0.35; transition: all 0.3s ease;"><i class="fa-solid fa-gem" style="color: #ffb829;"></i></div>
+                            <span class="badge-title" style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); display: block; transition: color 0.3s ease;">Loyalty Champion</span>
+                            <span class="badge-status" style="font-size: 0.58rem; color: rgba(255, 255, 255, 0.35); text-transform: uppercase; margin-top: 0.1rem; font-weight: 700; transition: color 0.3s ease;">Locked</span>
+                        </div>
+                        <!-- Badge 4 -->
+                        <div class="milestone-badge-item" id="badge-voucher" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0.75rem; border-radius: 10px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); text-align: center; transition: all 0.3s ease;">
+                            <div class="badge-icon" style="font-size: 1.75rem; margin-bottom: 0.4rem; filter: grayscale(1); opacity: 0.35; transition: all 0.3s ease;"><i class="fa-solid fa-receipt" style="color: #15846e;"></i></div>
+                            <span class="badge-title" style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); display: block; transition: color 0.3s ease;">Voucher Pioneer</span>
+                            <span class="badge-status" style="font-size: 0.58rem; color: rgba(255, 255, 255, 0.35); text-transform: uppercase; margin-top: 0.1rem; font-weight: 700; transition: color 0.3s ease;">Locked</span>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="student-dashboard-grid">
                     <!-- Column 1: Daily Check-In attendance gamification -->
@@ -1053,10 +1086,13 @@
                         </div>
 
                         <!-- Quick Invite buttons -->
-                        <div style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid rgba(255,255,255,0.06); display: flex; gap: 1rem; align-items: center;">
+                        <div style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid rgba(255,255,255,0.06); display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
                             <span style="font-size: 0.76rem; font-weight: 700; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.05em;">Quick Invite:</span>
                             <button class="btn btn-secondary btn-sm" id="btn-quick-wa" style="border-color: rgba(37, 211, 102, 0.2); background: rgba(37, 211, 102, 0.05); color: #25d366; display: flex; align-items: center; gap: 0.4rem; font-size: 0.72rem; padding: 0.45rem 0.85rem; border-radius: 6px; font-weight: 700; height: auto;">
                                 <i class="fa-brands fa-whatsapp"></i> Share on WhatsApp
+                            </button>
+                            <button class="btn btn-secondary btn-sm" id="btn-quick-share" style="border-color: rgba(223, 177, 91, 0.25); background: rgba(223, 177, 91, 0.05); color: #dfb15b; display: none; align-items: center; gap: 0.4rem; font-size: 0.72rem; padding: 0.45rem 0.85rem; border-radius: 6px; font-weight: 700; height: auto;">
+                                <i class="fa-solid fa-share-nodes"></i> Share Invite Link
                             </button>
                             <button class="btn btn-secondary btn-sm" id="btn-quick-copy" style="border-color: rgba(255,255,255,0.1); background: rgba(255,255,255,0.02); color: #fff; display: flex; align-items: center; gap: 0.4rem; font-size: 0.72rem; padding: 0.45rem 0.85rem; border-radius: 6px; font-weight: 700; height: auto;">
                                 <i class="fa-solid fa-copy"></i> Copy Invite Message
@@ -1609,9 +1645,16 @@
                             </button>
                         </div>
                         <div style="margin-bottom:1rem;">
-                            <div style="position:relative;">
+                            <div style="position:relative; margin-bottom:0.75rem;">
                                 <i class="fa-solid fa-magnifying-glass" style="position:absolute; left:0.85rem; top:50%; transform:translateY(-50%); color:rgba(255,255,255,0.3); font-size:0.8rem;"></i>
                                 <input type="text" id="traffic-search-input" placeholder="Search by student, IP address, or activity..." style="width:100%; box-sizing:border-box; padding:0.65rem 0.75rem 0.65rem 2.25rem; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:8px; color:#fff; font-family:inherit; font-size:0.82rem; outline:none;">
+                            </div>
+                            <!-- Filter pills for logs -->
+                            <div class="log-filter-pills-container" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                <button class="log-filter-btn active" data-filter="all" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 0.35rem 0.75rem; border-radius: 6px; font-size: 0.72rem; cursor: pointer; font-family: inherit; font-weight: 700; transition: all 0.2s ease;">All Activities</button>
+                                <button class="log-filter-btn" data-filter="auth" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); color: rgba(255,255,255,0.5); padding: 0.35rem 0.75rem; border-radius: 6px; font-size: 0.72rem; cursor: pointer; font-family: inherit; font-weight: 700; transition: all 0.2s ease;">User Logins</button>
+                                <button class="log-filter-btn" data-filter="points" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); color: rgba(255,255,255,0.5); padding: 0.35rem 0.75rem; border-radius: 6px; font-size: 0.72rem; cursor: pointer; font-family: inherit; font-weight: 700; transition: all 0.2s ease;">Points Operations</button>
+                                <button class="log-filter-btn" data-filter="voucher" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); color: rgba(255,255,255,0.5); padding: 0.35rem 0.75rem; border-radius: 6px; font-size: 0.72rem; cursor: pointer; font-family: inherit; font-weight: 700; transition: all 0.2s ease;">Voucher Claims</button>
                             </div>
                         </div>
                         <div class="table-scroll-container">
