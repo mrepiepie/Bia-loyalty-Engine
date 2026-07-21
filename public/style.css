@@ -2581,6 +2581,33 @@ body.login-modal-active #pixel-grid-canvas {
     border-radius: 9999px;
 }
 
+.academic-crest-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.crest-svg {
+    filter: drop-shadow(0 0 15px rgba(232, 184, 56, 0.3));
+    animation: float 6s ease-in-out infinite;
+}
+
+/* Force pitch black crest in light mode */
+body:not(.dark-theme) .crest-svg {
+    filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.1));
+}
+body:not(.dark-theme) .crest-svg path,
+body:not(.dark-theme) .crest-svg polygon {
+    stroke: #000000 !important;
+}
+body:not(.dark-theme) .crest-svg polygon {
+    fill: #000000 !important;
+}
+body:not(.dark-theme) .crest-svg path[fill] {
+    fill: rgba(0, 0, 0, 0.05) !important;
+}
+
 .carousel-controls {
     display: flex;
     justify-content: center;
