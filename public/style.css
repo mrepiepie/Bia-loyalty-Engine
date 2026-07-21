@@ -6809,7 +6809,7 @@ body:not(.dark-theme) .btn-primary.btn-m3 .m3-ripple {
 
 body:not(.dark-theme) .query-card-wrapper h2,
 body:not(.dark-theme) .query-card-wrapper .query-heading-text {
-  color: #111111 !important;
+  color: #ffffff !important;
 }
 
 .query-card-wrapper p {
@@ -6817,12 +6817,13 @@ body:not(.dark-theme) .query-card-wrapper .query-heading-text {
 }
 
 body:not(.dark-theme) .query-card-wrapper p {
-  color: #4a5568 !important;
+  color: rgba(255, 255, 255, 0.58) !important;
 }
 
 body:not(.dark-theme) .query-card-wrapper {
-  background: rgba(0, 0, 0, 0.015) !important;
-  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  background: linear-gradient(135deg, #0f1117 0%, #12151e 60%, #0d1420 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.07) !important;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255,255,255,0.04) !important;
 }
 
 .query-card-inner {
@@ -6870,9 +6871,9 @@ body:not(.dark-theme) .query-visual-container {
 }
 
 body:not(.dark-theme) .query-floating-tag {
-  background: rgba(0, 0, 0, 0.02) !important;
-  border: 1px solid rgba(0, 0, 0, 0.06) !important;
-  color: var(--text-muted) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.09) !important;
+  color: rgba(255, 255, 255, 0.72) !important;
 }
 
 .btn-query-round {
@@ -6882,9 +6883,9 @@ body:not(.dark-theme) .query-floating-tag {
 }
 
 body:not(.dark-theme) .btn-query-round {
-  border: 1px solid rgba(0, 0, 0, 0.08) !important;
-  background: rgba(0, 0, 0, 0.01) !important;
-  color: var(--text-main) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: rgba(255, 255, 255, 0.85) !important;
 }
 
 /* Looping Mouse Pointer Animation */

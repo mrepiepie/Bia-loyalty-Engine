@@ -354,18 +354,61 @@ app.post('/api/admin/adjust-points', async (req, res) => {
         const expiry = new Date();
         expiry.setFullYear(expiry.getFullYear() + 4);
 
+        let ledgerResult;
         if (isDeduction) {
             await deductPoints(user_id, absPoints);
-            await runQuery(`INSERT INTO points_ledger (user_id, points_change, event_type, description, points_remaining, expires_at) VALUES (?, ?, 'Adjustment', ?, 0, NULL)`, [user_id, points_change, `Admin Adjustment: ${description}`]);
+            ledgerResult = await runQuery(`INSERT INTO points_ledger (user_id, points_change, event_type, description, points_remaining, expires_at) VALUES (?, ?, 'Adjustment', ?, 0, NULL)`, [user_id, points_change, `Admin Adjustment: ${description}`]);
         } else {
-            await runQuery(`INSERT INTO points_ledger (user_id, points_change, event_type, description, points_remaining, expires_at) VALUES (?, ?, 'Adjustment', ?, ?, ?)`, [user_id, points_change, `Admin Adjustment: ${description}`, points_change, expiry.toISOString()]);
+            ledgerResult = await runQuery(`INSERT INTO points_ledger (user_id, points_change, event_type, description, points_remaining, expires_at) VALUES (?, ?, 'Adjustment', ?, ?, ?)`, [user_id, points_change, `Admin Adjustment: ${description}`, points_change, expiry.toISOString()]);
         }
 
         await runQuery(`UPDATE users SET points_balance = points_balance + ? WHERE user_id = ?`, [points_change, user_id]);
         await updateUserTier(user_id);
-        res.json({ success: true, message: 'Points adjusted successfully' });
+
+        // Return ledger_id so frontend can offer undo within grace period
+        res.json({ success: true, message: 'Points adjusted successfully', ledger_id: ledgerResult.lastID });
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
+
+// ── Undo a points adjustment within the 3-second grace period ────────────────
+app.delete('/api/admin/undo-points/:ledgerId', async (req, res) => {
+    try {
+        const ledgerId = parseInt(req.params.ledgerId);
+        if (!ledgerId) return res.status(400).json({ error: 'Invalid ledger ID' });
+
+        // Fetch the ledger entry
+        const entry = await getQuery(
+            `SELECT * FROM points_ledger WHERE ledger_id = ? AND event_type = 'Adjustment'`,
+            [ledgerId]
+        );
+        if (!entry) return res.status(404).json({ error: 'Ledger entry not found or already reversed.' });
+
+        // Check it's within 30 seconds (generous server-side grace window)
+        const createdAt = new Date(entry.created_at);
+        const ageSeconds = (Date.now() - createdAt.getTime()) / 1000;
+        if (ageSeconds > 30) return res.status(410).json({ error: 'Undo window has expired.' });
+
+        // Reverse: subtract whatever was added (or add back what was deducted)
+        const reverseAmount = -entry.points_change;
+        const student = await getQuery(`SELECT points_balance FROM users WHERE user_id = ?`, [entry.user_id]);
+        if (!student) return res.status(404).json({ error: 'Student not found.' });
+
+        // Prevent balance going negative
+        const newBalance = student.points_balance + reverseAmount;
+        if (newBalance < 0) return res.status(400).json({ error: 'Cannot undo: would result in negative balance.' });
+
+        // Delete the original ledger entry
+        await runQuery(`DELETE FROM points_ledger WHERE ledger_id = ?`, [ledgerId]);
+
+        // Restore balance
+        await runQuery(`UPDATE users SET points_balance = ? WHERE user_id = ?`, [newBalance, entry.user_id]);
+        await updateUserTier(entry.user_id);
+
+        res.json({ success: true, message: 'Points adjustment successfully undone.', reversed_change: entry.points_change });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+
 
 app.get('/api/settings', async (req, res) => {
     try {

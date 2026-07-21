@@ -4843,6 +4843,136 @@ window.closeStudentDetailModal = function() {
     }
 };
 
+// ── Undo toast helper ────────────────────────────────────────────────────────
+function showUndoToast(ledgerId, change, description, userId) {
+    const UNDO_MS = 3000;
+
+    // Remove any existing undo toast
+    const existing = document.getElementById('bia-undo-toast');
+    if (existing) existing.remove();
+
+    const sign = change > 0 ? '+' : '';
+    const toast = document.createElement('div');
+    toast.id = 'bia-undo-toast';
+    toast.innerHTML = `
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.55rem;">
+            <span style="font-size:1.1rem;">⚡</span>
+            <div style="flex:1;min-width:0;">
+                <div style="font-weight:700;font-size:0.82rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                    ${sign}${change} pts applied
+                </div>
+                <div style="font-size:0.7rem;color:rgba(255,255,255,0.55);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                    ${description}
+                </div>
+            </div>
+            <button id="bia-undo-btn" style="
+                background: rgba(255,255,255,0.12);
+                border: 1px solid rgba(255,255,255,0.2);
+                color: #fff;
+                font-size: 0.72rem;
+                font-weight: 800;
+                letter-spacing: 0.06em;
+                padding: 0.3rem 0.75rem;
+                border-radius: 6px;
+                cursor: pointer;
+                white-space: nowrap;
+                transition: background 0.15s ease;
+                flex-shrink: 0;
+            ">UNDO</button>
+        </div>
+        <div style="width:100%;height:3px;background:rgba(255,255,255,0.1);border-radius:2px;overflow:hidden;">
+            <div id="bia-undo-bar" style="
+                height:100%;
+                width:100%;
+                background: linear-gradient(90deg, #4ade80, #22d3ee);
+                border-radius:2px;
+                transition: width ${UNDO_MS}ms linear;
+            "></div>
+        </div>
+    `;
+    toast.style.cssText = `
+        position: fixed;
+        bottom: 1.5rem;
+        right: 1.5rem;
+        z-index: 99999;
+        background: rgba(15, 15, 20, 0.96);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(74, 222, 128, 0.3);
+        border-radius: 12px;
+        padding: 0.85rem 1rem;
+        width: 320px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(74,222,128,0.1);
+        animation: bia-undo-slide-in 0.25s cubic-bezier(0.34,1.56,0.64,1) both;
+    `;
+
+    // Inject keyframes if not already present
+    if (!document.getElementById('bia-undo-keyframes')) {
+        const style = document.createElement('style');
+        style.id = 'bia-undo-keyframes';
+        style.textContent = `
+            @keyframes bia-undo-slide-in {
+                from { opacity: 0; transform: translateY(20px) scale(0.96); }
+                to   { opacity: 1; transform: translateY(0) scale(1); }
+            }
+            @keyframes bia-undo-slide-out {
+                from { opacity: 1; transform: translateY(0) scale(1); }
+                to   { opacity: 0; transform: translateY(12px) scale(0.95); }
+            }
+            #bia-undo-btn:hover { background: rgba(255,255,255,0.22) !important; }
+        `;
+        document.head.appendChild(style);
+    }
+
+    document.body.appendChild(toast);
+
+    // Start countdown bar (shrink to 0 over UNDO_MS)
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            const bar = document.getElementById('bia-undo-bar');
+            if (bar) bar.style.width = '0%';
+        });
+    });
+
+    let undone = false;
+
+    // Auto-dismiss after UNDO_MS
+    const autoTimer = setTimeout(() => {
+        if (undone) return;
+        toast.style.animation = 'bia-undo-slide-out 0.2s ease forwards';
+        setTimeout(() => toast.remove(), 220);
+    }, UNDO_MS);
+
+    // Undo button handler
+    document.getElementById('bia-undo-btn').addEventListener('click', async () => {
+        if (undone) return;
+        undone = true;
+        clearTimeout(autoTimer);
+
+        const btn = document.getElementById('bia-undo-btn');
+        if (btn) { btn.textContent = '...'; btn.disabled = true; }
+
+        try {
+            const res = await fetch(`${API_BASE}/admin/undo-points/${ledgerId}`, { method: 'DELETE' });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Undo failed');
+
+            // Dismisss undo toast
+            toast.style.animation = 'bia-undo-slide-out 0.2s ease forwards';
+            setTimeout(() => toast.remove(), 220);
+
+            showToast('Undone ↩️', `Reversed: ${sign}${change} pts removed from record.`, 'success');
+
+            // Refresh modal and list
+            await loadAdminStudents();
+            await showStudentDetailModal(userId);
+        } catch (err) {
+            toast.style.animation = 'bia-undo-slide-out 0.2s ease forwards';
+            setTimeout(() => toast.remove(), 220);
+            showToast('Undo Failed', err.message, 'error');
+        }
+    });
+}
+
 // Admin Preset adjuster helper
 window.adjustPointsQuick = async function(userId, change, description) {
     try {
@@ -4854,15 +4984,17 @@ window.adjustPointsQuick = async function(userId, change, description) {
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'Failed to adjust points');
 
-        showToast('Points Adjusted! ⚡', `Added ${change} pts: ${description}`, 'success');
-        
         // Refresh details modal & active admin list dynamically
         await loadAdminStudents();
         await showStudentDetailModal(userId);
+
+        // Show undo toast AFTER modal refresh so it sits on top
+        showUndoToast(data.ledger_id, change, description, userId);
     } catch (err) {
         showToast('Adjustment Error', err.message, 'error');
     }
 };
+
 
 // Admin Voucher mark-used helper
 window.markVoucherUsedAdmin = async function(voucherCode, userId) {
