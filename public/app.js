@@ -4660,8 +4660,8 @@ window.showStudentDetailModal = async function(userId) {
 
     const logContainer = document.getElementById('sd-activity-log');
     logContainer.innerHTML = auditEvents.map(e => `
-        <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 0.25rem;">
-            <span style="color: rgba(255,255,255,0.7);">${e.action}</span>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.25rem;">
+            <span style="color: var(--text-main);">${e.action}</span>
             <span style="color: #dfb15b; font-size: 0.65rem; white-space: nowrap; margin-left: 0.5rem;">${e.time}</span>
         </div>
     `).join('');
@@ -4695,19 +4695,19 @@ window.showStudentDetailModal = async function(userId) {
         const vouchers = await response.json();
 
         if (vouchers.length === 0) {
-            vouchersList.innerHTML = `<span style="font-size:0.7rem; color:rgba(255,255,255,0.3); display:block; padding:0.5rem 0;">No generated tuition vouchers.</span>`;
+            vouchersList.innerHTML = `<span style="font-size:0.7rem; color:var(--text-muted); display:block; padding:0.5rem 0;">No generated tuition vouchers.</span>`;
         } else {
             vouchersList.innerHTML = vouchers.map(v => {
                 const dateStr = new Date(v.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
                 const isUnused = v.status.toLowerCase() === 'unused';
                 const actionBtn = isUnused 
                     ? `<button class="btn btn-primary btn-sm" onclick="markVoucherUsedAdmin('${v.voucher_code}', ${student.user_id})" style="background:#dfb15b; color:#000; border:none; padding:0.25rem 0.5rem; font-size:0.65rem; font-weight:700;">Redeem</button>`
-                    : `<span style="color:rgba(255,255,255,0.3); font-size:0.68rem; font-weight:700; display:inline-block; margin-right:0.35rem;">USED</span>`;
+                    : `<span style="color:var(--text-muted); font-size:0.68rem; font-weight:700; display:inline-block; margin-right:0.35rem;">USED</span>`;
                 return `
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); padding:0.4rem 0.5rem; border-radius:6px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem; background:var(--bg-card); border:1px solid var(--border-color); padding:0.4rem 0.5rem; border-radius:6px;">
                         <div>
-                            <span style="font-family:'Outfit'; font-weight:700; color:#fff; font-size:0.75rem; display:block;">${v.voucher_code}</span>
-                            <span style="font-size:0.65rem; color:rgba(255,255,255,0.45);">${dateStr} | AED ${v.discount_aed}</span>
+                            <span style="font-family:'Outfit'; font-weight:700; color:var(--text-main); font-size:0.75rem; display:block;">${v.voucher_code}</span>
+                            <span style="font-size:0.65rem; color:var(--text-muted);">${dateStr} | AED ${v.discount_aed}</span>
                         </div>
                         <div style="display: flex; gap: 0.25rem; align-items: center;">
                             ${actionBtn}
