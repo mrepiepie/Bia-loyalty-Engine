@@ -6638,11 +6638,11 @@ function renderCareerUpgrades() {
             <span style="font-size: 0.65rem; color: #dfb15b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.25rem;">
                 <i class="fa-solid fa-gift"></i> ${offer}
             </span>
-            <strong style="color: #fff; font-size: 0.9rem; display: block; margin-bottom: 0.35rem; font-family: 'Outfit';">${title}</strong>
-            <p style="color: rgba(255,255,255,0.55); font-size: 0.78rem; margin: 0 0 0.85rem 0; line-height: 1.45;">${description}</p>
+            <strong style="color: var(--text-main); font-size: 0.9rem; display: block; margin-bottom: 0.35rem; font-family: 'Outfit';">${title}</strong>
+            <p style="color: var(--text-muted); font-size: 0.78rem; margin: 0 0 0.85rem 0; line-height: 1.45;">${description}</p>
             
             <ul style="margin: 0; padding-left: 0; list-style: none; display: flex; flex-direction: column; gap: 0.35rem;">
-                ${benefits.map(b => `<li style="font-size: 0.74rem; color: rgba(255,255,255,0.7); line-height: 1.3; display: flex; align-items: flex-start; gap: 0.4rem;"><i class="fa-solid fa-circle-check text-emerald" style="font-size: 0.72rem; margin-top: 0.15rem; flex-shrink: 0;"></i>${b}</li>`).join('')}
+                ${benefits.map(b => `<li style="font-size: 0.74rem; color: var(--text-muted); line-height: 1.3; display: flex; align-items: flex-start; gap: 0.4rem;"><i class="fa-solid fa-circle-check text-emerald" style="font-size: 0.72rem; margin-top: 0.15rem; flex-shrink: 0;"></i>${b}</li>`).join('')}
             </ul>
         </div>
         <button id="btn-upsell-enquire" onclick="submitUpsellEnquiry('${targetProg}', ${points})" class="btn btn-primary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: 700; padding: 0.68rem;">
