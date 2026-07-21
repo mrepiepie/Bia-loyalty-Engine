@@ -2,7 +2,28 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
-const sqlite3 = require('sqlite3').verbose();
+const { createClient } = require('@libsql/client');
+const { Resend } = require('resend');
+
+const resend = new Resend(process.env.RESEND_API_KEY || 're_placeholder_key');
+
+// Helper function to send voucher emails
+async function sendVoucherEmail(userEmail, voucherCode, rewardName) {
+    if (!process.env.RESEND_API_KEY) return; // Skip if no API key is set
+    try {
+        await resend.emails.send({
+            from: 'BIA Rewards <rewards@bia-loyalty.com>',
+            to: userEmail,
+            subject: 'Your BIA Loyalty Reward Voucher!',
+            html: `<p>Congratulations! You have successfully redeemed your points for a <strong>${rewardName}</strong>.</p>
+                   <p>Your unique voucher code is: <strong style="font-size:1.2rem; color:#8052ff;">${voucherCode}</strong></p>
+                   <p>Present this code to claim your reward.</p>`
+        });
+        console.log(`Voucher email sent to ${userEmail}`);
+    } catch (err) {
+        console.error('Error sending voucher email:', err);
+    }
+}
 
 const PARTNERS_FILE = path.join(__dirname, 'partners.json');
 
@@ -47,45 +68,47 @@ app.use(async (req, res, next) => {
     next();
 });
 
-// Ensure data directory exists
+// Ensure data directory exists for local development fallback
 const isVercel = process.env.VERCEL || process.env.NOW_BUILDER;
 const dbDir = isVercel ? '/tmp' : path.join(__dirname, 'data');
 if (!isVercel && !fs.existsSync(dbDir)) {
     fs.mkdirSync(dbDir, { recursive: true });
 }
 
-// Initialize SQLite database (persisted to file-based database)
-const dbPath = path.join(dbDir, 'loyalty.db');
+// Initialize Turso database (or fallback to local file if no URL provided)
+const dbUrl = process.env.TURSO_DATABASE_URL || `file:${path.join(dbDir, 'loyalty.db')}`;
+const dbAuthToken = process.env.TURSO_AUTH_TOKEN || '';
+
+const db = createClient({
+    url: dbUrl,
+    authToken: dbAuthToken
+});
+
+console.log(`Connected to database at ${dbUrl}`);
+
 let dbInitialized = false;
-let dbInitPromise = null;
 
-const db = new sqlite3.Database(dbPath, (err) => {
-    if (err) console.error('Error opening DB:', err.message);
-    else {
-        console.log(`Connected to the persisted SQLite database at ${dbPath}`);
-        dbInitPromise = initializeDatabase();
-    }
-});
+// SQLite Promise Wrappers (Updated for @libsql/client)
+const runQuery = async (sql, params = []) => {
+    const res = await db.execute({ sql, args: params });
+    return { 
+        lastID: res.lastInsertRowid ? Number(res.lastInsertRowid) : undefined, 
+        changes: res.rowsAffected 
+    };
+};
 
-// SQLite Promise Wrappers
-const runQuery = (sql, params = []) => new Promise((resolve, reject) => {
-    db.run(sql, params, function(err) {
-        if (err) reject(err);
-        else resolve(this);
-    });
-});
-const getQuery = (sql, params = []) => new Promise((resolve, reject) => {
-    db.get(sql, params, (err, row) => {
-        if (err) reject(err);
-        else resolve(row);
-    });
-});
-const allQuery = (sql, params = []) => new Promise((resolve, reject) => {
-    db.all(sql, params, (err, rows) => {
-        if (err) reject(err);
-        else resolve(rows);
-    });
-});
+const getQuery = async (sql, params = []) => {
+    const res = await db.execute({ sql, args: params });
+    return res.rows[0];
+};
+
+const allQuery = async (sql, params = []) => {
+    const res = await db.execute({ sql, args: params });
+    return res.rows;
+};
+
+// Initialize the database asynchronously
+let dbInitPromise = initializeDatabase().catch(err => console.error('Database Init Error:', err));
 
 // Setup Database Tables & Seed data
 async function initializeDatabase() {
@@ -1174,7 +1197,7 @@ app.post('/api/redeem/confirm', async (req, res) => {
         const { user_id, points_deducted, discount_aed } = req.body;
         if (!user_id || !points_deducted || !discount_aed) return res.status(400).json({ error: 'Missing parameters' });
 
-        const user = await getQuery(`SELECT points_balance FROM users WHERE user_id = ?`, [user_id]);
+        const user = await getQuery(`SELECT email, points_balance FROM users WHERE user_id = ?`, [user_id]);
         if (!user) return res.status(404).json({ error: 'User not found' });
         if (user.points_balance < points_deducted) return res.status(400).json({ error: 'Insufficient balance' });
 
@@ -1197,6 +1220,9 @@ app.post('/api/redeem/confirm', async (req, res) => {
             [user_id, voucherCode, discount_aed, points_deducted]);
 
         const voucher = await getQuery(`SELECT * FROM tuition_vouchers WHERE voucher_code = ?`, [voucherCode]);
+        
+        // Send email
+        await sendVoucherEmail(user.email, voucherCode, `AED ${discount_aed} Tuition Discount`);
 
         res.json({ success: true, message: 'Points successfully redeemed!', voucher });
     } catch (err) { res.status(500).json({ error: err.message }); }
@@ -1229,7 +1255,7 @@ app.post('/api/redeem/collaborator', async (req, res) => {
             return res.status(400).json({ error: 'Missing parameters' });
         }
 
-        const user = await getQuery(`SELECT points_balance FROM users WHERE user_id = ?`, [user_id]);
+        const user = await getQuery(`SELECT email, points_balance FROM users WHERE user_id = ?`, [user_id]);
         if (!user) return res.status(404).json({ error: 'User not found' });
         if (user.points_balance < points_deducted) return res.status(400).json({ error: 'Insufficient points balance.' });
 
@@ -1245,6 +1271,9 @@ app.post('/api/redeem/collaborator', async (req, res) => {
         let code = `${partner_id.toUpperCase()}-`;
         for (let i = 0; i < 8; i++) code += chars[Math.floor(Math.random() * chars.length)];
 
+        // Send email
+        await sendVoucherEmail(user.email, code, reward_name);
+
         res.json({ success: true, message: 'Points successfully redeemed!', voucher_code: code, new_tier: newTier });
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -1256,7 +1285,7 @@ app.post('/api/redeem/adnoc', async (req, res) => {
         const reward_name = option_key === 'oasis' ? 'Oasis Cafe Voucher' : 'Fuel Voucher';
         
         // Forward to the generic collaborator handler logic
-        const user = await getQuery(`SELECT points_balance FROM users WHERE user_id = ?`, [user_id]);
+        const user = await getQuery(`SELECT email, points_balance FROM users WHERE user_id = ?`, [user_id]);
         if (!user) return res.status(404).json({ error: 'User not found' });
         if (user.points_balance < points_deducted) return res.status(400).json({ error: 'Insufficient points balance.' });
 
@@ -1271,6 +1300,9 @@ app.post('/api/redeem/adnoc', async (req, res) => {
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         let code = 'ADNOC-';
         for (let i = 0; i < 8; i++) code += chars[Math.floor(Math.random() * chars.length)];
+
+        // Send email
+        await sendVoucherEmail(user.email, code, reward_name);
 
         res.json({ success: true, message: 'Points successfully redeemed!', voucher_code: code, new_tier: newTier });
     } catch (err) { res.status(500).json({ error: err.message }); }
