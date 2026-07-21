@@ -6545,29 +6545,29 @@ body:not(.dark-theme) .landing-hero-boxed-container {
   box-shadow: none !important;
 }
 
-/* Light theme gradient overrides for readability and high contrast */
+/* Light theme gradient — same vivid neon as dark mode */
 body:not(.dark-theme) .from-gradient-1-start {
-  --tw-gradient-from: #4f46e5; /* Deep Indigo */
-  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(79, 70, 229, 0));
+  --tw-gradient-from: #39ff14;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(57, 255, 20, 0));
 }
 body:not(.dark-theme) .to-gradient-1-end {
-  --tw-gradient-to: #0ea5e9; /* Sky Blue */
+  --tw-gradient-to: #00ffff;
 }
 
 body:not(.dark-theme) .from-gradient-2-start {
-  --tw-gradient-from: #db2777; /* Rose Crimson */
-  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(219, 39, 119, 0));
+  --tw-gradient-from: #ff073a;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(255, 7, 58, 0)));
 }
 body:not(.dark-theme) .to-gradient-2-end {
-  --tw-gradient-to: #ea580c; /* Sunset Orange */
+  --tw-gradient-to: #ff6ec7;
 }
 
 body:not(.dark-theme) .from-gradient-3-start {
-  --tw-gradient-from: #b45309; /* Bronze Gold */
-  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(180, 83, 9, 0));
+  --tw-gradient-from: #faff00;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(250, 255, 0, 0));
 }
 body:not(.dark-theme) .to-gradient-3-end {
-  --tw-gradient-to: #15803d; /* Forest Emerald */
+  --tw-gradient-to: #00f0ff;
 }
 
 .hero-subtitle.split-done {
@@ -6678,15 +6678,15 @@ body:not(.dark-theme) .to-gradient-3-end {
 }
 
 body:not(.dark-theme) .from-gradient-1-start {
-  background-image: linear-gradient(to right, #4f46e5, #0ea5e9) !important;
+  background-image: linear-gradient(to right, #39ff14, #00ffff) !important;
 }
 
 body:not(.dark-theme) .from-gradient-2-start {
-  background-image: linear-gradient(to right, #db2777, #ea580c) !important;
+  background-image: linear-gradient(to right, #ff073a, #ff6ec7) !important;
 }
 
 body:not(.dark-theme) .from-gradient-3-start {
-  background-image: linear-gradient(to right, #b45309, #15803d) !important;
+  background-image: linear-gradient(to right, #faff00, #00f0ff) !important;
 }
 
 .bg-clip-text {
