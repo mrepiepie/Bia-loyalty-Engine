@@ -3819,7 +3819,7 @@ const TOAST_ICONS = {
     points:  '<i class="fa-solid fa-coins"></i>'
 };
 
-function showToast(title, message, type = 'success', duration = 4000) {
+function showToast(title, message, type = 'success', duration = 4000, action = null) {
     const container = document.getElementById('bia-toast-container');
     if (!container) return;
 
@@ -3831,24 +3831,70 @@ function showToast(title, message, type = 'success', duration = 4000) {
             <div class="bia-toast-title">${title}</div>
             ${message ? `<div class="bia-toast-msg">${message}</div>` : ''}
         </div>
+        ${action ? `<button type="button" class="bia-toast-action">${action.label}</button>` : ''}
+        ${action ? '<div class="bia-toast-progress" aria-hidden="true"></div>' : ''}
     `;
 
     container.appendChild(toast);
+
+    let dismissed = false;
+    const dismiss = () => {
+        if (dismissed) return;
+        dismissed = true;
+        if (window.gsap) {
+            gsap.to(toast, {
+                opacity: 0, x: 60, scale: 0.9, duration: 0.28, ease: 'power2.in',
+                onComplete: () => toast.remove()
+            });
+        } else {
+            toast.classList.add('bia-toast-leaving');
+            setTimeout(() => toast.remove(), 280);
+        }
+    };
+
+    const actionButton = toast.querySelector('.bia-toast-action');
+    if (actionButton) {
+        actionButton.addEventListener('click', async () => {
+            if (actionButton.disabled) return;
+            actionButton.disabled = true;
+            actionButton.textContent = 'Undoing...';
+            try {
+                await action.onClick();
+                dismiss();
+            } catch (err) {
+                dismiss();
+                showToast('Undo Failed', err.message || 'The change could not be reverted.', 'error');
+            }
+        });
+    }
 
     if (window.gsap) {
         gsap.fromTo(toast,
             { opacity: 0, x: 60, scale: 0.92 },
             { opacity: 1, x: 0, scale: 1, duration: 0.38, ease: 'back.out(1.6)' }
         );
-        setTimeout(() => {
-            gsap.to(toast, {
-                opacity: 0, x: 60, scale: 0.9, duration: 0.28, ease: 'power2.in',
-                onComplete: () => toast.remove()
-            });
-        }, duration);
-    } else {
-        setTimeout(() => toast.remove(), duration);
     }
+
+    setTimeout(dismiss, duration);
+    return toast;
+}
+
+function showPointsUndoToast(message, ledgerId, userId) {
+    showToast('Points Adjusted! ⚡', message, 'points', 2000, {
+        label: 'Undo',
+        onClick: async () => {
+            const response = await fetch(`${API_BASE}/admin/adjust-points/${ledgerId}/undo`, { method: 'POST' });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'Failed to undo adjustment.');
+
+            await loadAdminStudents();
+            const detailModal = document.getElementById('student-detail-modal');
+            if (detailModal && detailModal.style.display === 'flex') {
+                await showStudentDetailModal(userId);
+            }
+            showToast('Adjustment Undone', 'The student\'s points balance has been restored.', 'success', 2500);
+        }
+    });
 }
 
 // ──────────────────────────────────────────────────────────
@@ -4046,7 +4092,7 @@ if (_adjustForm) {
             const data = await response.json();
             if (!response.ok) throw new Error(data.error || 'Adjustment failed');
             const sign = points_change > 0 ? '+' : '';
-            showToast('Points Adjusted', `${sign}${formatNumber(points_change)} pts applied to student wallet.`, 'points');
+            showPointsUndoToast(`${sign}${formatNumber(points_change)} pts applied to student wallet.`, data.ledger_id, appState.selectedUserIdForAdjustment);
             closeAdjustmentModal();
             loadAdminStudents();
         } catch (err) {
@@ -6847,4 +6893,3 @@ window.addEventListener('load', () => {
         }
     }
 });
-
