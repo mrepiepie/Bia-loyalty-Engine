@@ -6216,7 +6216,6 @@ body:not(.dark-theme) .logo-item {
 }
 
 body:not(.dark-theme) .app-container {
-    background-color: var(--bg-dark) !important;
     color: var(--text-main) !important;
 }
 
