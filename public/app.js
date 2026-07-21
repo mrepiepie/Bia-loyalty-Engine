@@ -2899,9 +2899,8 @@ function setup3DGlobe() {
     }
 
     function getRandomBrandColor() {
-        const isDark = document.body.classList.contains('dark-theme');
-        const colors = ['#8052ff', '#ffb829', '#15846e', isDark ? '#ffffff' : '#1d1c16'];
-        return colors[Math.floor(Math.random() * colors.length)];
+        // Return an index 0-3 instead of hardcoded strings to allow dynamic theme switching
+        return Math.floor(Math.random() * 4);
     }
 
     const scrollContainer = document.getElementById('login-overlay');
@@ -2957,6 +2956,13 @@ function setup3DGlobe() {
         for (let i = 0; i < projected.length; i++) {
             const p = projected[i];
             
+            const isDark = document.body.classList.contains('dark-theme');
+            // Provide dynamically evaluated color palette based on current theme
+            const colorPalette = isDark 
+                ? ['#8052ff', '#ffb829', '#15846e', '#ffffff'] 
+                : ['#5c2bbd', '#d68b00', '#0f6151', '#1d1c16'];
+            const actualColor = colorPalette[p.color];
+            
             for (let j = i + 1; j < projected.length; j++) {
                 const other = projected[j];
                 const dx = p.x3d - other.x3d;
@@ -2965,8 +2971,8 @@ function setup3DGlobe() {
                 const dist = Math.hypot(dx, dy, dz);
 
                 if (dist < maxDist) {
-                    ctx.strokeStyle = p.color;
-                    ctx.globalAlpha = (1.0 - (dist / maxDist)) * 0.12 * p.depthAlpha;
+                    ctx.strokeStyle = actualColor;
+                    ctx.globalAlpha = (1.0 - (dist / maxDist)) * (isDark ? 0.12 : 0.25) * p.depthAlpha;
                     ctx.lineWidth = 0.5;
                     ctx.beginPath();
                     ctx.moveTo(p.x2d, p.y2d);
@@ -2976,8 +2982,8 @@ function setup3DGlobe() {
             }
 
             // Draw triangles
-            ctx.fillStyle = p.color;
-            ctx.globalAlpha = 0.15 + p.depthAlpha * 0.85;
+            ctx.fillStyle = actualColor;
+            ctx.globalAlpha = (isDark ? 0.15 : 0.4) + p.depthAlpha * (isDark ? 0.85 : 0.6);
             ctx.beginPath();
             const sz = p.size * p.scale;
             ctx.moveTo(p.x2d, p.y2d - sz);
