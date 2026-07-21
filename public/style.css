@@ -6474,6 +6474,31 @@ body:not(.dark-theme) .db-voucher-code-row span {
     color: var(--text-main) !important;
 }
 
+/* Light theme gradient - sleek, dark, high-contrast (21st.dev style) */
+body:not(.dark-theme) .from-gradient-1-start {
+  --tw-gradient-from: #1e3a8a; /* Deep Blue */
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(30, 58, 138, 0));
+}
+body:not(.dark-theme) .to-gradient-1-end {
+  --tw-gradient-to: #4338ca; /* Indigo */
+}
+
+body:not(.dark-theme) .from-gradient-2-start {
+  --tw-gradient-from: #881337; /* Dark Rose */
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(136, 19, 55, 0));
+}
+body:not(.dark-theme) .to-gradient-2-end {
+  --tw-gradient-to: #be123c; /* Crimson */
+}
+
+body:not(.dark-theme) .from-gradient-3-start {
+  --tw-gradient-from: #14532d; /* Dark Emerald */
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(20, 83, 45, 0));
+}
+body:not(.dark-theme) .to-gradient-3-end {
+  --tw-gradient-to: #047857; /* Rich Green */
+}
+
 /* 5. Reward catalog cards & titles */
 body:not(.dark-theme) .reward-catalog-card {
     background: #ffffff !important;
@@ -6685,15 +6710,15 @@ body:not(.dark-theme) .to-gradient-3-end {
 }
 
 body:not(.dark-theme) .from-gradient-1-start {
-  background-image: linear-gradient(to right, #39ff14, #00ffff) !important;
+  background-image: linear-gradient(to right, #1e3a8a, #4338ca) !important;
 }
 
 body:not(.dark-theme) .from-gradient-2-start {
-  background-image: linear-gradient(to right, #ff073a, #ff6ec7) !important;
+  background-image: linear-gradient(to right, #881337, #be123c) !important;
 }
 
 body:not(.dark-theme) .from-gradient-3-start {
-  background-image: linear-gradient(to right, #faff00, #00f0ff) !important;
+  background-image: linear-gradient(to right, #14532d, #047857) !important;
 }
 
 .bg-clip-text {
