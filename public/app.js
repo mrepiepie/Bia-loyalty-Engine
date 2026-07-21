@@ -298,9 +298,12 @@ function setupPixelGridBackground() {
                 
                 if (distSq < maxDistSq) {
                     const dist = Math.sqrt(distSq);
-                    const alpha = (1.0 - (dist / maxDist)) * 0.12;
+                    let alpha = (1.0 - (dist / maxDist)) * 0.12;
                     const isDark = document.body.classList.contains('dark-theme');
-                    ctx.strokeStyle = isDark ? `rgba(255, 255, 255, ${alpha})` : `rgba(29, 28, 22, ${alpha * 0.45})`;
+                    if (!isDark) {
+                        alpha *= 2.5; // Boost line visibility in light mode
+                    }
+                    ctx.strokeStyle = isDark ? `rgba(255, 255, 255, ${alpha})` : `rgba(29, 28, 22, ${alpha})`;
                     ctx.beginPath();
                     ctx.moveTo(p1.x, p1.y);
                     ctx.lineTo(p2.x, p2.y);
@@ -343,11 +346,25 @@ function setupPixelGridBackground() {
             ctx.rotate(p.angle);
             
             let finalColorPrefix = p.color;
+            const isDark = document.body.classList.contains('dark-theme');
+            
             if (p.color === 'adaptive') {
-                const isDark = document.body.classList.contains('dark-theme');
                 finalColorPrefix = isDark ? 'rgba(255, 255, 255, ' : 'rgba(29, 28, 22, ';
+            } else if (!isDark) {
+                // In light mode, bright neon colors are invisible on beige. 
+                // We use much darker, richer variants of the brand colors.
+                if (p.color === 'rgba(128, 82, 255, ') finalColorPrefix = 'rgba(75, 40, 180, '; // Deep Purple
+                else if (p.color === 'rgba(255, 184, 41, ') finalColorPrefix = 'rgba(180, 90, 0, ';   // Deep Orange-Brown
+                else if (p.color === 'rgba(21, 132, 110, ') finalColorPrefix = 'rgba(10, 80, 60, ';   // Dark Pine
             }
-            ctx.fillStyle = `${finalColorPrefix}${activeOpacity})`;
+            
+            let finalOpacity = activeOpacity;
+            if (!isDark) {
+                // Boost opacity heavily in light mode because the beige background washes out alpha
+                finalOpacity = Math.min(0.9, activeOpacity * 2.0);
+            }
+            
+            ctx.fillStyle = `${finalColorPrefix}${finalOpacity})`;
             
             // Draw tiny triangles
             ctx.beginPath();
