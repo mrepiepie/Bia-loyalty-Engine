@@ -6364,11 +6364,13 @@ body:not(.dark-theme) .hero-subtitle {
     color: #1d1c16 !important;
 }
 
-/* Force gradient text to render in light mode — overrides the flat color above */
+/* Force pitch black text in light mode for the hero title */
 body:not(.dark-theme) .hero-subtitle .bg-clip-text.text-transparent {
-    color: transparent !important;
-    -webkit-background-clip: text !important;
-    background-clip: text !important;
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+    background: none !important;
+    -webkit-background-clip: unset !important;
+    background-clip: unset !important;
 }
 
 /* Floating Switcher Toggle Button */
