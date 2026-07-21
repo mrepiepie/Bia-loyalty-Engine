@@ -6525,24 +6525,24 @@ body:not(.dark-theme) .clickable-pill:hover {
 .landing-hero-boxed-container {
   position: relative;
   padding: 1.25rem 1.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 12px;
-  background: rgba(0, 0, 0, 0.15);
-  backdrop-filter: blur(10px);
-  overflow: hidden;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  backdrop-filter: none;
+  overflow: visible;
   margin-bottom: 1.5rem;
   transition: all 0.3s ease;
 }
 
-body:not(.dark-theme) .landing-hero-boxed-container {
-  background: rgba(0, 0, 0, 0.02) !important;
-  border: 1px solid rgba(0, 0, 0, 0.08) !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+/* Hide the corner + icons for both themes */
+.landing-hero-boxed-container > i.fa-plus {
+  display: none !important;
 }
 
-body:not(.dark-theme) .landing-hero-boxed-container i {
-  color: var(--primary) !important;
-  opacity: 0.5 !important;
+body:not(.dark-theme) .landing-hero-boxed-container {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 /* Light theme gradient overrides for readability and high contrast */
