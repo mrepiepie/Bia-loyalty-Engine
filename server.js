@@ -1465,6 +1465,19 @@ app.get('/api/admin/health', async (req, res) => {
         // Count active users to give a sense of scale
         const userCountRow = await getQuery(`SELECT COUNT(*) as count FROM users`);
         
+        // New Scalability Metrics
+        const memUsage = process.memoryUsage();
+        const heapUsedMB = (memUsage.heapUsed / 1024 / 1024).toFixed(2);
+        
+        const uptimeSeconds = process.uptime();
+        let uptimeStr = '';
+        if (uptimeSeconds < 60) uptimeStr = `${Math.floor(uptimeSeconds)}s`;
+        else if (uptimeSeconds < 3600) uptimeStr = `${Math.floor(uptimeSeconds / 60)}m`;
+        else uptimeStr = `${Math.floor(uptimeSeconds / 3600)}h ${Math.floor((uptimeSeconds % 3600) / 60)}m`;
+
+        const ledgerCountRow = await getQuery(`SELECT COUNT(*) as count FROM ledger`);
+        const voucherCountRow = await getQuery(`SELECT COUNT(*) as count FROM vouchers`);
+        
         res.json({
             success: true,
             dbLatencyMs: dbLatency,
@@ -1472,7 +1485,13 @@ app.get('/api/admin/health', async (req, res) => {
             resendStatus: isResendConfigured ? 'Connected' : 'Missing API Key',
             region: region,
             environment: environment,
-            totalUsers: userCountRow ? userCountRow.count : 0
+            totalUsers: userCountRow ? userCountRow.count : 0,
+            
+            // Added metrics
+            memoryHeapMB: heapUsedMB,
+            serverUptime: uptimeStr,
+            totalTransactions: ledgerCountRow ? ledgerCountRow.count : 0,
+            totalVouchersIssued: voucherCountRow ? voucherCountRow.count : 0
         });
     } catch (err) {
         res.status(500).json({ error: err.message, dbStatus: 'Disconnected' });

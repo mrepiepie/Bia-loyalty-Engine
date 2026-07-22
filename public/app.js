@@ -6937,6 +6937,14 @@ async function fetchSystemHealth() {
             
             document.getElementById('health-user-count').innerText = data.totalUsers;
             
+            // Populate the new metrics
+            if (document.getElementById('health-memory')) {
+                document.getElementById('health-memory').innerText = data.memoryHeapMB + ' MB';
+                document.getElementById('health-uptime').innerText = data.serverUptime;
+                document.getElementById('health-transactions').innerText = data.totalTransactions;
+                document.getElementById('health-vouchers').innerText = data.totalVouchersIssued;
+            }
+            
             // Add a slight pulse animation to show it updated
             const latencyElement = document.getElementById('health-db-latency');
             latencyElement.style.opacity = '0.5';
