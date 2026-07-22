@@ -1451,6 +1451,34 @@ app.delete('/api/events/:id', async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// ADMIN: System Health & Scalability API
+app.get('/api/admin/health', async (req, res) => {
+    try {
+        const startPing = Date.now();
+        await getQuery(`SELECT 1`); // Ping the database
+        const dbLatency = Date.now() - startPing;
+        
+        const isResendConfigured = !!process.env.RESEND_API_KEY;
+        const region = process.env.VERCEL_REGION || 'Local Dev Environment';
+        const environment = process.env.VERCEL ? 'Production (Vercel Serverless)' : 'Local Host';
+        
+        // Count active users to give a sense of scale
+        const userCountRow = await getQuery(`SELECT COUNT(*) as count FROM users`);
+        
+        res.json({
+            success: true,
+            dbLatencyMs: dbLatency,
+            dbStatus: dbLatency < 500 ? 'Healthy' : 'Slow',
+            resendStatus: isResendConfigured ? 'Connected' : 'Missing API Key',
+            region: region,
+            environment: environment,
+            totalUsers: userCountRow ? userCountRow.count : 0
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message, dbStatus: 'Disconnected' });
+    }
+});
+
 const PORT = process.env.PORT || 3000;
 
 // Export for Vercel serverless

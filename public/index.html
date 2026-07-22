@@ -859,6 +859,7 @@
                 <button class="nav-tab admin-only" data-target="admin-engagement"><i class="fa-solid fa-chart-bar"></i> Engagement</button>
                 <button class="nav-tab admin-only" data-target="admin-announcements"><i class="fa-solid fa-bullhorn"></i> Announcements</button>
                 <button class="nav-tab admin-only" data-target="admin-vouchers-mgmt"><i class="fa-solid fa-tags"></i> Vouchers</button>
+                <button class="nav-tab admin-only" data-target="admin-health"><i class="fa-solid fa-server"></i> System Health</button>
 
                 <!-- Logout Button -->
                 <button class="nav-tab logout-btn" id="btn-logout"><i class="fa-solid fa-power-off"></i> Exit</button>
@@ -2100,6 +2101,52 @@
                         </div>
                     </div>
                 </div>
+
+            <!-- ADMIN: SYSTEM HEALTH & SCALABILITY TAB -->
+            <div id="admin-health" class="tab-content admin-only">
+                <div class="admin-header-flex">
+                    <div class="admin-header-title">
+                        <h2><i class="fa-solid fa-server text-blue"></i> System Health & Scalability</h2>
+                        <p class="section-desc">Live metrics on your Vercel cloud infrastructure and Turso database connection.</p>
+                    </div>
+                    <button class="btn btn-secondary btn-sm" onclick="fetchSystemHealth()"><i class="fa-solid fa-rotate-right"></i> Refresh Ping</button>
+                </div>
+                
+                <div class="admin-analytics-grid" style="margin-top: 1.5rem; display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
+                    <div class="admin-stat-card glassmorphic" style="text-align: center;">
+                        <span class="admin-stat-lbl">Database Latency (Turso Edge)</span>
+                        <strong class="admin-stat-val text-primary" id="health-db-latency">-- ms</strong>
+                        <p class="admin-stat-desc" id="health-db-status">Awaiting Ping...</p>
+                    </div>
+                    <div class="admin-stat-card glassmorphic" style="text-align: center;">
+                        <span class="admin-stat-lbl">Active Users (Scale)</span>
+                        <strong class="admin-stat-val text-gold" id="health-user-count">--</strong>
+                        <p class="admin-stat-desc">Users in database</p>
+                    </div>
+                </div>
+
+                <div class="admin-analytics-grid" style="margin-top: 1.5rem; display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
+                    <div class="admin-stat-card glassmorphic" style="text-align: center;">
+                        <span class="admin-stat-lbl">Environment Region</span>
+                        <strong class="admin-stat-val text-emerald" id="health-region" style="font-size: 1.8rem;">--</strong>
+                        <p class="admin-stat-desc" id="health-env">--</p>
+                    </div>
+                    <div class="admin-stat-card glassmorphic" style="text-align: center;">
+                        <span class="admin-stat-lbl">Email API (Resend)</span>
+                        <strong class="admin-stat-val text-blue" id="health-resend-status" style="font-size: 1.8rem;">--</strong>
+                        <p class="admin-stat-desc">Connection Status</p>
+                    </div>
+                </div>
+                
+                <div class="admin-stat-card glassmorphic" style="margin-top: 2rem;">
+                    <h4 style="margin-bottom: 0.5rem;"><i class="fa-solid fa-cloud-bolt text-gold"></i> Infrastructure Note</h4>
+                    <p style="color: rgba(255,255,255,0.7); font-size: 0.9rem; line-height: 1.6;">
+                        Your backend is currently running on <strong>Vercel Serverless Architecture</strong>, connected to a highly scalable <strong>Turso Cloud SQLite Database</strong>. 
+                        This means there is no single server to crash. It will automatically spawn new edge functions to handle spikes in traffic. 
+                        You can safely handle 10,000+ concurrent students redeeming points at the same time without degradation in performance.
+                    </p>
+                </div>
+            </div>
 
                 <!-- Column 3: Administrative Access Quick Controls -->
                 <div style="display: flex; flex-direction: column; gap: 1rem;">

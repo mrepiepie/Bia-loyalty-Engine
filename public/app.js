@@ -6916,3 +6916,53 @@ window.addEventListener('load', () => {
         }
     }
 });
+
+// --- SYSTEM HEALTH & SCALABILITY DASHBOARD ---
+let healthPollInterval = null;
+
+async function fetchSystemHealth() {
+    try {
+        const res = await fetch('/api/admin/health');
+        const data = await res.json();
+        
+        if (data.success) {
+            document.getElementById('health-db-latency').innerText = data.dbLatencyMs + ' ms';
+            document.getElementById('health-db-status').innerText = data.dbStatus;
+            
+            document.getElementById('health-resend-status').innerText = data.resendStatus;
+            document.getElementById('health-resend-status').className = data.resendStatus === 'Connected' ? 'admin-stat-val text-blue' : 'admin-stat-val text-red';
+            
+            document.getElementById('health-region').innerText = data.region;
+            document.getElementById('health-env').innerText = data.environment;
+            
+            document.getElementById('health-user-count').innerText = data.totalUsers;
+            
+            // Add a slight pulse animation to show it updated
+            const latencyElement = document.getElementById('health-db-latency');
+            latencyElement.style.opacity = '0.5';
+            setTimeout(() => latencyElement.style.opacity = '1', 200);
+        }
+    } catch (e) {
+        console.error('Failed to fetch system health:', e);
+        document.getElementById('health-db-status').innerText = 'Offline';
+    }
+}
+
+// Hook into the tab navigation to start/stop polling
+document.addEventListener('click', (e) => {
+    const tabBtn = e.target.closest('.nav-tab');
+    if (tabBtn) {
+        if (tabBtn.getAttribute('data-target') === 'admin-health') {
+            fetchSystemHealth(); // Fetch immediately
+            if (!healthPollInterval) {
+                healthPollInterval = setInterval(fetchSystemHealth, 2000); // Poll every 2 seconds
+            }
+        } else {
+            // Stop polling if we navigate away
+            if (healthPollInterval) {
+                clearInterval(healthPollInterval);
+                healthPollInterval = null;
+            }
+        }
+    }
+});
