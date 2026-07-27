@@ -1488,64 +1488,7 @@
                         </div>
                     </form>
                 </div>
-                <!-- PROMO CODES TAB -->
-            <div id="admin-promos" class="tab-content admin-only" style="display: none;">
-                <div class="card settings-card glassmorphic">
-                    <h3><i class="fa-solid fa-gift"></i> Generate Global Promo Code</h3>
-                    <p class="section-desc">Create standalone secret promo codes that students can redeem directly from their dashboard. Set maximum usage limits to create urgency.</p>
-                    
-                    <form id="admin-new-promo-form">
-                        <div class="settings-grid">
-                            <div class="settings-input-group">
-                                <label>Secret Promo Code String</label>
-                                <p>The code students will type (e.g. BIA100, WELCOME24)</p>
-                                <input type="text" id="promo-form-code" required placeholder="e.g. BIAWELCOME" style="text-transform: uppercase;">
-                            </div>
-                            <div class="settings-input-group">
-                                <label>Points Reward</label>
-                                <p>How many points this code is worth</p>
-                                <input type="number" id="promo-form-points" required placeholder="e.g. 50">
-                            </div>
-                            <div class="settings-input-group">
-                                <label>Maximum Uses (Limit)</label>
-                                <p>Set to 0 for unlimited uses</p>
-                                <input type="number" id="promo-form-uses" value="0" required placeholder="e.g. 50">
-                            </div>
-                            <div class="settings-input-group">
-                                <label>Occasion / Event Name</label>
-                                <p>What is this code for? (e.g. Orientation 2024)</p>
-                                <input type="text" id="promo-form-occasion" placeholder="e.g. General" required>
-                            </div>
-                        </div>
-                        <div class="settings-actions" style="margin-top: 2rem; text-align: right;">
-                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-magic"></i> Generate Code</button>
-                        </div>
-                    </form>
 
-                    <div style="margin-top: 3rem;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                            <h4 style="margin: 0;">Active Promo Codes</h4>
-                            <input type="text" id="promo-search-filter" placeholder="Search by occasion or code..." style="padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.4); color: white; width: 300px;">
-                        </div>
-                        <div class="table-responsive">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Code</th>
-                                        <th>Occasion</th>
-                                        <th>Points</th>
-                                        <th>Usage</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="admin-promos-list">
-                                    <!-- Injected via app.js -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
 
                 <!-- Add New Collaborator Card -->
@@ -1980,6 +1923,65 @@
                             <button onclick="exportVouchersCSV()" style="display:flex; align-items:center; gap:0.4rem; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); color:rgba(255,255,255,0.65); padding:0.5rem 1rem; border-radius:8px; cursor:pointer; font-size:0.75rem; font-family:inherit; font-weight:700;">
                                 <i class="fa-solid fa-file-csv"></i> Export as CSV
                             </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADMIN: PROMO CODES TAB -->
+            <div id="admin-promos" class="tab-content admin-only" style="display: none;">
+                <div class="card settings-card glassmorphic">
+                    <h3><i class="fa-solid fa-gift"></i> Generate Global Promo Code</h3>
+                    <p class="section-desc">Create standalone secret promo codes that students can redeem directly from their dashboard. Set maximum usage limits to create urgency.</p>
+                    
+                    <form id="admin-new-promo-form">
+                        <div class="settings-grid">
+                            <div class="settings-input-group">
+                                <label>Secret Promo Code String</label>
+                                <p>The code students will type (e.g. BIA100, WELCOME24)</p>
+                                <input type="text" id="promo-form-code" required placeholder="e.g. BIAWELCOME" style="text-transform: uppercase;">
+                            </div>
+                            <div class="settings-input-group">
+                                <label>Points Reward</label>
+                                <p>How many points this code is worth</p>
+                                <input type="number" id="promo-form-points" required placeholder="e.g. 50">
+                            </div>
+                            <div class="settings-input-group">
+                                <label>Maximum Uses (Limit)</label>
+                                <p>Set to 0 for unlimited uses</p>
+                                <input type="number" id="promo-form-uses" value="0" required placeholder="e.g. 50">
+                            </div>
+                            <div class="settings-input-group">
+                                <label>Occasion / Event Name</label>
+                                <p>What is this code for? (e.g. Orientation 2024)</p>
+                                <input type="text" id="promo-form-occasion" placeholder="e.g. General" required>
+                            </div>
+                        </div>
+                        <div class="settings-actions" style="margin-top: 2rem; text-align: right;">
+                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-magic"></i> Generate Code</button>
+                        </div>
+                    </form>
+
+                    <div style="margin-top: 3rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h4 style="margin: 0;">Active Promo Codes</h4>
+                            <input type="text" id="promo-search-filter" placeholder="Search by occasion or code..." style="padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.4); color: white; width: 300px;">
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Code</th>
+                                        <th>Occasion</th>
+                                        <th>Points</th>
+                                        <th>Usage</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-promos-list">
+                                    <!-- Injected via app.js -->
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
