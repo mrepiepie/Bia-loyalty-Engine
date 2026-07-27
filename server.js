@@ -1676,6 +1676,26 @@ app.post('/api/admin/promos', async (req, res) => {
     }
 });
 
+app.get('/api/admin/promos', async (req, res) => {
+    try {
+        const promos = await getQuery(`SELECT * FROM promo_codes ORDER BY created_at DESC`, [], true);
+        res.json({ success: true, promos: promos || [] });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.delete('/api/admin/promos/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        await runQuery(`DELETE FROM promo_codes WHERE code_id = ?`, [id]);
+        await runQuery(`DELETE FROM promo_claims WHERE code_id = ?`, [id]);
+        res.json({ success: true, message: 'Promo code deleted.' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 app.post('/api/promos/redeem', async (req, res) => {
     try {
         const { user_id, code } = req.body;

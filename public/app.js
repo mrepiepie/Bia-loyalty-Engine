@@ -7019,6 +7019,52 @@ async function claimEventPoints(eventId, btnElement) {
 
 // --- GLOBAL PROMO SYSTEM ---
 const adminPromoForm = document.getElementById('admin-new-promo-form');
+const adminPromosList = document.getElementById('admin-promos-list');
+
+async function loadAdminPromos() {
+    if (!adminPromosList) return;
+    try {
+        const response = await fetch(`${API_BASE}/admin/promos`);
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Failed to fetch promos');
+        
+        if (data.promos.length === 0) {
+            adminPromosList.innerHTML = '<tr><td colspan="4" style="text-align: center; color: rgba(255,255,255,0.5);">No promo codes active</td></tr>';
+            return;
+        }
+
+        adminPromosList.innerHTML = data.promos.map(p => `
+            <tr>
+                <td><strong style="color: var(--bia-gold);">${p.code}</strong></td>
+                <td>+${p.points_reward} pts</td>
+                <td>${p.current_uses} / ${p.max_uses === 0 ? '&infin;' : p.max_uses}</td>
+                <td>
+                    <button class="btn btn-danger btn-small" onclick="deletePromo(${p.code_id})">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    } catch (err) {
+        console.error('Error loading promos:', err);
+    }
+}
+
+window.deletePromo = async function(id) {
+    if (!confirm('Are you sure you want to delete this promo code? Students will no longer be able to claim it.')) return;
+    
+    try {
+        const response = await fetch(`${API_BASE}/admin/promos/${id}`, { method: 'DELETE' });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error);
+        
+        showToast('Deleted', 'Promo code removed successfully.', 'success');
+        loadAdminPromos();
+    } catch (err) {
+        showToast('Error', err.message, 'error');
+    }
+};
+
 if (adminPromoForm) {
     adminPromoForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -7037,10 +7083,14 @@ if (adminPromoForm) {
             
             showToast('Promo Generated! 🎁', `Code ${code} is now active.`, 'success');
             adminPromoForm.reset();
+            loadAdminPromos();
         } catch (err) {
             showToast('Generation Error', err.message, 'error');
         }
     });
+    
+    // Load promos immediately if we are on the admin view
+    loadAdminPromos();
 }
 
 const studentPromoForm = document.getElementById('student-promo-redeem-form');
