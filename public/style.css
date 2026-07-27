@@ -4805,7 +4805,12 @@ textarea:focus {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    filter: brightness(0.4) contrast(1.1) saturate(0.85);
+    filter: brightness(0.8) contrast(1.05) saturate(1.1);
+    transition: filter 0.3s ease;
+}
+
+.event-card:hover .event-card-bg-img {
+    filter: brightness(1.0) contrast(1.1) saturate(1.2);
 }
 
 .event-card-overlay {
@@ -4856,6 +4861,16 @@ textarea:focus {
     font-size: 0.85rem;
     line-height: 1.5;
     color: rgba(236, 235, 227, 0.6);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    transition: color 0.3s ease, -webkit-line-clamp 0.3s ease;
+}
+
+.event-card:hover .event-card-desc {
+    -webkit-line-clamp: 10;
+    color: rgba(236, 235, 227, 0.95);
 }
 
 /* Empty State Humor Card (Aesthetic & Funny) */
