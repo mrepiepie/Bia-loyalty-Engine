@@ -171,7 +171,19 @@ async function initializeDatabase() {
             description TEXT NOT NULL,
             points INTEGER DEFAULT 0,
             image_url TEXT,
+            claim_code TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )`);
+
+        try { await runQuery(`ALTER TABLE campus_events ADD COLUMN claim_code TEXT`); } catch(e) {}
+
+        await runQuery(`CREATE TABLE IF NOT EXISTS event_claims (
+            claim_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            event_id INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
+            claimed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (event_id) REFERENCES campus_events(event_id),
+            FOREIGN KEY (user_id) REFERENCES users(user_id)
         )`);
 
         await runQuery(`CREATE TABLE IF NOT EXISTS tuition_vouchers (
@@ -1499,14 +1511,23 @@ app.get('/api/admin/ledger', async (req, res) => {
 // BIA CAMPUS EVENTS API ENDPOINTS
 app.get('/api/events', async (req, res) => {
     try {
-        const rows = await allQuery(`SELECT * FROM campus_events ORDER BY event_id DESC`);
-        res.json(rows);
+        const rows = await allQuery(`SELECT event_id, title, description, points, image_url, claim_code, created_at FROM campus_events ORDER BY event_id DESC`);
+        const safeRows = rows.map(r => ({
+            event_id: r.event_id,
+            title: r.title,
+            description: r.description,
+            points: r.points,
+            image_url: r.image_url,
+            created_at: r.created_at,
+            has_claim: !!r.claim_code
+        }));
+        res.json(safeRows);
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 app.post('/api/events', async (req, res) => {
     try {
-        const { title, description, points, image_url } = req.body;
+        const { title, description, points, image_url, claim_code } = req.body;
         if (!title || !description) {
             return res.status(400).json({ error: 'Missing title or description' });
         }
@@ -1514,10 +1535,52 @@ app.post('/api/events', async (req, res) => {
         const finalImageUrl = saveBase64Image(image_url, 'event');
         
         await runQuery(
-            `INSERT INTO campus_events (title, description, points, image_url) VALUES (?, ?, ?, ?)`,
-            [title, description, points || 0, finalImageUrl || '']
+            `INSERT INTO campus_events (title, description, points, image_url, claim_code) VALUES (?, ?, ?, ?, ?)`,
+            [title, description, points || 0, finalImageUrl || '', claim_code || null]
         );
         res.json({ success: true, message: 'Event successfully added' });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/events/claim', async (req, res) => {
+    try {
+        const { user_id, claim_code } = req.body;
+        if (!user_id || !claim_code) {
+            return res.status(400).json({ error: 'Missing user_id or claim_code' });
+        }
+
+        // 1. Find event by claim code
+        const event = await getQuery(`SELECT * FROM campus_events WHERE claim_code = ? COLLATE NOCASE`, [claim_code]);
+        if (!event) {
+            return res.status(404).json({ error: 'Invalid claim code or event not found.' });
+        }
+
+        if (event.points <= 0) {
+            return res.status(400).json({ error: 'This event does not award points.' });
+        }
+
+        // 2. Check if user already claimed this event
+        const existingClaim = await getQuery(`SELECT claim_id FROM event_claims WHERE user_id = ? AND event_id = ?`, [user_id, event.event_id]);
+        if (existingClaim) {
+            return res.status(400).json({ error: 'You have already claimed points for this event!' });
+        }
+
+        // 3. Award points & record claim
+        const settings = await getSettings();
+        const validityMonths = settings.points_validity_months || 12;
+        const expiresAt = new Date();
+        expiresAt.setMonth(expiresAt.getMonth() + validityMonths);
+
+        await runQuery(
+            `INSERT INTO points_ledger (user_id, points_change, event_type, description, points_remaining, expires_at)
+             VALUES (?, ?, ?, ?, ?, ?)`,
+            [user_id, event.points, 'Event Attendance', `Attended: ${event.title}`, event.points, expiresAt.toISOString()]
+        );
+        
+        await runQuery(`UPDATE users SET points = points + ? WHERE user_id = ?`, [event.points, user_id]);
+        await runQuery(`INSERT INTO event_claims (event_id, user_id) VALUES (?, ?)`, [event.event_id, user_id]);
+
+        res.json({ success: true, message: `Success! You earned ${event.points} points.`, points: event.points });
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 

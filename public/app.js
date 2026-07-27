@@ -6974,3 +6974,45 @@ document.addEventListener('click', (e) => {
         }
     }
 });
+
+async function claimEventPoints(eventId, btnElement) {
+    const container = btnElement.closest('.event-claim-container');
+    const input = container.querySelector('.event-claim-input');
+    const claim_code = input.value.trim();
+
+    if (!claim_code) {
+        showToast('Claim Error', 'Please enter a secret code.', 'error');
+        return;
+    }
+
+    if (!CURRENT_USER) {
+        showToast('Authentication Error', 'You must be logged in.', 'error');
+        return;
+    }
+
+    const originalText = btnElement.innerText;
+    btnElement.innerText = 'Verifying...';
+    btnElement.disabled = true;
+
+    try {
+        const response = await fetch(`${API_BASE}/events/claim`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: CURRENT_USER.user_id, claim_code })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) throw new Error(data.error || 'Invalid code');
+
+        showToast('Points Claimed! 🎉', data.message, 'success');
+        btnElement.innerText = 'Claimed!';
+        btnElement.style.background = 'rgba(255,255,255,0.2)';
+        input.disabled = true;
+        loadUserProfile(); // Refresh points
+    } catch (err) {
+        showToast('Claim Failed', err.message, 'error');
+        btnElement.innerText = originalText;
+        btnElement.disabled = false;
+    }
+}

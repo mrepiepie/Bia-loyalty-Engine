@@ -1578,7 +1578,15 @@
                             </div>
                             <div class="settings-input-group">
                                 <label>Points Reward</label>
+                                <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 5px;">
+                                    <input type="checkbox" id="event-form-no-points" style="width: auto;">
+                                    <span style="color: rgba(255,255,255,0.7); font-size: 0.85rem;">Announcement Only (0 Points)</span>
+                                </div>
                                 <input type="number" id="event-form-points" required placeholder="e.g. 150">
+                            </div>
+                            <div class="settings-input-group">
+                                <label>Secret Claim Code</label>
+                                <input type="text" id="event-form-claim-code" placeholder="e.g. HACKATHON24 (Leave blank if none)">
                             </div>
                             <div class="settings-input-group" style="grid-column: span 2;">
                                 <label>Event Description</label>
