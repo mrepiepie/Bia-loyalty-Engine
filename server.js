@@ -634,6 +634,45 @@ app.post('/api/student/enquire-upgrade', async (req, res) => {
 });
 
 
+// Admin endpoint: Retrieve blocked IPs
+app.get('/api/admin/blacklist', async (req, res) => {
+    try {
+        const rows = await allQuery(`SELECT * FROM ip_blacklist ORDER BY blocked_at DESC`);
+        res.json(rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Admin endpoint: Add IP to blacklist
+app.post('/api/admin/blacklist/add', async (req, res) => {
+    try {
+        const { ip_address, reason } = req.body;
+        if (!ip_address) return res.status(400).json({ error: 'IP Address is required' });
+        
+        await runQuery(
+            `INSERT INTO ip_blacklist (ip_address, reason) VALUES (?, ?) ON CONFLICT(ip_address) DO UPDATE SET reason = excluded.reason`,
+            [ip_address, reason || 'Manually blocked']
+        );
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Admin endpoint: Remove IP from blacklist
+app.post('/api/admin/blacklist/remove', async (req, res) => {
+    try {
+        const { ip_address } = req.body;
+        if (!ip_address) return res.status(400).json({ error: 'IP Address is required' });
+        
+        await runQuery(`DELETE FROM ip_blacklist WHERE ip_address = ?`, [ip_address]);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // Admin endpoint: Retrieve all traffic logs
 app.get('/api/admin/traffic', async (req, res) => {
     try {
