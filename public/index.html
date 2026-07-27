@@ -966,6 +966,24 @@
                                 <i class="fa-solid fa-unlock-keyhole"></i> Redeem Code
                             </button>
                         </form>
+                        
+                        <div style="margin-top: 1.5rem;">
+                            <h5 style="margin: 0 0 0.5rem 0; font-size: 0.8rem; color: rgba(255,255,255,0.6); text-transform: uppercase;">Redemption History</h5>
+                            <div class="table-scroll-container" style="max-height: 150px; overflow-y: auto;">
+                                <table class="ledger-table" style="font-size: 0.75rem;">
+                                    <thead>
+                                        <tr>
+                                            <th>Code</th>
+                                            <th>Pts</th>
+                                            <th>Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="student-promo-history-list">
+                                        <tr><td colspan="3" style="text-align: center; color: rgba(255,255,255,0.4);">Loading history...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Column 1: Daily Check-In attendance gamification -->
@@ -2291,6 +2309,24 @@
                         <h4 style="font-size: 0.78rem; font-weight: 700; color: #dfb15b; text-transform: uppercase; margin: 0 0 0.4rem 0; letter-spacing: 0.05em;">Tuition Vouchers Audit</h4>
                         <div style="background: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.5rem; max-height: 150px; overflow-y: auto;" id="sd-vouchers-audit-list">
                             <!-- Populated on click -->
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 style="font-size: 0.78rem; font-weight: 700; color: #dfb15b; text-transform: uppercase; margin: 0 0 0.4rem 0; letter-spacing: 0.05em;">Promo Codes Claimed</h4>
+                        <div style="background: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.5rem; max-height: 150px; overflow-y: auto;">
+                            <table class="ledger-table" style="font-size: 0.75rem; width: 100%;">
+                                <thead>
+                                    <tr>
+                                        <th>Code</th>
+                                        <th>Pts</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="sd-promo-history-list">
+                                    <tr><td colspan="3" style="text-align: center; color: rgba(255,255,255,0.4);">Loading history...</td></tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>

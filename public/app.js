@@ -7216,3 +7216,32 @@ window.editPromoLimit = async function(id, currentMax) {
         showToast('Error', err.message, 'error');
     }
 };
+
+async function loadStudentPromoHistory(userId, isAdminModal = false) {
+    try {
+        const response = await fetch(`${API_BASE}/users/${userId}/promo-history`);
+        if (!response.ok) return;
+        const data = await response.json();
+        
+        const targetList = isAdminModal ? document.getElementById('sd-promo-history-list') : document.getElementById('student-promo-history-list');
+        if (!targetList) return;
+        
+        if (!data.history || data.history.length === 0) {
+            targetList.innerHTML = '<tr><td colspan="3" style="text-align: center; color: rgba(255,255,255,0.4);">No promo codes redeemed yet.</td></tr>';
+            return;
+        }
+        
+        targetList.innerHTML = data.history.map(h => {
+            const dateStr = new Date(h.claimed_at + 'Z').toLocaleDateString();
+            return `
+                <tr>
+                    <td><strong style="color: var(--bia-gold);">${h.code}</strong></td>
+                    <td>+${h.points_reward}</td>
+                    <td style="color: rgba(255,255,255,0.5);">${dateStr}</td>
+                </tr>
+            `;
+        }).join('');
+    } catch (err) {
+        console.error('Error loading promo history:', err);
+    }
+}

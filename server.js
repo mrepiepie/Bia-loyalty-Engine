@@ -1671,6 +1671,20 @@ app.get('/api/admin/health', async (req, res) => {
     }
 });
 
+app.get('/api/users/:userId/promo-history', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const history = await allQuery(`
+            SELECT pc.code, pc.occasion, p.claimed_at, pc.points_reward
+            FROM promo_claims p
+            JOIN promo_codes pc ON p.code_id = pc.code_id
+            WHERE p.user_id = ?
+            ORDER BY p.claimed_at DESC
+        `, [userId]);
+        res.json({ success: true, history: history || [] });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 // --- GLOBAL PROMO CODES ---
 app.post('/api/admin/promos', async (req, res) => {
     try {
@@ -1684,8 +1698,24 @@ app.post('/api/admin/promos', async (req, res) => {
         res.json({ success: true, message: 'Promo code created successfully.' });
     } catch (err) {
         if (err.message.includes('UNIQUE constraint failed')) {
-            return res.status(400).json({ error: 'Promo code already exists.' });
+            return res.status(400).json({ error: 'Promo code already exists.', promo_exists: true });
         }
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.put('/api/admin/promos/:code/override', async (req, res) => {
+    try {
+        const { code } = req.params;
+        const { points_reward, max_uses, occasion } = req.body;
+        if (!points_reward) return res.status(400).json({ error: 'Points Reward is required.' });
+        
+        await runQuery(
+            `UPDATE promo_codes SET points_reward = ?, max_uses = ?, occasion = ?, status = 'active' WHERE code = ? COLLATE NOCASE`,
+            [points_reward, max_uses || 0, occasion || 'General', code]
+        );
+        res.json({ success: true, message: 'Promo code updated successfully.' });
+    } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
