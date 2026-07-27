@@ -186,6 +186,24 @@ async function initializeDatabase() {
             FOREIGN KEY (user_id) REFERENCES users(user_id)
         )`);
 
+        await runQuery(`CREATE TABLE IF NOT EXISTS promo_codes (
+            code_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            code TEXT UNIQUE NOT NULL,
+            points_reward INTEGER NOT NULL,
+            max_uses INTEGER DEFAULT 0,
+            current_uses INTEGER DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )`);
+
+        await runQuery(`CREATE TABLE IF NOT EXISTS promo_claims (
+            claim_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            code_id INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
+            claimed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (code_id) REFERENCES promo_codes(code_id),
+            FOREIGN KEY (user_id) REFERENCES users(user_id)
+        )`);
+
         await runQuery(`CREATE TABLE IF NOT EXISTS tuition_vouchers (
             voucher_id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,
@@ -1637,6 +1655,59 @@ app.get('/api/admin/health', async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: err.message, dbStatus: 'Disconnected' });
     }
+});
+
+// --- GLOBAL PROMO CODES ---
+app.post('/api/admin/promos', async (req, res) => {
+    try {
+        const { code, points_reward, max_uses } = req.body;
+        if (!code || !points_reward) return res.status(400).json({ error: 'Code and Points Reward are required.' });
+        
+        await runQuery(
+            `INSERT INTO promo_codes (code, points_reward, max_uses) VALUES (?, ?, ?)`,
+            [code, points_reward, max_uses || 0]
+        );
+        res.json({ success: true, message: 'Promo code created successfully.' });
+    } catch (err) {
+        if (err.message.includes('UNIQUE constraint failed')) {
+            return res.status(400).json({ error: 'Promo code already exists.' });
+        }
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/promos/redeem', async (req, res) => {
+    try {
+        const { user_id, code } = req.body;
+        if (!user_id || !code) return res.status(400).json({ error: 'Missing user_id or code.' });
+
+        const promo = await getQuery(`SELECT * FROM promo_codes WHERE code = ? COLLATE NOCASE`, [code]);
+        if (!promo) return res.status(404).json({ error: 'Invalid promo code.' });
+
+        if (promo.max_uses > 0 && promo.current_uses >= promo.max_uses) {
+            return res.status(400).json({ error: 'This promo code has reached its maximum usage limit.' });
+        }
+
+        const existingClaim = await getQuery(`SELECT claim_id FROM promo_claims WHERE user_id = ? AND code_id = ?`, [user_id, promo.code_id]);
+        if (existingClaim) return res.status(400).json({ error: 'You have already redeemed this promo code!' });
+
+        const settings = await getSettings();
+        const validityMonths = settings.points_validity_months || 12;
+        const expiresAt = new Date();
+        expiresAt.setMonth(expiresAt.getMonth() + validityMonths);
+
+        await runQuery(
+            `INSERT INTO points_ledger (user_id, points_change, event_type, description, points_remaining, expires_at)
+             VALUES (?, ?, ?, ?, ?, ?)`,
+            [user_id, promo.points_reward, 'Promo Code', `Redeemed Code: ${promo.code}`, promo.points_reward, expiresAt.toISOString()]
+        );
+        
+        await runQuery(`UPDATE users SET points = points + ? WHERE user_id = ?`, [promo.points_reward, user_id]);
+        await runQuery(`INSERT INTO promo_claims (code_id, user_id) VALUES (?, ?)`, [promo.code_id, user_id]);
+        await runQuery(`UPDATE promo_codes SET current_uses = current_uses + 1 WHERE code_id = ?`, [promo.code_id]);
+
+        res.json({ success: true, message: `Success! You earned ${promo.points_reward} points.`, points: promo.points_reward });
+    } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 const PORT = process.env.PORT || 3000;

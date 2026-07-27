@@ -7016,3 +7016,67 @@ async function claimEventPoints(eventId, btnElement) {
         btnElement.disabled = false;
     }
 }
+
+// --- GLOBAL PROMO SYSTEM ---
+const adminPromoForm = document.getElementById('admin-new-promo-form');
+if (adminPromoForm) {
+    adminPromoForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const code = document.getElementById('promo-form-code').value.trim();
+        const points_reward = parseInt(document.getElementById('promo-form-points').value) || 0;
+        const max_uses = parseInt(document.getElementById('promo-form-uses').value) || 0;
+        
+        try {
+            const response = await fetch(`${API_BASE}/admin/promos`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code, points_reward, max_uses })
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'Failed to generate promo code');
+            
+            showToast('Promo Generated! 🎁', `Code ${code} is now active.`, 'success');
+            adminPromoForm.reset();
+        } catch (err) {
+            showToast('Generation Error', err.message, 'error');
+        }
+    });
+}
+
+const studentPromoForm = document.getElementById('student-promo-redeem-form');
+if (studentPromoForm) {
+    studentPromoForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const code = document.getElementById('promo-redeem-code').value.trim();
+        if (!code) return;
+        
+        if (!CURRENT_USER) {
+            showToast('Auth Error', 'You must be logged in.', 'error');
+            return;
+        }
+
+        const btn = document.getElementById('btn-redeem-promo');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying...';
+        btn.disabled = true;
+        
+        try {
+            const response = await fetch(`${API_BASE}/promos/redeem`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: CURRENT_USER.user_id, code })
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'Failed to redeem code');
+            
+            showToast('Promo Redeemed! 🎉', data.message, 'success');
+            studentPromoForm.reset();
+            loadUserProfile(); // Refresh points
+        } catch (err) {
+            showToast('Redemption Failed', err.message, 'error');
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    });
+}

@@ -955,6 +955,18 @@
                 </div>
 
                 <div class="student-dashboard-grid">
+                    <!-- Column 1.5: Redeem Global Promo Code -->
+                    <div class="card student-widget-card glassmorphic spotlight-card">
+                        <h4><i class="fa-solid fa-gift"></i> Redeem Promo Code</h4>
+                        <p class="widget-desc">Have a global secret code? Enter it below to instantly claim your bonus points.</p>
+                        <form id="student-promo-redeem-form" style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.75rem;">
+                            <input type="text" id="promo-redeem-code" placeholder="e.g. BIAWELCOME" required style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 6px; padding: 0.65rem 0.85rem; color: #fff; width: 100%; box-sizing: border-box; text-transform: uppercase;">
+                            <button type="submit" class="btn btn-primary btn-full-width" id="btn-redeem-promo">
+                                <i class="fa-solid fa-unlock-keyhole"></i> Redeem Code
+                            </button>
+                        </form>
+                    </div>
+
                     <!-- Column 1: Daily Check-In attendance gamification -->
                     <div class="card student-widget-card glassmorphic spotlight-card" id="widget-checkin">
                         <h4><i class="fa-solid fa-calendar-check"></i> Attendance Check-In</h4>
@@ -1472,6 +1484,33 @@
                         </div>
                         <div class="settings-actions" style="margin-top: 2rem; text-align: right;">
                             <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Save Rules to Database</button>
+                        </div>
+                    </form>
+                <!-- Generate Secret Promo Code Card -->
+                <div class="card settings-card glassmorphic" style="margin-top: 2rem;">
+                    <h3><i class="fa-solid fa-gift"></i> Generate Global Promo Code</h3>
+                    <p class="section-desc">Create standalone secret promo codes that students can redeem directly from their dashboard. Set maximum usage limits to create urgency.</p>
+                    
+                    <form id="admin-new-promo-form">
+                        <div class="settings-grid">
+                            <div class="settings-input-group">
+                                <label>Secret Promo Code String</label>
+                                <p>The code students will type (e.g. BIA100, WELCOME24)</p>
+                                <input type="text" id="promo-form-code" required placeholder="e.g. BIAWELCOME" style="text-transform: uppercase;">
+                            </div>
+                            <div class="settings-input-group">
+                                <label>Points Reward</label>
+                                <p>How many points this code is worth</p>
+                                <input type="number" id="promo-form-points" required placeholder="e.g. 50">
+                            </div>
+                            <div class="settings-input-group">
+                                <label>Maximum Uses (Limit)</label>
+                                <p>Set to 0 for unlimited uses</p>
+                                <input type="number" id="promo-form-uses" value="0" required placeholder="e.g. 50">
+                            </div>
+                        </div>
+                        <div class="settings-actions" style="margin-top: 2rem; text-align: right;">
+                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-magic"></i> Generate Code</button>
                         </div>
                     </form>
                 </div>
