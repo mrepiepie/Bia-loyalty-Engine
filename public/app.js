@@ -7050,7 +7050,7 @@ if (studentPromoForm) {
         const code = document.getElementById('promo-redeem-code').value.trim();
         if (!code) return;
         
-        if (!CURRENT_USER) {
+        if (!appState.currentUser) {
             showToast('Auth Error', 'You must be logged in.', 'error');
             return;
         }
@@ -7064,14 +7064,14 @@ if (studentPromoForm) {
             const response = await fetch(`${API_BASE}/promos/redeem`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: CURRENT_USER.user_id, code })
+                body: JSON.stringify({ user_id: appState.currentUser.user_id, code })
             });
             const data = await response.json();
             if (!response.ok) throw new Error(data.error || 'Failed to redeem code');
             
             showToast('Promo Redeemed! 🎉', data.message, 'success');
             studentPromoForm.reset();
-            loadUserProfile(); // Refresh points
+            loadUserProfile(appState.currentUser.user_id); // Refresh points
         } catch (err) {
             showToast('Redemption Failed', err.message, 'error');
         } finally {
