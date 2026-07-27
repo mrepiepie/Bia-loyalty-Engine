@@ -1442,8 +1442,8 @@ app.get('/api/partners', (req, res) => {
 app.post('/api/partners', (req, res) => {
     try {
         const { name, badge, title, subtitle, disclosure, image, logoColor, rewards } = req.body;
-        if (!name || !title || !subtitle || !rewards || !Array.isArray(rewards) || rewards.length !== 3) {
-            return res.status(400).json({ error: 'Missing or invalid parameters' });
+        if (!name || !title || !subtitle || !rewards || !Array.isArray(rewards) || rewards.length === 0 || rewards.length > 3) {
+            return res.status(400).json({ error: 'Missing or invalid parameters. Must provide 1 to 3 rewards.' });
         }
 
         let partnersList = [];
