@@ -192,8 +192,15 @@ async function initializeDatabase() {
             points_reward INTEGER NOT NULL,
             max_uses INTEGER DEFAULT 0,
             current_uses INTEGER DEFAULT 0,
+            occasion TEXT DEFAULT 'General',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
+
+        try {
+            await runQuery(`ALTER TABLE promo_codes ADD COLUMN occasion TEXT DEFAULT 'General'`);
+        } catch (e) {
+            // Column already exists
+        }
 
         await runQuery(`CREATE TABLE IF NOT EXISTS promo_claims (
             claim_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -1660,12 +1667,12 @@ app.get('/api/admin/health', async (req, res) => {
 // --- GLOBAL PROMO CODES ---
 app.post('/api/admin/promos', async (req, res) => {
     try {
-        const { code, points_reward, max_uses } = req.body;
+        const { code, points_reward, max_uses, occasion } = req.body;
         if (!code || !points_reward) return res.status(400).json({ error: 'Code and Points Reward are required.' });
         
         await runQuery(
-            `INSERT INTO promo_codes (code, points_reward, max_uses) VALUES (?, ?, ?)`,
-            [code, points_reward, max_uses || 0]
+            `INSERT INTO promo_codes (code, points_reward, max_uses, occasion) VALUES (?, ?, ?, ?)`,
+            [code, points_reward, max_uses || 0, occasion || 'General']
         );
         res.json({ success: true, message: 'Promo code created successfully.' });
     } catch (err) {

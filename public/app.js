@@ -7028,27 +7028,50 @@ async function loadAdminPromos() {
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'Failed to fetch promos');
         
-        if (data.promos.length === 0) {
-            adminPromosList.innerHTML = '<tr><td colspan="4" style="text-align: center; color: rgba(255,255,255,0.5);">No promo codes active</td></tr>';
-            return;
-        }
-
-        adminPromosList.innerHTML = data.promos.map(p => `
-            <tr>
-                <td><strong style="color: var(--bia-gold);">${p.code}</strong></td>
-                <td>+${p.points_reward} pts</td>
-                <td>${p.current_uses} / ${p.max_uses === 0 ? '&infin;' : p.max_uses}</td>
-                <td>
-                    <button class="btn btn-danger btn-small" onclick="deletePromo(${p.code_id})">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-                </td>
-            </tr>
-        `).join('');
+        window.allAdminPromos = data.promos; // Store globally for filtering
+        renderAdminPromos(data.promos);
     } catch (err) {
         console.error('Error loading promos:', err);
     }
 }
+
+function renderAdminPromos(promos) {
+    if (!adminPromosList) return;
+    
+    if (promos.length === 0) {
+        adminPromosList.innerHTML = '<tr><td colspan="5" style="text-align: center; color: rgba(255,255,255,0.5);">No promo codes found</td></tr>';
+        return;
+    }
+
+    adminPromosList.innerHTML = promos.map(p => `
+        <tr>
+            <td><strong style="color: var(--bia-gold);">${p.code}</strong></td>
+            <td>${p.occasion || 'General'}</td>
+            <td>+${p.points_reward} pts</td>
+            <td>${p.current_uses} / ${p.max_uses === 0 ? '&infin;' : p.max_uses}</td>
+            <td>
+                <button class="btn btn-danger btn-small" onclick="deletePromo(${p.code_id})">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+const promoSearchFilter = document.getElementById('promo-search-filter');
+if (promoSearchFilter) {
+    promoSearchFilter.addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        if (!window.allAdminPromos) return;
+        
+        const filtered = window.allAdminPromos.filter(p => 
+            p.code.toLowerCase().includes(term) || 
+            (p.occasion && p.occasion.toLowerCase().includes(term))
+        );
+        renderAdminPromos(filtered);
+    });
+}
+
 
 window.deletePromo = async function(id) {
     if (!confirm('Are you sure you want to delete this promo code? Students will no longer be able to claim it.')) return;
@@ -7071,12 +7094,13 @@ if (adminPromoForm) {
         const code = document.getElementById('promo-form-code').value.trim();
         const points_reward = parseInt(document.getElementById('promo-form-points').value) || 0;
         const max_uses = parseInt(document.getElementById('promo-form-uses').value) || 0;
+        const occasion = document.getElementById('promo-form-occasion').value.trim();
         
         try {
             const response = await fetch(`${API_BASE}/admin/promos`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ code, points_reward, max_uses })
+                body: JSON.stringify({ code, points_reward, max_uses, occasion })
             });
             const data = await response.json();
             if (!response.ok) throw new Error(data.error || 'Failed to generate promo code');
