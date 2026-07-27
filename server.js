@@ -193,11 +193,18 @@ async function initializeDatabase() {
             max_uses INTEGER DEFAULT 0,
             current_uses INTEGER DEFAULT 0,
             occasion TEXT DEFAULT 'General',
+            status TEXT DEFAULT 'active',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
 
         try {
             await runQuery(`ALTER TABLE promo_codes ADD COLUMN occasion TEXT DEFAULT 'General'`);
+        } catch (e) {
+            // Column already exists
+        }
+
+        try {
+            await runQuery(`ALTER TABLE promo_codes ADD COLUMN status TEXT DEFAULT 'active'`);
         } catch (e) {
             // Column already exists
         }
@@ -1685,7 +1692,7 @@ app.post('/api/admin/promos', async (req, res) => {
 
 app.get('/api/admin/promos', async (req, res) => {
     try {
-        const promos = await getQuery(`SELECT * FROM promo_codes ORDER BY created_at DESC`, [], true);
+        const promos = await allQuery(`SELECT * FROM promo_codes ORDER BY created_at DESC`);
         res.json({ success: true, promos: promos || [] });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -1695,9 +1702,8 @@ app.get('/api/admin/promos', async (req, res) => {
 app.delete('/api/admin/promos/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        await runQuery(`DELETE FROM promo_codes WHERE code_id = ?`, [id]);
-        await runQuery(`DELETE FROM promo_claims WHERE code_id = ?`, [id]);
-        res.json({ success: true, message: 'Promo code deleted.' });
+        await runQuery(`UPDATE promo_codes SET status = 'archived' WHERE code_id = ?`, [id]);
+        res.json({ success: true, message: 'Promo code archived.' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -1709,7 +1715,7 @@ app.post('/api/promos/redeem', async (req, res) => {
         if (!user_id || !code) return res.status(400).json({ error: 'Missing user_id or code.' });
 
         const promo = await getQuery(`SELECT * FROM promo_codes WHERE code = ? COLLATE NOCASE`, [code]);
-        if (!promo) return res.status(404).json({ error: 'Invalid promo code.' });
+        if (!promo || promo.status === 'archived') return res.status(404).json({ error: 'Invalid or expired promo code.' });
 
         if (promo.max_uses > 0 && promo.current_uses >= promo.max_uses) {
             return res.status(400).json({ error: 'This promo code has reached its maximum usage limit.' });

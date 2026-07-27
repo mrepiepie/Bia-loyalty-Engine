@@ -7038,24 +7038,56 @@ async function loadAdminPromos() {
 function renderAdminPromos(promos) {
     if (!adminPromosList) return;
     
-    if (promos.length === 0) {
-        adminPromosList.innerHTML = '<tr><td colspan="5" style="text-align: center; color: rgba(255,255,255,0.5);">No promo codes found</td></tr>';
-        return;
+    // Filter into active and inactive
+    const activePromos = promos.filter(p => p.status === 'active' && (p.max_uses === 0 || p.current_uses < p.max_uses));
+    
+    const sixtyDaysAgo = new Date();
+    sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+    
+    const inactivePromos = promos.filter(p => {
+        const isInactive = p.status === 'archived' || (p.max_uses > 0 && p.current_uses >= p.max_uses);
+        const createdAt = new Date(p.created_at + 'Z');
+        return isInactive && createdAt > sixtyDaysAgo;
+    });
+
+    if (activePromos.length === 0) {
+        adminPromosList.innerHTML = '<tr><td colspan="5" style="text-align: center; color: rgba(255,255,255,0.5);">No active promo codes found</td></tr>';
+    } else {
+        adminPromosList.innerHTML = activePromos.map(p => `
+            <tr>
+                <td><strong style="color: var(--bia-gold);">${p.code}</strong></td>
+                <td>${p.occasion || 'General'}</td>
+                <td>+${p.points_reward} pts</td>
+                <td>${p.current_uses} / ${p.max_uses === 0 ? '&infin;' : p.max_uses}</td>
+                <td>
+                    <button class="btn btn-danger btn-small" onclick="deletePromo(${p.code_id})" title="Archive Code">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
     }
 
-    adminPromosList.innerHTML = promos.map(p => `
-        <tr>
-            <td><strong style="color: var(--bia-gold);">${p.code}</strong></td>
-            <td>${p.occasion || 'General'}</td>
-            <td>+${p.points_reward} pts</td>
-            <td>${p.current_uses} / ${p.max_uses === 0 ? '&infin;' : p.max_uses}</td>
-            <td>
-                <button class="btn btn-danger btn-small" onclick="deletePromo(${p.code_id})">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
-            </td>
-        </tr>
-    `).join('');
+    const expiredList = document.getElementById('admin-expired-promos-list');
+    if (expiredList) {
+        if (inactivePromos.length === 0) {
+            expiredList.innerHTML = '<tr><td colspan="5" style="text-align: center; color: rgba(255,255,255,0.5);">No used or expired promo codes in the last 60 days</td></tr>';
+        } else {
+            expiredList.innerHTML = inactivePromos.map(p => `
+                <tr style="opacity: 0.6;">
+                    <td><strong>${p.code}</strong></td>
+                    <td>${p.occasion || 'General'}</td>
+                    <td>+${p.points_reward} pts</td>
+                    <td>${p.current_uses} / ${p.max_uses === 0 ? '&infin;' : p.max_uses}</td>
+                    <td>
+                        <span style="color: ${p.status === 'archived' ? 'var(--bia-red)' : 'var(--bia-gold)'}; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">
+                            ${p.status === 'archived' ? 'Archived' : 'Fully Claimed'}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+    }
 }
 
 const promoSearchFilter = document.getElementById('promo-search-filter');
@@ -7074,7 +7106,7 @@ if (promoSearchFilter) {
 
 
 window.deletePromo = async function(id) {
-    if (!confirm('Are you sure you want to delete this promo code? Students will no longer be able to claim it.')) return;
+    if (!confirm('Are you sure you want to archive this promo code? Students will no longer be able to claim it, but it will remain in your records.')) return;
     
     try {
         const response = await fetch(`${API_BASE}/admin/promos/${id}`, { method: 'DELETE' });
