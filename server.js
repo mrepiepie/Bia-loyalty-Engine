@@ -1602,7 +1602,7 @@ app.post('/api/events/claim', async (req, res) => {
             [user_id, event.points, 'Event Attendance', `Attended: ${event.title}`, event.points, expiresAt.toISOString()]
         );
         
-        await runQuery(`UPDATE users SET points = points + ? WHERE user_id = ?`, [event.points, user_id]);
+        await runQuery(`UPDATE users SET points_balance = points_balance + ? WHERE user_id = ?`, [event.points, user_id]);
         await runQuery(`INSERT INTO event_claims (event_id, user_id) VALUES (?, ?)`, [event.event_id, user_id]);
 
         res.json({ success: true, message: `Success! You earned ${event.points} points.`, points: event.points });
@@ -1729,7 +1729,7 @@ app.post('/api/promos/redeem', async (req, res) => {
             [user_id, promo.points_reward, 'Promo Code', `Redeemed Code: ${promo.code}`, promo.points_reward, expiresAt.toISOString()]
         );
         
-        await runQuery(`UPDATE users SET points = points + ? WHERE user_id = ?`, [promo.points_reward, user_id]);
+        await runQuery(`UPDATE users SET points_balance = points_balance + ? WHERE user_id = ?`, [promo.points_reward, user_id]);
         await runQuery(`INSERT INTO promo_claims (code_id, user_id) VALUES (?, ?)`, [promo.code_id, user_id]);
         await runQuery(`UPDATE promo_codes SET current_uses = current_uses + 1 WHERE code_id = ?`, [promo.code_id]);
 
