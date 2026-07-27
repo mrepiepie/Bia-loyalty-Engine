@@ -7060,6 +7060,9 @@ function renderAdminPromos(promos) {
                 <td>+${p.points_reward} pts</td>
                 <td>${p.current_uses} / ${p.max_uses === 0 ? '&infin;' : p.max_uses}</td>
                 <td>
+                    <button class="btn btn-primary btn-small" onclick="editPromoLimit(${p.code_id}, ${p.max_uses})" title="Edit Usage Limit" style="margin-right: 0.5rem; background: rgba(223,177,91,0.2); border: 1px solid rgba(223,177,91,0.4); color: var(--bia-gold);">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
                     <button class="btn btn-danger btn-small" onclick="deletePromo(${p.code_id})" title="Archive Code">
                         <i class="fa-solid fa-trash"></i>
                     </button>
@@ -7178,6 +7181,11 @@ if (studentPromoForm) {
             showToast('Promo Redeemed! 🎉', data.message, 'success');
             studentPromoForm.reset();
             loadUserProfile(appState.currentUser.user_id); // Refresh points
+            
+            // Update admin table if open in same session
+            if (typeof loadAdminPromos === 'function') {
+                loadAdminPromos();
+            }
         } catch (err) {
             showToast('Redemption Failed', err.message, 'error');
         } finally {
@@ -7186,3 +7194,25 @@ if (studentPromoForm) {
         }
     });
 }
+
+window.editPromoLimit = async function(id, currentMax) {
+    const newLimit = prompt(`Enter new maximum usage limit (0 for unlimited):\nCurrently set to: ${currentMax}`, currentMax);
+    if (newLimit === null) return;
+    
+    const maxUses = parseInt(newLimit);
+    if (isNaN(maxUses) || maxUses < 0) return alert('Invalid limit. Must be a number 0 or greater.');
+
+    try {
+        const response = await fetch(`${API_BASE}/admin/promos/${id}/limit`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ max_uses: maxUses })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Failed to update limit');
+        showToast('Success', 'Usage limit updated successfully!', 'success');
+        loadAdminPromos();
+    } catch (err) {
+        showToast('Error', err.message, 'error');
+    }
+};

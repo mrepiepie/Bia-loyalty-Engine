@@ -1709,6 +1709,19 @@ app.delete('/api/admin/promos/:id', async (req, res) => {
     }
 });
 
+app.put('/api/admin/promos/:id/limit', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { max_uses } = req.body;
+        if (max_uses === undefined) return res.status(400).json({ error: 'max_uses is required.' });
+        
+        await runQuery(`UPDATE promo_codes SET max_uses = ? WHERE code_id = ?`, [parseInt(max_uses), id]);
+        res.json({ success: true, message: 'Promo limit updated.' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 app.post('/api/promos/redeem', async (req, res) => {
     try {
         const { user_id, code } = req.body;
