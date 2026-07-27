@@ -34,6 +34,31 @@ app.use(express.json({ limit: '15mb' }));
 app.use(express.urlencoded({ limit: '15mb', extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Helper to parse Base64 image and save to public/uploads
+function saveBase64Image(base64String, prefix) {
+    if (!base64String || !base64String.startsWith('data:image/')) return base64String;
+    
+    try {
+        const matches = base64String.match(/^data:image\/([A-Za-z-+\/]+);base64,(.+)$/);
+        if (!matches || matches.length !== 3) return base64String;
+
+        const extension = matches[1] === 'jpeg' ? 'jpg' : matches[1];
+        const imageData = Buffer.from(matches[2], 'base64');
+        const fileName = `${prefix}-${Date.now()}.${extension}`;
+        const uploadDir = path.join(__dirname, 'public', 'uploads');
+        
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        
+        fs.writeFileSync(path.join(uploadDir, fileName), imageData);
+        return `/uploads/${fileName}`;
+    } catch (err) {
+        console.error('Failed to save base64 image:', err);
+        return base64String;
+    }
+}
+
 // Database boot synchronization middleware
 app.use(async (req, res, next) => {
     if (!dbInitialized && dbInitPromise) {
@@ -1397,7 +1422,7 @@ app.post('/api/partners', (req, res) => {
             title,
             subtitle,
             disclosure: disclosure || 'Redemption rates are calculated dynamically based on real-time partner value.',
-            image: image || 'images/adnoc_students.png',
+            image: saveBase64Image(image, 'partner') || 'images/adnoc_students.png',
             logoColor: logoColor || '#EB4C42',
             rewards
         };
@@ -1485,9 +1510,12 @@ app.post('/api/events', async (req, res) => {
         if (!title || !description) {
             return res.status(400).json({ error: 'Missing title or description' });
         }
+        
+        const finalImageUrl = saveBase64Image(image_url, 'event');
+        
         await runQuery(
             `INSERT INTO campus_events (title, description, points, image_url) VALUES (?, ?, ?, ?)`,
-            [title, description, points || 0, image_url || '']
+            [title, description, points || 0, finalImageUrl || '']
         );
         res.json({ success: true, message: 'Event successfully added' });
     } catch (err) { res.status(500).json({ error: err.message }); }
