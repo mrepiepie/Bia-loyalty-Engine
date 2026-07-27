@@ -704,16 +704,18 @@ app.get('/api/admin/traffic/stats', async (req, res) => {
 });
 
 // Admin endpoint: Update security and traffic settings parameters
-// Admin endpoint: Maintenance mode toggle (simplified)
-app.post('/api/admin/maintenance', async (req, res) => {
+// Admin endpoint: Update Traffic Control (Maintenance & Firewall)
+app.post('/api/admin/traffic/control', async (req, res) => {
     try {
-        const { maintenance_mode, maintenance_duration } = req.body;
+        const { maintenance_mode, maintenance_duration, geofence_gcc_only, rate_limit_min } = req.body;
+        
         if (maintenance_mode !== undefined) {
             await runQuery(`UPDATE settings SET value = ? WHERE key = 'maintenance_mode'`, [String(maintenance_mode)]);
             if (String(maintenance_mode) === '0') {
                 await runQuery(`UPDATE settings SET value = '' WHERE key = 'maintenance_end_time'`);
             }
         }
+        
         if (maintenance_duration !== undefined) {
             const duration = parseInt(maintenance_duration);
             if (duration > 0) {
@@ -724,6 +726,15 @@ app.post('/api/admin/maintenance', async (req, res) => {
                 await runQuery(`UPDATE settings SET value = '' WHERE key = 'maintenance_end_time'`);
             }
         }
+        
+        if (geofence_gcc_only !== undefined) {
+            await runQuery(`INSERT INTO settings (key, value) VALUES ('geofence_gcc_only', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value`, [String(geofence_gcc_only)]);
+        }
+        
+        if (rate_limit_min !== undefined) {
+            await runQuery(`INSERT INTO settings (key, value) VALUES ('rate_limit_min', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value`, [String(rate_limit_min)]);
+        }
+        
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: err.message });
