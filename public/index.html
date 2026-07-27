@@ -968,7 +968,10 @@
                         </form>
                         
                         <div style="margin-top: 1.5rem;">
-                            <h5 style="margin: 0 0 0.5rem 0; font-size: 0.8rem; color: rgba(255,255,255,0.6); text-transform: uppercase;">Redemption History</h5>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                <h5 style="margin: 0; font-size: 0.8rem; color: rgba(255,255,255,0.6); text-transform: uppercase;">Redemption History</h5>
+                                <input type="text" id="student-promo-search" placeholder="Search code or date..." onkeyup="filterPromoHistory(this.value, 'student-promo-history-list')" style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.65rem; width: 130px; font-family: inherit;">
+                            </div>
                             <div class="table-scroll-container" style="max-height: 150px; overflow-y: auto;">
                                 <table class="ledger-table" style="font-size: 0.75rem;">
                                     <thead>
@@ -2313,7 +2316,10 @@
                     </div>
 
                     <div>
-                        <h4 style="font-size: 0.78rem; font-weight: 700; color: #dfb15b; text-transform: uppercase; margin: 0 0 0.4rem 0; letter-spacing: 0.05em;">Promo Codes Claimed</h4>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                            <h4 style="font-size: 0.78rem; font-weight: 700; color: #dfb15b; text-transform: uppercase; margin: 0; letter-spacing: 0.05em;">Promo Codes Claimed</h4>
+                            <input type="text" id="sd-promo-search" placeholder="Search codes..." onkeyup="filterPromoHistory(this.value, 'sd-promo-history-list')" style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.65rem; width: 110px; font-family: inherit;">
+                        </div>
                         <div style="background: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.5rem; max-height: 150px; overflow-y: auto;">
                             <table class="ledger-table" style="font-size: 0.75rem; width: 100%;">
                                 <thead>
