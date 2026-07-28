@@ -7505,20 +7505,20 @@ document.addEventListener('submit', async (e) => {
         submitBtn.disabled = true;
 
         try {
-            const newFaqRef = firebase.database().ref('faq_submissions').push();
-            
-            // Allow anonymous submission
             const isAnon = (typeof currentUser === 'undefined' || !currentUser);
-            
-            await newFaqRef.set({
-                question: questionText,
-                studentId: isAnon ? 'Anonymous' : (currentUser.studentId || 'N/A'),
-                studentName: isAnon ? 'Guest User' : (currentUser.name || 'Unknown'),
-                email: isAnon ? 'N/A' : (currentUser.email || 'N/A'),
-                timestamp: firebase.database.ServerValue.TIMESTAMP,
-                status: 'pending',
-                bookmarked: false
+            const response = await fetch('/api/faqs', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    question: questionText,
+                    studentId: isAnon ? 'Anonymous' : (currentUser.studentId || 'N/A'),
+                    studentName: isAnon ? 'Guest User' : (currentUser.name || 'Unknown'),
+                    email: isAnon ? 'N/A' : (currentUser.email || 'N/A')
+                })
             });
+            
+            if (!response.ok) throw new Error('Failed to submit');
+
             
             questionInput.value = '';
             const formContainer = document.getElementById('faq-form-container');
@@ -7541,22 +7541,22 @@ document.addEventListener('submit', async (e) => {
 });
 
 // Admin Dashboard: Render FAQs
-function initAdminFAQs() {
+async function initAdminFAQs() {
     const faqsBody = document.getElementById('admin-faqs-body');
     if (!faqsBody) return;
     
-    firebase.database().ref('faq_submissions').on('value', (snapshot) => {
-        faqsBody.innerHTML = '';
-        const data = snapshot.val();
+    try {
+        const response = await fetch('/api/admin/faqs');
+        const data = await response.json();
+        const submissions = data.faqs || [];
         
-        if (!data) {
+        faqsBody.innerHTML = '';
+        if (submissions.length === 0) {
             faqsBody.innerHTML = '<tr><td colspan="5" class="no-data" style="text-align: center; color: rgba(255,255,255,0.4); padding: 2rem;">No questions have been submitted yet.</td></tr>';
             return;
         }
         
-        const submissions = Object.keys(data).map(key => ({ id: key, ...data[key] }));
-        // Sort newest first
-        submissions.sort((a, b) => b.timestamp - a.timestamp);
+        // submissions is already sorted by DESC from DB
         
         submissions.forEach(sub => {
             const dateStr = new Date(sub.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
@@ -7589,10 +7589,14 @@ function initAdminFAQs() {
 // Admin Action: Bookmark FAQ
 window.bookmarkFAQ = async function(id, currentState) {
     try {
-        await firebase.database().ref('faq_submissions/' + id).update({
-            bookmarked: !currentState
+        const response = await fetch('/api/admin/faqs/' + id + '/bookmark', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ bookmarked: !currentState })
         });
+        if (!response.ok) throw new Error('Update failed');
         showToast(currentState ? 'Bookmark removed.' : 'Question bookmarked!', 'success');
+        initAdminFAQs(); // Refresh table
     } catch (error) {
         console.error('Error bookmarking FAQ:', error);
         showToast('Failed to update bookmark.', 'error');
@@ -7604,8 +7608,12 @@ window.removeFAQ = async function(id) {
     if (!confirm('Are you sure you want to permanently delete this question?')) return;
     
     try {
-        await firebase.database().ref('faq_submissions/' + id).remove();
+        const response = await fetch('/api/admin/faqs/' + id, {
+            method: 'DELETE'
+        });
+        if (!response.ok) throw new Error('Delete failed');
         showToast('Question removed.', 'success');
+        initAdminFAQs(); // Refresh table
     } catch (error) {
         console.error('Error removing FAQ:', error);
         showToast('Failed to remove question.', 'error');

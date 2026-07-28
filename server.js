@@ -248,6 +248,16 @@ async function initializeDatabase() {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
 
+        await runQuery(`CREATE TABLE IF NOT EXISTS faq_submissions (
+            id TEXT PRIMARY KEY,
+            question TEXT NOT NULL,
+            student_id TEXT NOT NULL,
+            student_name TEXT NOT NULL,
+            email TEXT,
+            timestamp INTEGER NOT NULL,
+            status TEXT DEFAULT 'pending',
+            bookmarked INTEGER DEFAULT 0
+        )`);
         await runQuery(`CREATE TABLE IF NOT EXISTS ip_blacklist (
             ip_address TEXT PRIMARY KEY,
             reason TEXT,
@@ -1625,6 +1635,56 @@ app.delete('/api/events/:id', async (req, res) => {
 });
 
 // ADMIN: System Health & Scalability API
+
+// --- FAQ Endpoints ---
+app.post('/api/faqs', async (req, res) => {
+    try {
+        const { question, studentId, studentName, email } = req.body;
+        const id = 'faq_' + Date.now() + '_' + Math.random().toString(36).substring(2,9);
+        const timestamp = Date.now();
+        await runQuery(
+            'INSERT INTO faq_submissions (id, question, student_id, student_name, email, timestamp, status, bookmarked) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            [id, question, studentId || 'Anonymous', studentName || 'Guest User', email || 'N/A', timestamp, 'pending', 0]
+        );
+        res.json({ success: true, id });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+app.get('/api/admin/faqs', async (req, res) => {
+    try {
+        const faqs = await fetchAll('SELECT * FROM faq_submissions ORDER BY timestamp DESC');
+        res.json({ faqs });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+app.post('/api/admin/faqs/:id/bookmark', async (req, res) => {
+    try {
+        const { bookmarked } = req.body;
+        await runQuery('UPDATE faq_submissions SET bookmarked = ? WHERE id = ?', [bookmarked ? 1 : 0, req.params.id]);
+        res.json({ success: true });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+app.delete('/api/admin/faqs/:id', async (req, res) => {
+    try {
+        await runQuery('DELETE FROM faq_submissions WHERE id = ?', [req.params.id]);
+        res.json({ success: true });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+// ----------------------
+
 app.get('/api/admin/health', async (req, res) => {
     try {
         const startPing = Date.now();
