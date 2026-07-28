@@ -6900,7 +6900,11 @@ function animateLandingText() {
 }
 
 window.resetDatabaseState = async function(btn) {
-    if (!confirm("Are you sure you want to drop all database tables and restore default seeded profiles? This cannot be undone.")) return;
+    const confirmText = prompt("WARNING: This will DESTROY ALL USER ACCOUNTS, POINTS, AND REFERRALS.\n\nTo proceed, please type: RESET DATABASE");
+    if (confirmText !== "RESET DATABASE") {
+        alert("Reset aborted.");
+        return;
+    }
     
     const origHtml = btn.innerHTML;
     btn.disabled = true;
