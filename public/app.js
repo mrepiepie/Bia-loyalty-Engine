@@ -7497,6 +7497,9 @@ document.addEventListener('submit', async (e) => {
         const questionInput = document.getElementById('faq-question-text');
         const questionText = questionInput.value.trim();
         
+        const emailInput = document.getElementById('faq-email-input');
+        const emailText = emailInput ? emailInput.value.trim() : '';
+        
         if (!questionText) return;
         
         const submitBtn = faqForm.querySelector('button[type="submit"]');
@@ -7513,7 +7516,7 @@ document.addEventListener('submit', async (e) => {
                     question: questionText,
                     studentId: isAnon ? 'Anonymous' : (currentUser.studentId || 'N/A'),
                     studentName: isAnon ? 'Guest User' : (currentUser.name || 'Unknown'),
-                    email: isAnon ? 'N/A' : (currentUser.email || 'N/A')
+                    email: isAnon ? (emailText || 'N/A') : (currentUser.email || emailText || 'N/A')
                 })
             });
             
@@ -7521,6 +7524,7 @@ document.addEventListener('submit', async (e) => {
 
             
             questionInput.value = '';
+            if (emailInput) emailInput.value = '';
             const formContainer = document.getElementById('faq-form-container');
             if(formContainer) formContainer.style.display = 'none';
             const successMsg = document.getElementById('faq-success-msg');
@@ -7569,7 +7573,10 @@ async function initAdminFAQs() {
             tr.style = bgStyle;
             tr.innerHTML = `
                 <td style="color: rgba(255,255,255,0.6); font-size: 0.8rem;">${dateStr}</td>
-                <td style="font-weight: 600; color: #fff;">${escapeHTML(sub.student_name || sub.studentName || 'Unknown')}</td>
+                <td style="font-weight: 600; color: #fff;">
+                    ${escapeHTML(sub.student_name || sub.studentName || 'Unknown')}<br>
+                    <span style="font-size: 0.75rem; color: rgba(255,255,255,0.5); font-weight: normal;">${escapeHTML(sub.email && sub.email !== 'N/A' ? sub.email : 'No email provided')}</span>
+                </td>
                 <td style="color: #dfb15b; font-family: monospace;">${escapeHTML(sub.student_id || sub.studentId || 'N/A')}</td>
                 <td style="color: rgba(255,255,255,0.85); max-width: 300px; word-wrap: break-word;">${escapeHTML(sub.question)}</td>
                 <td style="display: flex; gap: 0.5rem;">
