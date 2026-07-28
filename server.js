@@ -1713,8 +1713,8 @@ app.get('/api/admin/health', async (req, res) => {
         else if (uptimeSeconds < 3600) uptimeStr = `${Math.floor(uptimeSeconds / 60)}m`;
         else uptimeStr = `${Math.floor(uptimeSeconds / 3600)}h ${Math.floor((uptimeSeconds % 3600) / 60)}m`;
 
-        const ledgerCountRow = await getQuery(`SELECT COUNT(*) as count FROM ledger`);
-        const voucherCountRow = await getQuery(`SELECT COUNT(*) as count FROM vouchers`);
+        const ledgerCountRow = await getQuery(`SELECT COUNT(*) as count FROM points_ledger`);
+        const voucherCountRow = await getQuery(`SELECT COUNT(*) as count FROM tuition_vouchers`);
         
         res.json({
             success: true,
