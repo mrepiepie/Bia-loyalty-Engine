@@ -1859,7 +1859,7 @@ async function loadAnnouncements() {
     const list = document.getElementById('announcements-list');
     if (!list) return;
     try {
-        const res = await fetch(`${API_BASE}/admin/announcements`);
+        const res = await fetch(`${API_BASE}/announcements`);
         if (!res.ok) throw new Error();
         const items = await res.json();
         if (items.length === 0) {
