@@ -7412,6 +7412,15 @@ window.showLegal = function(type) {
     
     modal.style.display = 'flex';
     
+    
+    // Reset form state if it was submitted previously
+    const formContainer = document.getElementById('faq-form-container');
+    const successMsg = document.getElementById('faq-success-msg');
+    if (formContainer && successMsg) {
+        formContainer.style.display = 'block';
+        successMsg.style.display = 'none';
+    }
+
     if (window.gsap) {
         gsap.fromTo(modal.querySelector('.card'), 
             { y: 20, opacity: 0, scale: 0.95 },
@@ -7511,9 +7520,14 @@ if (faqForm) {
                 status: 'pending'
             });
             
-            showToast('Your question has been sent to the admin team!', 'success');
             questionInput.value = '';
-            document.getElementById('faq-modal').style.display = 'none';
+            document.getElementById('faq-form-container').style.display = 'none';
+            const successMsg = document.getElementById('faq-success-msg');
+            successMsg.style.display = 'block';
+            
+            if (window.gsap) {
+                gsap.fromTo(successMsg, { opacity: 0, y: 15, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "back.out(1.5)" });
+            }
         } catch (error) {
             console.error('FAQ submission error:', error);
             showToast('Failed to submit question. Please try again.', 'error');
