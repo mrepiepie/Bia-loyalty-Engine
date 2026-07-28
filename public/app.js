@@ -7569,8 +7569,8 @@ async function initAdminFAQs() {
             tr.style = bgStyle;
             tr.innerHTML = `
                 <td style="color: rgba(255,255,255,0.6); font-size: 0.8rem;">${dateStr}</td>
-                <td style="font-weight: 600; color: #fff;">${escapeHTML(sub.studentName)}</td>
-                <td style="color: #dfb15b; font-family: monospace;">${escapeHTML(sub.studentId)}</td>
+                <td style="font-weight: 600; color: #fff;">${escapeHTML(sub.student_name || sub.studentName || 'Unknown')}</td>
+                <td style="color: #dfb15b; font-family: monospace;">${escapeHTML(sub.student_id || sub.studentId || 'N/A')}</td>
                 <td style="color: rgba(255,255,255,0.85); max-width: 300px; word-wrap: break-word;">${escapeHTML(sub.question)}</td>
                 <td style="display: flex; gap: 0.5rem;">
                     <button class="btn btn-secondary btn-sm" onclick="bookmarkFAQ('${sub.id}', ${sub.bookmarked || false})" title="Bookmark this question" style="font-size: 0.8rem; padding: 0.4rem 0.6rem; border-color: rgba(223, 177, 91, 0.3); color: #dfb15b; background: transparent;">
