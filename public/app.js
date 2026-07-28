@@ -7583,7 +7583,9 @@ async function initAdminFAQs() {
             `;
             faqsBody.appendChild(tr);
         });
-    });
+    } catch (error) {
+        console.error('Error fetching FAQs:', error);
+    }
 }
 
 // Admin Action: Bookmark FAQ
