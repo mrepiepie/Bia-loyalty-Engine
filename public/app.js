@@ -7373,3 +7373,49 @@ function triggerGoogleTranslate(targetLang) {
         combo.dispatchEvent(new Event('change'));
     }
 }
+
+// ----------------------------------------------------
+// LEGAL MODALS (TERMS & PRIVACY)
+// ----------------------------------------------------
+window.showLegal = function(type) {
+    const modal = document.getElementById('legal-modal');
+    const title = document.getElementById('legal-title');
+    const content = document.getElementById('legal-content');
+    
+    if (!modal || !title || !content) return;
+    
+    if (type === 'terms') {
+        title.innerHTML = '<i class="fa-solid fa-scale-balanced" style="color: #dfb15b; font-size: 1.3rem; margin-right: 0.5rem;"></i> Terms of Use';
+        content.innerHTML = `
+            <p>Welcome to the Bradford International Alliance (BIA) Loyalty Engine. By accessing our platform, you agree to these core terms:</p>
+            <ol style="padding-left: 1.25rem; margin-top: 1rem; display: flex; flex-direction: column; gap: 0.75rem;">
+                <li><strong>Account Eligibility:</strong> This platform is strictly restricted to enrolled BIA students in good academic standing.</li>
+                <li><strong>Earning Points:</strong> Points are awarded for verified academic milestones, seminar attendance, and approved peer referrals. Any manipulation or abuse of the points system will result in permanent account suspension.</li>
+                <li><strong>Voucher Redemption:</strong> Loyalty points have no cash value. They can only be redeemed for approved BIA tuition fee vouchers or partner network rewards via the portal.</li>
+                <li><strong>Program Modifications:</strong> Bradford International Alliance reserves the right to modify point allocation values, reward tiers, and program rules at any time without prior notice.</li>
+            </ol>
+            <p style="margin-top: 1rem;">For detailed academic regulations, please refer to the official BIA Student Handbook.</p>
+        `;
+    } else {
+        title.innerHTML = '<i class="fa-solid fa-shield-halved" style="color: #dfb15b; font-size: 1.3rem; margin-right: 0.5rem;"></i> Privacy Policy';
+        content.innerHTML = `
+            <p>Bradford International Alliance is committed to protecting your privacy and educational data.</p>
+            <ol style="padding-left: 1.25rem; margin-top: 1rem; display: flex; flex-direction: column; gap: 0.75rem;">
+                <li><strong>Data Collection:</strong> We collect your academic performance metrics, physical check-in attendance records, and login activity solely for the purpose of operating the Loyalty Engine securely.</li>
+                <li><strong>Data Usage:</strong> Your data is used exclusively to calculate your loyalty points, generate tuition vouchers, and personalize your higher educational journey.</li>
+                <li><strong>Third-Party Sharing:</strong> BIA does not sell your personal data. Limited academic milestone information may be securely shared with the EduAbroad university network only if you explicitly opt-in for university placement services.</li>
+                <li><strong>Security Infrastructure:</strong> All platform data is encrypted using industry-standard protocols. Administrative access is strictly logged and audited in real-time.</li>
+            </ol>
+            <p style="margin-top: 1rem;">If you have any privacy concerns, please contact the BIA Administration Office.</p>
+        `;
+    }
+    
+    modal.style.display = 'flex';
+    
+    if (window.gsap) {
+        gsap.fromTo(modal.querySelector('.card'), 
+            { y: 20, opacity: 0, scale: 0.95 },
+            { y: 0, opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.2)" }
+        );
+    }
+};
