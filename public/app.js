@@ -647,7 +647,7 @@ function setupLiveFeedSimulator() {
                 <span class="feed-user">${name}</span>
                 <span>${ev.desc}</span>
             </div>
-            <span class="feed-pts ${ev.type}">${ev.pts}</span>
+            <span class="feed-pts notranslate ${ev.type}">${ev.pts}</span>
         `;
 
         ticker.appendChild(item);
@@ -3532,7 +3532,7 @@ async function loadDynamicPartners() {
                                         <div class="partnership-reward-card">
                                             <div class="reward-icon-badge"><i class="fa-solid ${r.icon || 'fa-gift'}"></i></div>
                                             <h4>${r.name}</h4>
-                                            <span class="reward-cost">${r.cost} Points <span class="reward-cash">(${r.cash})</span></span>
+                                            <span class="reward-cost notranslate">${r.cost} Points <span class="reward-cash">(${r.cash})</span></span>
                                         </div>
                                     `).join('')}
                                 </div>
@@ -7304,3 +7304,61 @@ window.filterPromoHistory = function(query, listId) {
         list.appendChild(emptyRow);
     }
 };
+
+// ----------------------------------------------------
+// LANGUAGE TRANSLATION ENGINE (GOOGLE TRANSLATE BINDING)
+// ----------------------------------------------------
+let currentLang = localStorage.getItem('bia-lang') || 'en';
+
+window.addEventListener('load', () => {
+    // Initial check for saved language
+    setTimeout(() => {
+        if (currentLang === 'ar') {
+            triggerGoogleTranslate('ar');
+        }
+    }, 1000);
+
+    const footerBtn = document.getElementById('lang-toggle-btn');
+    if (footerBtn) {
+        footerBtn.addEventListener('click', toggleLanguage);
+    }
+    
+    const dashBtn = document.getElementById('dash-lang-toggle');
+    if (dashBtn) {
+        dashBtn.addEventListener('click', toggleLanguage);
+    }
+    
+    updateLangUI();
+});
+
+function toggleLanguage() {
+    currentLang = currentLang === 'en' ? 'ar' : 'en';
+    localStorage.setItem('bia-lang', currentLang);
+    triggerGoogleTranslate(currentLang);
+    updateLangUI();
+}
+
+function updateLangUI() {
+    const textFooter = document.getElementById('lang-toggle-text');
+    const textDash = document.getElementById('dash-lang-text');
+    
+    if (currentLang === 'en') {
+        if (textFooter) textFooter.innerText = 'عربي / Arabic';
+        if (textDash) textDash.innerText = 'عربي';
+        document.documentElement.lang = 'en';
+        document.body.classList.remove('rtl-mode');
+    } else {
+        if (textFooter) textFooter.innerText = 'English';
+        if (textDash) textDash.innerText = 'English';
+        document.documentElement.lang = 'ar';
+        document.body.classList.add('rtl-mode');
+    }
+}
+
+function triggerGoogleTranslate(targetLang) {
+    const combo = document.querySelector('.goog-te-combo');
+    if (combo) {
+        combo.value = targetLang;
+        combo.dispatchEvent(new Event('change'));
+    }
+}

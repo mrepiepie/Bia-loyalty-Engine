@@ -11,6 +11,29 @@
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css?v=1.2.3">
+
+    <!-- Google Translate Script -->
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({pageLanguage: 'en', includedLanguages: 'ar,en', autoDisplay: false}, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <style>
+        /* Hide the default Google Translate widget */
+        .goog-te-banner-frame.skiptranslate { display: none !important; }
+        body { top: 0px !important; }
+        #google_translate_element { display: none !important; }
+        /* RTL Overrides when Arabic is active */
+        html[lang="ar"] { direction: rtl; }
+        html[lang="ar"] body { font-family: 'Cairo', 'Tajawal', sans-serif !important; }
+        html[lang="ar"] .partnerships-layout-container { flex-direction: row-reverse; }
+        html[lang="ar"] .landing-nav-links { flex-direction: row-reverse; }
+        html[lang="ar"] .hero-stats { flex-direction: row-reverse; }
+        html[lang="ar"] .footer-container { flex-direction: row-reverse; text-align: right; }
+        html[lang="ar"] .footer-social-icons { justify-content: flex-start; }
+    </style>
+
 </head>
 <body>
     <!-- Interactive Canvas background representing pixelated grid grid mesh -->
@@ -671,11 +694,12 @@
                         <a href="#">Terms of Use</a>
                         <a href="#">Privacy Policy</a>
                     </div>
-                    <div class="footer-language-row">
-                        <span class="lang-arabic">عربي</span>
-                        <div class="flag-container">
-                            <div class="uae-flag-box">
-                                <div class="uae-red-stripe"></div>
+                    
+                    <div class="footer-language-row" id="lang-toggle-btn" style="cursor: pointer; padding: 5px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2);">
+                        <span class="lang-arabic" id="lang-toggle-text">عربي / Arabic</span>
+                        <div id="google_translate_element"></div>
+                    </div>
+
                                 <div class="uae-green-stripe"></div>
                                 <div class="uae-white-stripe"></div>
                                 <div class="uae-black-stripe"></div>
@@ -891,7 +915,7 @@
                             <div class="points-medal-outer">
                                 <div class="points-medal-inner">
                                     <div class="medal-tier-icon"><i class="fa-solid fa-award"></i></div>
-                                    <span class="points-count" id="points-balance">0</span>
+                                    <span class="points-count notranslate" id="points-balance">0</span>
                                     <span class="points-lbl">LOYALTY PTS</span>
                                 </div>
                             </div>
