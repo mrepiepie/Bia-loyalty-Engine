@@ -7488,17 +7488,22 @@ window.showFAQModal = function() {
     }
 };
 
-// Handle Student FAQ Submission
-const faqForm = document.getElementById('faq-submit-form');
-if (faqForm) {
-    faqForm.addEventListener('submit', async (e) => {
+// Handle Student FAQ Submission via Event Delegation
+document.addEventListener('submit', async (e) => {
+    if (e.target && e.target.id === 'faq-submit-form') {
         e.preventDefault();
         
-        if (!currentUser) {
-            showToast('You must be logged in to ask a question.', 'error');
+        if (typeof currentUser === 'undefined' || !currentUser) {
+            // Check if showToast exists, if not just alert
+            if (typeof showToast === 'function') {
+                showToast('You must be logged in to ask a question.', 'error');
+            } else {
+                alert('You must be logged in to ask a question.');
+            }
             return;
         }
 
+        const faqForm = e.target;
         const questionInput = document.getElementById('faq-question-text');
         const questionText = questionInput.value.trim();
         
@@ -7521,22 +7526,24 @@ if (faqForm) {
             });
             
             questionInput.value = '';
-            document.getElementById('faq-form-container').style.display = 'none';
+            const formContainer = document.getElementById('faq-form-container');
+            if(formContainer) formContainer.style.display = 'none';
             const successMsg = document.getElementById('faq-success-msg');
-            successMsg.style.display = 'block';
-            
-            if (window.gsap) {
-                gsap.fromTo(successMsg, { opacity: 0, y: 15, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "back.out(1.5)" });
+            if(successMsg) {
+                successMsg.style.display = 'block';
+                if (window.gsap) {
+                    gsap.fromTo(successMsg, { opacity: 0, y: 15, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "back.out(1.5)" });
+                }
             }
         } catch (error) {
             console.error('FAQ submission error:', error);
-            showToast('Failed to submit question. Please try again.', 'error');
+            if (typeof showToast === 'function') showToast('Failed to submit question. Please try again.', 'error');
         } finally {
             submitBtn.innerHTML = originalText;
             submitBtn.disabled = false;
         }
-    });
-}
+    }
+});
 
 // Admin Dashboard: Render FAQs
 function initAdminFAQs() {
