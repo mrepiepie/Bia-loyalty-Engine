@@ -423,7 +423,7 @@ app.post('/api/admin/create-student', async (req, res) => {
 
         // Award welcome points
         const settings = await getSettings();
-        const welcomePoints = parseInt(settings.welcome_points) || 200;
+        const welcomePoints = parseInt(settings.new_joiner_points) || 200;
 
         const result = await runQuery(`INSERT INTO users (name, email, password, role, student_id, referral_code, programme, points_balance) VALUES (?, ?, ?, 'student', ?, ?, ?, ?)`,
             [name.trim(), email.trim().toLowerCase(), password, student_id.trim(), referralCode, prog, welcomePoints]);

@@ -1226,6 +1226,7 @@ async function fetchSettings() {
         
         appState.settings = {};
         data.forEach(s => {
+            if (s.key === "maintenance_mode" || s.key === "maintenance_end_time" || s.key === "welcome_points") return;
             appState.settings[s.key] = parseFloat(s.value) || s.value;
         });
 
