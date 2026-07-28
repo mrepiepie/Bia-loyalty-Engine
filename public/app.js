@@ -4720,7 +4720,7 @@ window.showStudentDetailModal = async function(userId) {
     // Actions bridge
     document.getElementById('btn-sd-email').href = `mailto:${student.email}`;
     document.getElementById('btn-sd-adjust').onclick = () => {
-        closeStudentDetailModal();
+        window.closeStudentDetailModal();
         openAdjustmentModal(student.user_id, student.name);
     };
 
@@ -4883,7 +4883,7 @@ window.showStudentDetailModal = async function(userId) {
 
             showToast('Account Deleted 🗑️', `Student profile "${student.name}" has been deleted from BIA.`, 'success');
             
-            closeStudentDetailModal();
+            window.closeStudentDetailModal();
             await loadAdminStudents();
         } catch (err) {
             showToast('Delete Failed', err.message, 'error');
@@ -5214,8 +5214,8 @@ const setupStudentDetailListeners = () => {
     const closeBtn = document.getElementById('student-detail-modal-close');
     const closeActionBtn = document.getElementById('btn-sd-close');
 
-    if (closeBtn) closeBtn.addEventListener('click', closeStudentDetailModal);
-    if (closeActionBtn) closeActionBtn.addEventListener('click', closeStudentDetailModal);
+    if (closeBtn) closeBtn.addEventListener('click', window.closeStudentDetailModal);
+    if (closeActionBtn) closeActionBtn.addEventListener('click', window.closeStudentDetailModal);
 };
 
 const setupAdminStudentSearchListener = () => {
