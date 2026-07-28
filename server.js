@@ -258,11 +258,16 @@ async function initializeDatabase() {
             status TEXT DEFAULT 'pending',
             bookmarked INTEGER DEFAULT 0
         )`);
+        
         await runQuery(`CREATE TABLE IF NOT EXISTS ip_blacklist (
             ip_address TEXT PRIMARY KEY,
             reason TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
+        
+        try {
+            await runQuery(`ALTER TABLE faq_submissions ADD COLUMN email TEXT`);
+        } catch (e) {}
 
         const defaultSettings = [
             ['point_aed_value', '0.25', 'Cash equivalent value of 1 point in AED'],
