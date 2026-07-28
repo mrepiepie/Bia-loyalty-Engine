@@ -7419,3 +7419,44 @@ window.showLegal = function(type) {
         );
     }
 };
+
+// ----------------------------------------------------
+// ABOUT MODALS (RULES & MANIFESTO)
+// ----------------------------------------------------
+window.showAbout = function(type) {
+    const modal = document.getElementById('legal-modal');
+    const title = document.getElementById('legal-title');
+    const content = document.getElementById('legal-content');
+    
+    if (!modal || !title || !content) return;
+    
+    if (type === 'rules') {
+        title.innerHTML = '<i class="fa-solid fa-list-check" style="color: #dfb15b; font-size: 1.3rem; margin-right: 0.5rem;"></i> Programme Rules';
+        content.innerHTML = `
+            <p>To maintain fairness and prestige, all students must adhere to the BIA Loyalty Engine rules:</p>
+            <ol style="padding-left: 1.25rem; margin-top: 1rem; display: flex; flex-direction: column; gap: 0.75rem;">
+                <li><strong>Point Valuation:</strong> Loyalty points are dynamically calculated based on academic progression, event attendance, and referral conversions.</li>
+                <li><strong>Vouchers:</strong> Redeemed tuition vouchers are strictly non-transferable and can only be applied toward active tuition balances.</li>
+                <li><strong>Expiry:</strong> Accumulated points expire 12 months from the date of issuance or immediately upon student graduation or withdrawal.</li>
+                <li><strong>Peer-to-Peer Transfers:</strong> Points gifting between students incurs a 10% system burn tax to preserve program economy.</li>
+            </ol>
+            <p style="margin-top: 1rem;">Violations of these rules may result in immediate suspension of loyalty privileges.</p>
+        `;
+    } else {
+        title.innerHTML = '<i class="fa-solid fa-book-open" style="color: #dfb15b; font-size: 1.3rem; margin-right: 0.5rem;"></i> Academy Manifesto';
+        content.innerHTML = `
+            <p style="font-size: 1.05rem; font-family: 'DM Serif Display', serif; color: #dfb15b; margin-bottom: 1rem;">Bradford International Alliance believes in rewarding educational excellence.</p>
+            <p>Our mission is to create a closed-loop ecosystem where students are directly incentivized to perform well academically, participate in extracurricular executive seminars, and contribute to the growth of our international community.</p>
+            <p style="margin-top: 1rem;">We believe loyalty should be measurable, transparent, and financially beneficial to the student. By transforming engagement into tangible tuition relief, we ensure that our top performers are actively supported throughout their academic journey.</p>
+        `;
+    }
+    
+    modal.style.display = 'flex';
+    
+    if (window.gsap) {
+        gsap.fromTo(modal.querySelector('.card'), 
+            { y: 20, opacity: 0, scale: 0.95 },
+            { y: 0, opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.2)" }
+        );
+    }
+};
