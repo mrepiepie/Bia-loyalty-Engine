@@ -1655,7 +1655,7 @@ app.post('/api/faqs', async (req, res) => {
 
 app.get('/api/admin/faqs', async (req, res) => {
     try {
-        const faqs = await fetchAll('SELECT * FROM faq_submissions ORDER BY timestamp DESC');
+        const faqs = await allQuery('SELECT * FROM faq_submissions ORDER BY timestamp DESC');
         res.json({ faqs });
     } catch (err) {
         console.error(err);
