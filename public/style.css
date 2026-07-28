@@ -1369,6 +1369,8 @@ body.login-modal-active #pixel-grid-canvas {
     border-radius: 12px;
     border: 1px solid var(--border-color);
     align-items: center;
+    overflow-x: auto;
+    scrollbar-width: thin;
 }
 
 .nav-tab {
@@ -1385,6 +1387,8 @@ body.login-modal-active #pixel-grid-canvas {
     align-items: center;
     gap: 0.5rem;
     transition: all 0.2s ease;
+    flex-shrink: 0;
+    white-space: nowrap;
 }
 
 .nav-tab:hover {
