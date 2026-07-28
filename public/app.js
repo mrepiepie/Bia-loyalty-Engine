@@ -7343,11 +7343,17 @@ function updateLangUI() {
     const textDash = document.getElementById('dash-lang-text');
     
     if (currentLang === 'en') {
-        if (textFooter) textFooter.innerText = 'عربي / Arabic';
-        if (textDash) textDash.innerText = 'عربي';
+        if (textFooter) textFooter.innerText = 'English';
+        if (textDash) textDash.innerText = 'English';
         document.documentElement.lang = 'en';
         document.body.classList.remove('rtl-mode');
     } else {
+        if (textFooter) textFooter.innerText = 'عربي';
+        if (textDash) textDash.innerText = 'عربي';
+        document.documentElement.lang = 'ar';
+        document.body.classList.add('rtl-mode');
+    }
+} else {
         if (textFooter) textFooter.innerText = 'English';
         if (textDash) textDash.innerText = 'English';
         document.documentElement.lang = 'ar';

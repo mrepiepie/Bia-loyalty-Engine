@@ -20,10 +20,43 @@
     </script>
     <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
     <style>
-        /* Hide the default Google Translate widget */
-        .goog-te-banner-frame.skiptranslate { display: none !important; }
-        body { top: 0px !important; }
+        /* AGGRESSIVELY HIDE GOOGLE TRANSLATE BANNER */
+        iframe.skiptranslate,
+        .goog-te-banner-frame.skiptranslate, 
+        .goog-te-gadget-icon,
+        .goog-tooltip,
+        .goog-tooltip:hover,
+        .goog-text-highlight { 
+            display: none !important; 
+            box-shadow: none !important;
+            background-color: transparent !important;
+        }
+        body { 
+            top: 0px !important; 
+            position: static !important;
+        }
+        #goog-gt-tt { display: none !important; }
         #google_translate_element { display: none !important; }
+
+        /* Style for the language toggle to match user's image exactly */
+        .footer-lang-button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: transparent;
+            color: #fff;
+            font-family: inherit;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+        .footer-lang-button:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
         /* RTL Overrides when Arabic is active */
         html[lang="ar"] { direction: rtl; }
         html[lang="ar"] body { font-family: 'Cairo', 'Tajawal', sans-serif !important; }
@@ -695,18 +728,20 @@
                         <a href="#">Privacy Policy</a>
                     </div>
                     
-                    <div class="footer-language-row" id="lang-toggle-btn" style="cursor: pointer; padding: 5px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2);">
-                        <span class="lang-arabic" id="lang-toggle-text">عربي / Arabic</span>
-                        <div id="google_translate_element"></div>
-                        <div class="flag-container">
-                            <div class="uae-flag-box">
-                                <div class="uae-red-stripe"></div>
-                                <div class="uae-green-stripe"></div>
-                                <div class="uae-white-stripe"></div>
-                                <div class="uae-black-stripe"></div>
+                    <div class="footer-language-row">
+                        <button class="footer-lang-button" id="lang-toggle-btn">
+                            <span class="lang-text" id="lang-toggle-text">English</span>
+                            <div class="flag-container">
+                                <div class="uae-flag-box">
+                                    <div class="uae-red-stripe"></div>
+                                    <div class="uae-green-stripe"></div>
+                                    <div class="uae-white-stripe"></div>
+                                    <div class="uae-black-stripe"></div>
+                                </div>
                             </div>
-                        </div>
-                        <i class="fa-solid fa-chevron-down lang-chevron"></i>
+                            <i class="fa-solid fa-chevron-down lang-chevron"></i>
+                        </button>
+                        <div id="google_translate_element"></div>
                     </div>
                 </div>
             </div>
