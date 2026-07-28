@@ -17,10 +17,12 @@
         (function() {
             const savedLang = localStorage.getItem('bia-lang');
             if (savedLang === 'ar') {
+                window.isWaitingForTranslation = true;
                 document.cookie = 'googtrans=/en/ar; path=/';
                 document.cookie = 'googtrans=/en/ar; domain=' + window.location.hostname + '; path=/';
                 document.documentElement.lang = 'ar';
                 document.documentElement.dir = 'rtl';
+                
                 document.write('<style id="fouc-style">body { opacity: 0 !important; background-color: #0b0c10 !important; transition: opacity 0.4s ease; }</style>');
                 
                 let isRevealed = false;
@@ -30,6 +32,7 @@
                     const s = document.getElementById('fouc-style');
                     if (s) s.remove();
                     if (document.body) document.body.style.opacity = '1';
+                    window.dispatchEvent(new Event('translationDone'));
                 };
 
                 // Hard failsafe
@@ -43,7 +46,6 @@
                         let mutTimer;
                         const observer = new MutationObserver(() => {
                             // Debounce DOM mutations by 150ms. 
-                            // When mutations stop for 150ms, Google Translate is done traversing.
                             clearTimeout(mutTimer);
                             mutTimer = setTimeout(() => {
                                 if (document.documentElement.classList.contains('translated-rtl') || document.documentElement.classList.contains('translated-ltr')) {

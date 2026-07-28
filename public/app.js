@@ -6930,7 +6930,11 @@ window.loadAdminMetrics = async function() {
     }
 };
 
-bootApplication();
+if (window.isWaitingForTranslation) {
+    window.addEventListener('translationDone', bootApplication);
+} else {
+    bootApplication();
+}
 
 // Lazy load video backdrop after window finishes loading to prevent browser spinner hang
 window.addEventListener('load', () => {
