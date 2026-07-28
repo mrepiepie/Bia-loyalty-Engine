@@ -35,7 +35,7 @@
                     window.dispatchEvent(new Event('translationDone'));
                 };
 
-                // Hard failsafe
+                // Hard failsafe in case Google Translate fails
                 setTimeout(reveal, 2500);
 
                 // Wait for body to be available to observe Google Translate mutations
@@ -46,6 +46,7 @@
                         let mutTimer;
                         const observer = new MutationObserver(() => {
                             // Debounce DOM mutations by 150ms. 
+                            // When mutations stop for 150ms, Google Translate is done traversing.
                             clearTimeout(mutTimer);
                             mutTimer = setTimeout(() => {
                                 if (document.documentElement.classList.contains('translated-rtl') || document.documentElement.classList.contains('translated-ltr')) {
@@ -56,14 +57,6 @@
                         });
                         
                         observer.observe(document.body, { childList: true, subtree: true, characterData: true });
-                        
-                        // Initial check in case it's crazy fast
-                        mutTimer = setTimeout(() => {
-                            if (document.documentElement.classList.contains('translated-rtl') || document.documentElement.classList.contains('translated-ltr')) {
-                                observer.disconnect();
-                                reveal();
-                            }
-                        }, 300);
                     }
                 }, 10);
             } else {
