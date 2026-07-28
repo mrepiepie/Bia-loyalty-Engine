@@ -1024,6 +1024,7 @@ function showPortalDashboard() {
         }
 
         loadAdminStudents();
+        initAdminFAQs();
     } else {
         // Show student navigation tabs ONLY
         document.querySelectorAll('.nav-tab.student-only').forEach(el => {
@@ -2133,7 +2134,8 @@ document.querySelectorAll('.nav-tab').forEach(btn => {
         if (target === 'admin-vouchers-mgmt') loadAdminVoucherReport();
         if (target === 'admin-students') loadProgrammeOverview();
         if (target === 'overview') loadStudentAnnouncements();
-    });
+          if (target === 'admin-faqs') initAdminFAQs();
+      });
 });
 
 
@@ -7642,22 +7644,4 @@ window.removeFAQ = async function(id) {
     }
 };
 
-// Hook into existing initAdminDashboard
-const originalInitAdminDashboard = window.initAdminDashboard;
-if (typeof originalInitAdminDashboard === 'function') {
-    window.initAdminDashboard = function() {
-        originalInitAdminDashboard();
-        initAdminFAQs();
-    };
-} else {
-    // If it doesn't exist globally yet, we attach an event or wait for it
-    setTimeout(() => {
-        if (typeof window.initAdminDashboard === 'function') {
-            const oldInit = window.initAdminDashboard;
-            window.initAdminDashboard = function() {
-                oldInit();
-                initAdminFAQs();
-            };
-        }
-    }, 1000);
-}
+
