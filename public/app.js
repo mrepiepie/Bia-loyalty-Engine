@@ -7353,12 +7353,6 @@ function updateLangUI() {
         document.documentElement.lang = 'ar';
         document.body.classList.add('rtl-mode');
     }
-} else {
-        if (textFooter) textFooter.innerText = 'English';
-        if (textDash) textDash.innerText = 'English';
-        document.documentElement.lang = 'ar';
-        document.body.classList.add('rtl-mode');
-    }
 }
 
 function triggerGoogleTranslate(targetLang) {
