@@ -7334,8 +7334,23 @@ window.addEventListener('load', () => {
 function toggleLanguage() {
     currentLang = currentLang === 'en' ? 'ar' : 'en';
     localStorage.setItem('bia-lang', currentLang);
-    triggerGoogleTranslate(currentLang);
-    updateLangUI();
+    
+    if (currentLang === 'ar') {
+        document.cookie = 'googtrans=/en/ar; path=/';
+        document.cookie = 'googtrans=/en/ar; domain=' + window.location.hostname + '; path=/';
+        const combo = document.querySelector('.goog-te-combo');
+        if (combo) {
+            combo.value = 'ar';
+            combo.dispatchEvent(new Event('change'));
+            updateLangUI();
+        } else {
+            window.location.reload();
+        }
+    } else {
+        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/';
+        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=' + window.location.hostname + '; path=/';
+        window.location.reload();
+    }
 }
 
 function updateLangUI() {
