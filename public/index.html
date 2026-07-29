@@ -986,6 +986,7 @@
                 <button class="nav-tab admin-only" data-target="admin-faqs" style="color: #dfb15b;"><i class="fa-solid fa-circle-question"></i> FAQs (Inbox)</button>
                 <button class="nav-tab admin-only" data-target="admin-students"><i class="fa-solid fa-users"></i> Students Directory</button>
                 <button class="nav-tab admin-only" data-target="admin-settings"><i class="fa-solid fa-sliders"></i> Database Rules</button>
+                <button class="nav-tab admin-only" data-target="admin-referrals-mgmt"><i class="fa-solid fa-user-plus" style="color: #dfb15b;"></i> Referrals Mgmt</button>
                 <button class="nav-tab admin-only" data-target="admin-leads"><i class="fa-solid fa-graduation-cap" style="color: #dfb15b;"></i> Executive Leads</button>
                 <button class="nav-tab admin-only" data-target="admin-ledger"><i class="fa-solid fa-clock-rotate-left"></i> System Ledger</button>
                 <button class="nav-tab admin-only" data-target="admin-traffic"><i class="fa-solid fa-chart-line"></i> Activity Logs</button>
@@ -1821,6 +1822,32 @@
                             </thead>
                             <tbody id="admin-ledger-body">
                                 <tr><td colspan="5" class="no-data">Loading audit ledger...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADMIN: REFERRALS MGMT TAB -->
+            <div id="admin-referrals-mgmt" class="tab-content admin-only">
+                <div class="card ledger-card glassmorphic spotlight-card">
+                    <h3><i class="fa-solid fa-user-plus"></i> Referral Leads Management</h3>
+                    <p style="margin-bottom:1rem; opacity:0.8;">Review and verify student referrals to release their bonus points.</p>
+                    <div class="table-responsive">
+                        <table class="bia-table">
+                            <thead>
+                                <tr>
+                                    <th>Ref ID</th>
+                                    <th>Referrer</th>
+                                    <th>Referee Name</th>
+                                    <th>Referee Email</th>
+                                    <th>Program</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-referrals-body">
+                                <tr><td colspan="7" class="no-data">Loading referrals...</td></tr>
                             </tbody>
                         </table>
                     </div>

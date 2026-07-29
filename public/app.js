@@ -1525,12 +1525,9 @@ function renderReferralsQueue() {
                 <p>${ref.referee_email} | Program: <strong>${ref.program}</strong></p>
             </div>
             <div style="display: flex; gap: 0.35rem; align-items: center;">
-                <button class="btn btn-success btn-sm" onclick="verifyReferralPayment(${ref.referral_id})">
-                    <i class="fa-solid fa-receipt"></i> Verify Payment
-                </button>
-                <button class="btn btn-danger btn-sm" onclick="deleteReferralAdmin(this, ${ref.referral_id})" style="background:#ef4444; border:none; padding:0.35rem 0.5rem; height:auto; font-size:0.68rem;" title="Delete Referral">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
+                <span class="badge" style="background: rgba(239, 176, 68, 0.2); color: #efb044; padding: 0.25rem 0.6rem; border-radius: 4px; font-size: 0.75rem;">
+                    <i class="fa-solid fa-hourglass-half"></i> Pending
+                </span>
             </div>
         `;
         queue.appendChild(div);
@@ -1575,10 +1572,12 @@ async function verifyReferralPayment(referralId) {
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'Verification failed');
 
-        alert('Payment verified and points credited!');
-        loadUserProfile(appState.currentUser.user_id);
+        showToast('Success', 'Payment verified and points credited!', 'success');
+        if (typeof window.loadAdminReferrals === 'function') {
+            await window.loadAdminReferrals();
+        }
     } catch (err) {
-        alert(`Error: ${err.message}`);
+        showToast('Error', err.message, 'error');
     }
 }
 
@@ -4520,6 +4519,44 @@ window.claimExecutivePerk = async function(btn, type, details) {
     }
 };
 
+window.loadAdminReferrals = async function() {
+    const tableBody = document.getElementById('admin-referrals-body');
+    if (!tableBody) return;
+
+    try {
+        const response = await fetch(`${API_BASE}/admin/referrals`);
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Failed to fetch referrals');
+
+        tableBody.innerHTML = '';
+        if (data.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="7" class="no-data">No referrals found.</td></tr>';
+            return;
+        }
+
+        data.forEach(ref => {
+            const tr = document.createElement('tr');
+            const isVerified = ref.status === 'Verified';
+            
+            tr.innerHTML = `
+                <td>#${ref.referral_id}</td>
+                <td><strong>${ref.referrer_name || `User ${ref.referrer_id}`}</strong></td>
+                <td>${ref.referee_name}</td>
+                <td>${ref.referee_email}</td>
+                <td>${ref.program}</td>
+                <td><span class="badge" style="background: ${isVerified ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 176, 68, 0.2)'}; color: ${isVerified ? '#22c55e' : '#efb044'}; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">${ref.status}</span></td>
+                <td>
+                    ${!isVerified ? `<button class="btn btn-success btn-sm" onclick="verifyReferralPayment(${ref.referral_id})" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;"><i class="fa-solid fa-check"></i> Verify</button>` : ''}
+                    <button class="btn btn-danger btn-sm" onclick="deleteReferralAdmin(this, ${ref.referral_id})" style="background:#ef4444; border:none; padding: 0.25rem 0.5rem; font-size: 0.75rem;"><i class="fa-solid fa-trash"></i></button>
+                </td>
+            `;
+            tableBody.appendChild(tr);
+        });
+    } catch (err) {
+        tableBody.innerHTML = `<tr><td colspan="7" class="no-data" style="color: #ef4444;">Error: ${err.message}</td></tr>`;
+    }
+};
+
 window.loadAdminLeads = async function() {
     const tableBody = document.getElementById('admin-leads-body');
     if (!tableBody) return;
@@ -5159,6 +5196,17 @@ window.adjustPointsQuick = async function(userId, change, description) {
     }
 };
 
+window.verifyReferralPayment = async function(referralId) {
+    try {
+        const response = await fetch(`${API_BASE}/admin/referrals/${referralId}/verify`, { method: 'POST' });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Verification failed');
+        showToast('Referral Verified', 'Payment confirmed and points credited.', 'success');
+        if (typeof window.loadAdminReferrals === 'function') await window.loadAdminReferrals();
+    } catch (err) {
+        showToast('Verification Error', err.message, 'error');
+    }
+};
 
 // Admin Voucher mark-used helper
 window.markVoucherUsedAdmin = async function(voucherCode, userId) {

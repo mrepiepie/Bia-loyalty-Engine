@@ -1216,6 +1216,20 @@ app.delete('/api/admin/vouchers/:id', async (req, res) => {
     }
 });
 
+// Admin endpoint: Get all referrals
+app.get('/api/admin/referrals', async (req, res) => {
+    try {
+        const refs = await allQuery(`
+            SELECT r.*, u.name as referrer_name 
+            FROM referrals r
+            LEFT JOIN users u ON r.referrer_id = u.user_id
+            ORDER BY r.referral_id DESC
+        `);
+        res.json(refs);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 // Admin endpoint: Delete a student referral entry
 app.delete('/api/admin/referrals/:id', async (req, res) => {
     try {
