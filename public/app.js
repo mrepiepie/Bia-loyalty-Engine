@@ -5585,8 +5585,9 @@ const setupLinkedInIntegrationListeners = () => {
 
 // Traffic Dashboard Analytics & Security Policies
 async function loadTrafficDashboard() {
-    const activeSessionsEl = document.getElementById('traffic-active-sessions');
-    const totalHitsEl = document.getElementById('traffic-total-hits');
+    const activeSessionsEl = document.getElementById('stat-active-sessions');
+    const totalHitsEl = document.getElementById('stat-total-hits');
+    const uniqueStudentsEl = document.getElementById('stat-unique-students');
     const logsBody = document.getElementById('traffic-logs-body');
 
     if (!logsBody) return;
@@ -5603,8 +5604,9 @@ async function loadTrafficDashboard() {
         const statsRes = await fetch(`${API_BASE}/admin/traffic/stats`);
         if (statsRes.ok) {
             const stats = await statsRes.json();
-            if (activeSessionsEl) activeSessionsEl.textContent = `${stats.active_sessions || 0} live`;
-            if (totalHitsEl) totalHitsEl.textContent = `${stats.total_hits || 0} pageviews`;
+            if (activeSessionsEl) activeSessionsEl.textContent = `${stats.active_sessions || 0}`;
+            if (totalHitsEl) totalHitsEl.textContent = `${stats.total_hits || 0}`;
+            if (uniqueStudentsEl) uniqueStudentsEl.textContent = `${stats.unique_students || 0}`;
         }
 
         // 2. Load Logs

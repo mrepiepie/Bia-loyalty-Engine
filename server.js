@@ -834,10 +834,12 @@ app.get('/api/admin/traffic', async (req, res) => {
 app.get('/api/admin/traffic/stats', async (req, res) => {
     try {
         const totalHits = await getQuery(`SELECT COUNT(*) as count FROM traffic_logs`);
+        const uniqueStudents = await getQuery(`SELECT COUNT(DISTINCT user_id) as count FROM traffic_logs WHERE user_id IS NOT NULL`);
         const activeSessions = 3 + (totalHits.count % 7);
         res.json({
             total_hits: totalHits.count,
             active_sessions: activeSessions,
+            unique_students: uniqueStudents.count,
             security_level: 'High (SSL Secured)'
         });
     } catch (err) {
