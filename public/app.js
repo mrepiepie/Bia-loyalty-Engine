@@ -73,6 +73,8 @@ document.querySelectorAll('.nav-tab').forEach(btn => {
         if (targetId === 'admin-settings') {
             loadAdminSettings();
             window.loadAdminMetrics();
+        } else if (targetId === 'admin-referrals-mgmt') {
+            window.loadAdminReferrals();
         } else if (targetId === 'admin-students') {
             loadAdminStudents();
         } else if (targetId === 'admin-ledger') {
