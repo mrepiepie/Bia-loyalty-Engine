@@ -168,7 +168,7 @@ async function initializeDatabase() {
             used INTEGER DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users(user_id)
-        );
+        )`);
         await runQuery(`CREATE TABLE IF NOT EXISTS points_ledger (
             ledger_id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, points_change INTEGER, event_type TEXT,
             description TEXT, points_remaining INTEGER, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, expires_at TIMESTAMP,
