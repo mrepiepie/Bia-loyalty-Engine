@@ -420,8 +420,8 @@ app.post('/api/auth/retrieve-password', async (req, res) => {
         if (!user) return res.status(404).json({ error: 'No account matched.' });
 
         const code = Math.floor(100000 + Math.random() * 900000).toString();
-        const expiresAt = new Date(Date.now() + 15 * 60000);
-        await runQuery(`INSERT INTO password_resets (user_id, code, expires_at) VALUES (?, ?, ?)`, [user.user_id, code, expiresAt.toISOString()]);
+        
+        await runQuery(`INSERT INTO password_resets (user_id, code, expires_at) VALUES (?, ?, datetime('now', '+15 minutes'))`, [user.user_id, code]);
 
         const resendApiKey = process.env.RESEND_API_KEY;
         if (resendApiKey && resendApiKey !== 'dummy') {
@@ -457,9 +457,9 @@ app.post('/api/auth/verify-code', async (req, res) => {
 
         const resetRecord = await getQuery(`
             SELECT reset_id FROM password_resets 
-            WHERE user_id = ? AND code = ? AND used = 0 AND expires_at > CURRENT_TIMESTAMP 
+            WHERE user_id = ? AND code = ? AND used = 0 AND expires_at > datetime('now') 
             ORDER BY created_at DESC LIMIT 1
-        `, [user.user_id, code]);
+        `, [user.user_id, code.trim()]);
 
         if (!resetRecord) {
             return res.status(400).json({ error: 'Invalid or expired verification code.' });
