@@ -390,7 +390,7 @@ app.post('/api/auth/login', async (req, res) => {
     try {
         const { email, password } = req.body;
         if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
-        const user = await getQuery(`SELECT user_id, name, email, role, student_id, referral_code FROM users WHERE email = ? AND password = ?`, [email.trim(), password]);
+        const user = await getQuery(`SELECT user_id, name, email, role, student_id, referral_code FROM users WHERE LOWER(email) = LOWER(?) AND password = ?`, [email.trim(), password]);
         if (!user) return res.status(401).json({ error: 'Invalid credentials' });
 
         // Log login traffic
@@ -406,7 +406,7 @@ app.post('/api/auth/retrieve-password', async (req, res) => {
     try {
         const { identifier } = req.body;
         if (!identifier) return res.status(400).json({ error: 'Email or Student ID required' });
-        const user = await getQuery(`SELECT name, email, password, student_id, role FROM users WHERE email = ? OR student_id = ?`, [identifier.trim(), identifier.trim()]);
+        const user = await getQuery(`SELECT name, email, password, student_id, role FROM users WHERE LOWER(email) = LOWER(?) OR LOWER(student_id) = LOWER(?)`, [identifier.trim(), identifier.trim()]);
         if (!user) return res.status(404).json({ error: 'No account matched.' });
         res.json({ success: true, user });
     } catch (err) { res.status(500).json({ error: err.message }); }
