@@ -319,12 +319,6 @@ async function initializeDatabase() {
         await runQuery(`INSERT OR IGNORE INTO executive_leads (lead_id, user_id, type, details, status) VALUES (1, 1, 'consultation', 'Requested 1-on-1 DB/MBA Career Consultation', 'Pending')`);
         await runQuery(`INSERT OR IGNORE INTO executive_leads (lead_id, user_id, type, details, status) VALUES (2, 1, 'webinar', 'RSVP: BIA Executive Webinar: Leadership in Digital Age', 'Pending')`);
 
-        // Force update the seeded user names for demo consistency
-        await runQuery(`UPDATE users SET name = 'Sanjit' WHERE user_id = 101`);
-        await runQuery(`UPDATE users SET name = 'Amna' WHERE user_id = 1`);
-        await runQuery(`UPDATE users SET name = 'Balu' WHERE user_id = 2`);
-        await runQuery(`UPDATE users SET name = 'Samah' WHERE user_id = 3`);
-
         // Check if logs are already seeded to prevent duplicates
         const logCheck = await getQuery(`SELECT COUNT(*) as count FROM traffic_logs`);
         if (logCheck.count === 0) {
