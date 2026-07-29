@@ -1552,6 +1552,16 @@ app.post('/api/partners', (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+app.delete('/api/partners/:id', (req, res) => {
+    try {
+        if (!fs.existsSync(PARTNERS_FILE)) return res.json({ success: true });
+        let partnersList = JSON.parse(fs.readFileSync(PARTNERS_FILE, 'utf8'));
+        partnersList = partnersList.filter(p => p.id !== req.params.id);
+        fs.writeFileSync(PARTNERS_FILE, JSON.stringify(partnersList, null, 4));
+        res.json({ success: true, message: 'Partner deleted successfully.' });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 app.post('/api/cron/process-expiry', async (req, res) => {
     try {
         const expiredEntries = await allQuery(`SELECT * FROM points_ledger WHERE expires_at <= CURRENT_TIMESTAMP AND points_remaining > 0`);

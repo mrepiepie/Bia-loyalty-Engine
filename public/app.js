@@ -81,6 +81,8 @@ document.querySelectorAll('.nav-tab').forEach(btn => {
             window.loadAdminLeads();
         } else if (targetId === 'admin-traffic') {
             loadTrafficDashboard();
+        } else if (targetId === 'admin-partners') {
+            loadAdminPartners();
         } else if (targetId === 'overview' || targetId === 'referrals' || targetId === 'redeem' || targetId === 'ledger') {
             loadUserProfile(appState.currentUser.user_id);
         }
@@ -7693,3 +7695,107 @@ window.removeFAQ = async function(id) {
 };
 
 
+
+// ----------------------------------------------------
+// PARTNER BRANDS ADMIN LOGIC
+// ----------------------------------------------------
+async function loadAdminPartners() {
+    const tbody = document.getElementById('admin-partners-body');
+    if (!tbody) return;
+    try {
+        const response = await fetch('/api/partners');
+        const partners = await response.json();
+        
+        if (!partners || partners.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="no-data">No partners found.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = partners.map(p => `
+            <tr>
+                <td>
+                    <div style="display:flex; align-items:center; gap:0.75rem;">
+                        <img src="${p.image}" alt="${p.name}" style="height:30px; border-radius:4px; object-fit:contain; background:${p.logoColor || 'transparent'};">
+                        <div style="display:flex; flex-direction:column;">
+                            <strong>${p.name}</strong>
+                            <span style="font-size:0.7rem; color:#86868b;">${p.id}</span>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div style="display:flex; flex-direction:column;">
+                        <strong>${p.title}</strong>
+                        <span style="font-size:0.75rem; color:#86868b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:200px;">${p.subtitle}</span>
+                    </div>
+                </td>
+                <td>
+                    <div style="font-size:0.8rem; display:flex; flex-direction:column; gap:2px;">
+                        ${p.rewards ? p.rewards.map(r => `<span>${r.tier}: <b>${r.points}pts</b></span>`).join('') : 'None'}
+                    </div>
+                </td>
+                <td>
+                    <button class="btn" style="background:rgba(239, 68, 68, 0.1); color:#ef4444; border:1px solid rgba(239, 68, 68, 0.2); padding:0.4rem 0.8rem; font-size:0.8rem;" onclick="deletePartner('${p.id}')"><i class="fa-solid fa-trash"></i> Delete</button>
+                </td>
+            </tr>
+        `).join('');
+    } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="4" class="no-data" style="color:#ef4444;">Error: ${err.message}</td></tr>`;
+    }
+}
+window.loadAdminPartners = loadAdminPartners;
+
+async function deletePartner(id) {
+    if (!confirm('Are you sure you want to delete this partner? It will immediately disappear from the homepage.')) return;
+    try {
+        const res = await fetch(`/api/partners/${id}`, { method: 'DELETE' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to delete partner');
+        showToast('Deleted', 'Partner has been removed.', 'success');
+        loadAdminPartners();
+    } catch (err) {
+        showToast('Error', err.message, 'error');
+    }
+}
+window.deletePartner = deletePartner;
+
+document.addEventListener('DOMContentLoaded', () => {
+    const addPartnerForm = document.getElementById('admin-add-partner-form');
+    if (addPartnerForm) {
+        addPartnerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = addPartnerForm.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Adding...';
+            
+            try {
+                const payload = {
+                    name: document.getElementById('partner-name').value,
+                    title: document.getElementById('partner-title').value,
+                    subtitle: document.getElementById('partner-subtitle').value,
+                    badge: document.getElementById('partner-badge').value,
+                    image: document.getElementById('partner-image').value,
+                    logoColor: document.getElementById('partner-color').value,
+                    rewards: JSON.parse(document.getElementById('partner-rewards').value)
+                };
+
+                const res = await fetch('/api/partners', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Failed to add partner');
+                
+                showToast('Success', 'Partner added successfully!', 'success');
+                addPartnerForm.reset();
+                loadAdminPartners();
+            } catch (err) {
+                showToast('Error', err.message, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fa-solid fa-plus"></i> Add Partner';
+            }
+        });
+    }
+});

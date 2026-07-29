@@ -983,6 +983,8 @@
                 <!-- Admin Navigation -->
                 <button class="nav-tab admin-only" data-target="admin-faqs" style="color: #dfb15b;"><i class="fa-solid fa-circle-question"></i> FAQs (Inbox)</button>
                 <button class="nav-tab admin-only" data-target="admin-students"><i class="fa-solid fa-users"></i> Students Directory</button>
+                <button class="nav-tab admin-only" data-target="admin-faqs" style="color: #dfb15b;"><i class="fa-solid fa-circle-question"></i> FAQs (Inbox)</button>
+                <button class="nav-tab admin-only" data-target="admin-students"><i class="fa-solid fa-users"></i> Students Directory</button>
                 <button class="nav-tab admin-only" data-target="admin-settings"><i class="fa-solid fa-sliders"></i> Database Rules</button>
                 <button class="nav-tab admin-only" data-target="admin-leads"><i class="fa-solid fa-graduation-cap" style="color: #dfb15b;"></i> Executive Leads</button>
                 <button class="nav-tab admin-only" data-target="admin-ledger"><i class="fa-solid fa-clock-rotate-left"></i> System Ledger</button>
@@ -990,10 +992,10 @@
                 <button class="nav-tab admin-only" data-target="admin-engagement"><i class="fa-solid fa-chart-bar"></i> Engagement</button>
                 <button class="nav-tab admin-only" data-target="admin-announcements"><i class="fa-solid fa-bullhorn"></i> Announcements</button>
                 <button class="nav-tab admin-only" data-target="admin-vouchers-mgmt"><i class="fa-solid fa-tags"></i> Vouchers</button>
+                <button class="nav-tab admin-only" data-target="admin-partners"><i class="fa-solid fa-handshake"></i> Partners</button>
                 <button class="nav-tab admin-only" data-target="admin-promos"><i class="fa-solid fa-gift" style="color: #dfb15b;"></i> Promo Codes</button>
                 <button class="nav-tab admin-only" data-target="admin-health"><i class="fa-solid fa-server"></i> System Health</button>
                 
-
                 <!-- Logout Button -->
                 <button class="nav-tab logout-btn" id="btn-logout"><i class="fa-solid fa-power-off"></i> Exit</button>
             </nav>
@@ -2235,6 +2237,71 @@
                 </div>
             </div>
 
+
+            <!-- ADMIN: PARTNERS TAB -->
+            <div id="admin-partners" class="tab-content admin-only">
+                <div class="card ledger-card glassmorphic spotlight-card">
+                    <h3><i class="fa-solid fa-handshake"></i> Partner Brands Management</h3>
+                    <p class="section-desc">Manage the loyalty partners and rewards displayed on the landing page.</p>
+
+                    <div style="margin-top: 1rem; margin-bottom: 2rem;">
+                        <h4>Add New Partner</h4>
+                        <form id="admin-add-partner-form" style="display:flex; flex-direction:column; gap:1rem; margin-top:1rem; padding:1.5rem; background:rgba(255,255,255,0.03); border-radius:12px; border:1px solid rgba(255,255,255,0.05);">
+                            <div style="display:flex; gap:1rem; flex-wrap:wrap;">
+                                <div style="flex:1; min-width:200px;">
+                                    <label>Brand Name (e.g. Careem)</label>
+                                    <input type="text" id="partner-name" required placeholder="Careem">
+                                </div>
+                                <div style="flex:1; min-width:200px;">
+                                    <label>Header Title</label>
+                                    <input type="text" id="partner-title" required placeholder="BIA x Careem Rides">
+                                </div>
+                            </div>
+                            <div style="display:flex; gap:1rem; flex-wrap:wrap;">
+                                <div style="flex:1; min-width:200px;">
+                                    <label>Subtitle / Description</label>
+                                    <input type="text" id="partner-subtitle" required placeholder="Get up to 50% off rides...">
+                                </div>
+                                <div style="flex:1; min-width:200px;">
+                                    <label>Badge Text</label>
+                                    <input type="text" id="partner-badge" placeholder="TRANSPORTATION" value="NEW COLLABORATION">
+                                </div>
+                            </div>
+                            <div style="display:flex; gap:1rem; flex-wrap:wrap;">
+                                <div style="flex:1; min-width:200px;">
+                                    <label>Base64 Image URL</label>
+                                    <input type="text" id="partner-image" placeholder="data:image/png;base64,...">
+                                </div>
+                                <div style="flex:1; min-width:100px;">
+                                    <label>Brand Color</label>
+                                    <input type="color" id="partner-color" value="#00E676" style="width:100%; height:40px; border:none; background:transparent; cursor:pointer;">
+                                </div>
+                            </div>
+                            <div>
+                                <label>Rewards (JSON format: [{"tier":"Bronze", "points":100, "value":"AED 20"}, ...])</label>
+                                <textarea id="partner-rewards" rows="3" required placeholder='[{"tier": "Bronze", "points": 100, "value": "AED 20 Value"}, {"tier": "Silver", "points": 250, "value": "AED 50 Value"}, {"tier": "Gold", "points": 500, "value": "AED 100 Value"}]'></textarea>
+                            </div>
+                            <button type="submit" class="btn" style="align-self:flex-start;"><i class="fa-solid fa-plus"></i> Add Partner</button>
+                        </form>
+                    </div>
+
+                    <div class="table-scroll-container">
+                        <table class="ledger-table">
+                            <thead>
+                                <tr>
+                                    <th>Brand</th>
+                                    <th>Title</th>
+                                    <th>Rewards</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-partners-body">
+                                <tr><td colspan="4" class="no-data">Loading partners...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
 
             <!-- ADMIN: FAQs (INBOX) TAB -->
             <div id="admin-faqs" class="tab-content admin-only">
