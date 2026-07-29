@@ -7788,7 +7788,7 @@ async function loadAdminPartners() {
                 </td>
                 <td>
                     <div style="font-size:0.8rem; display:flex; flex-direction:column; gap:2px;">
-                        ${p.rewards ? p.rewards.map(r => `<span>${r.tier}: <b>${r.points}pts</b></span>`).join('') : 'None'}
+                        ${p.rewards ? p.rewards.map(r => `<span>${r.name || r.tier}: <b>${r.cost || r.points}pts</b></span>`).join('') : 'None'}
                     </div>
                 </td>
                 <td>

@@ -279,6 +279,34 @@ async function initializeDatabase() {
             await runQuery(`ALTER TABLE faq_submissions ADD COLUMN email TEXT`);
         } catch (e) {}
 
+        await runQuery(`CREATE TABLE IF NOT EXISTS partners (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            badge TEXT,
+            title TEXT,
+            subtitle TEXT,
+            disclosure TEXT,
+            image TEXT,
+            logoColor TEXT,
+            rewards TEXT
+        )`);
+
+        // Seed partners from partners.json if table is empty
+        const { count: partnerCount } = await getQuery(`SELECT COUNT(*) as count FROM partners`);
+        if (partnerCount === 0 && fs.existsSync(PARTNERS_FILE)) {
+            try {
+                const partnersData = JSON.parse(fs.readFileSync(PARTNERS_FILE, 'utf8'));
+                for (const p of partnersData) {
+                    await runQuery(
+                        `INSERT INTO partners (id, name, badge, title, subtitle, disclosure, image, logoColor, rewards) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                        [p.id, p.name, p.badge, p.title, p.subtitle, p.disclosure, p.image, p.logoColor, JSON.stringify(p.rewards || [])]
+                    );
+                }
+            } catch (err) {
+                console.error("Error seeding partners:", err);
+            }
+        }
+
         const defaultSettings = [
             ['point_aed_value', '0.25', 'Cash equivalent value of 1 point in AED'],
             ['first_referral_points', '1000', 'Points awarded for the first successful referral'],
@@ -1517,34 +1545,31 @@ app.post('/api/redeem/adnoc', async (req, res) => {
 });
 
 // GET /api/partners - Retrieve all dynamic collaborators
-app.get('/api/partners', (req, res) => {
+app.get('/api/partners', async (req, res) => {
     try {
-        if (!fs.existsSync(PARTNERS_FILE)) {
-            return res.json([]);
-        }
-        const data = fs.readFileSync(PARTNERS_FILE, 'utf8');
-        res.json(JSON.parse(data));
+        const partners = await allQuery(`SELECT * FROM partners`);
+        // Parse the rewards JSON string back to an array
+        const formattedPartners = partners.map(p => ({
+            ...p,
+            rewards: p.rewards ? JSON.parse(p.rewards) : []
+        }));
+        res.json(formattedPartners);
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 // POST /api/partners - Add new loyalty collaborator partner program
-app.post('/api/partners', (req, res) => {
+app.post('/api/partners', async (req, res) => {
     try {
         const { name, badge, title, subtitle, disclosure, image, logoColor, rewards } = req.body;
         if (!name || !title || !subtitle || !rewards || !Array.isArray(rewards) || rewards.length === 0 || rewards.length > 3) {
             return res.status(400).json({ error: 'Missing or invalid parameters. Must provide 1 to 3 rewards.' });
         }
 
-        let partnersList = [];
-        if (fs.existsSync(PARTNERS_FILE)) {
-            const data = fs.readFileSync(PARTNERS_FILE, 'utf8');
-            partnersList = JSON.parse(data);
-        }
-
         const newId = name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-');
         
         // Prevent duplicate partner ID
-        if (partnersList.some(p => p.id === newId)) {
+        const existing = await getQuery(`SELECT id FROM partners WHERE id = ?`, [newId]);
+        if (existing) {
             return res.status(400).json({ error: 'Partner with this name already exists' });
         }
 
@@ -1555,24 +1580,24 @@ app.post('/api/partners', (req, res) => {
             title,
             subtitle,
             disclosure: disclosure || 'Redemption rates are calculated dynamically based on real-time partner value.',
-            image: saveBase64Image(image, 'partner') || 'images/adnoc_students.png',
+            image: image || 'images/adnoc_students.png', // We keep the base64 string directly
             logoColor: logoColor || '#EB4C42',
             rewards
         };
 
-        partnersList.push(newPartner);
-        fs.writeFileSync(PARTNERS_FILE, JSON.stringify(partnersList, null, 4));
+        await runQuery(
+            `INSERT INTO partners (id, name, badge, title, subtitle, disclosure, image, logoColor, rewards) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [newPartner.id, newPartner.name, newPartner.badge, newPartner.title, newPartner.subtitle, newPartner.disclosure, newPartner.image, newPartner.logoColor, JSON.stringify(newPartner.rewards)]
+        );
+
         res.json({ success: true, message: 'Partner registered successfully!', partner: newPartner });
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.delete('/api/partners/:id', (req, res) => {
+app.delete('/api/partners/:id', async (req, res) => {
     try {
-        if (!fs.existsSync(PARTNERS_FILE)) return res.json({ success: true });
-        let partnersList = JSON.parse(fs.readFileSync(PARTNERS_FILE, 'utf8'));
-        partnersList = partnersList.filter(p => p.id !== req.params.id);
-        fs.writeFileSync(PARTNERS_FILE, JSON.stringify(partnersList, null, 4));
-        res.json({ success: true, message: 'Partner deleted successfully.' });
+        await runQuery(`DELETE FROM partners WHERE id = ?`, [req.params.id]);
+        res.json({ success: true });
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
