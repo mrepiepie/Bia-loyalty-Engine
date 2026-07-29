@@ -1089,6 +1089,14 @@ function showPortalDashboard() {
         loadUserProfile(appState.currentUser.user_id);
     }
 
+    // Apply tier theme instantly before container fades in to prevent CSS transition flash from default purple
+    if (role === 'student' && appState.currentUser.current_tier) {
+        container.classList.remove('tier-theme-bronze', 'tier-theme-silver', 'tier-theme-gold', 'tier-theme-platinum');
+        container.classList.add(`tier-theme-${appState.currentUser.current_tier.toLowerCase()}`);
+    } else {
+        container.classList.remove('tier-theme-bronze', 'tier-theme-silver', 'tier-theme-gold', 'tier-theme-platinum');
+    }
+
     container.style.display = 'block';
     if (window.gsap) {
         gsap.fromTo(container, 
