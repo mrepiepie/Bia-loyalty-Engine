@@ -160,6 +160,15 @@ async function initializeDatabase() {
             program TEXT, status TEXT DEFAULT 'Pending', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (referrer_id) REFERENCES users(user_id)
         )`);
+        await runQuery(`CREATE TABLE IF NOT EXISTS password_resets (
+            reset_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            code TEXT NOT NULL,
+            expires_at TIMESTAMP NOT NULL,
+            used INTEGER DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(user_id)
+        );
         await runQuery(`CREATE TABLE IF NOT EXISTS points_ledger (
             ledger_id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, points_change INTEGER, event_type TEXT,
             description TEXT, points_remaining INTEGER, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, expires_at TIMESTAMP,

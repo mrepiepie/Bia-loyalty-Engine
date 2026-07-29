@@ -852,18 +852,34 @@
                         <p>Retrieve password using your registered student details.</p>
                     </div>
                     
+                    
                     <form id="recovery-form">
                         <div class="form-group" style="margin-bottom: 1.25rem;">
                             <label>Registered Email or Student ID</label>
                             <input type="text" id="recovery-identifier" required placeholder="e.g. sarah@email.com or BIA-2024-9042">
                         </div>
                         <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;">
-                            <i class="fa-solid fa-key"></i> Retrieve Password
+                            <i class="fa-solid fa-paper-plane"></i> Send Verification Code
                         </button>
                         <div style="text-align: center; margin-bottom: 1.5rem;">
                             <a href="#" class="forgot-link" id="link-back-login">Back to Sign In</a>
                         </div>
                     </form>
+
+                    <form id="verify-form" style="display: none;">
+                        <p style="color: #4ade80; font-size: 0.85rem; margin-bottom: 1rem; text-align: center;"><i class="fa-solid fa-envelope-circle-check"></i> Code sent! Check your email.</p>
+                        <div class="form-group" style="margin-bottom: 1.25rem;">
+                            <label>6-Digit Verification Code</label>
+                            <input type="text" id="verify-code-input" required placeholder="123456" pattern="[0-9]{6}" maxlength="6" style="text-align: center; font-size: 1.2rem; letter-spacing: 4px;">
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;">
+                            <i class="fa-solid fa-unlock-keyhole"></i> Verify & Reveal Credentials
+                        </button>
+                        <div style="text-align: center; margin-bottom: 1.5rem;">
+                            <a href="#" class="forgot-link" onclick="document.getElementById('verify-form').style.display='none'; document.getElementById('recovery-form').style.display='block';">Try another email</a>
+                        </div>
+                    </form>
+
 
                     <!-- Professional Admin Support Help Box -->
                     <div class="admin-support-box">
@@ -2605,7 +2621,7 @@
     <!-- GSAP Animations CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-    <script src="app.js?v=1.3.16"></script>
+    <script src="app.js?v=1.3.17"></script>
 
     <!-- Comprehensive FAQ Modal -->
     <div id="faq-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(10, 11, 14, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 25000; align-items: center; justify-content: center;">
