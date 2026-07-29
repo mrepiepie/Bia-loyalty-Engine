@@ -913,7 +913,6 @@ document.getElementById('link-back-login').addEventListener('click', (e) => {
 });
 
 // Handle Credentials Recovery Submit
-
 // Step 1: Request Code
 document.getElementById('recovery-form').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -937,7 +936,7 @@ document.getElementById('recovery-form').addEventListener('submit', async (e) =>
         document.getElementById('verify-form').style.display = 'block';
         document.getElementById('verify-code-input').focus();
     } catch (err) {
-        showToast('Error', err.message, 'error');
+        alert(`Error: ${err.message}`);
     } finally {
         btn.innerHTML = originalText;
         btn.disabled = false;
@@ -982,7 +981,7 @@ if (verifyForm) {
                     onComplete: () => {
                         forgotView.style.display = 'none';
                         resultView.style.display = 'block';
-                        gsap.fromTo(resultView, {opacity: 0, scale: 0.95}, {opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.5)"});
+                        gsap.fromTo(resultView, {opacity: 0, y: 10}, {opacity: 1, y: 0, duration: 0.3});
                     }
                 });
             } else {
@@ -990,13 +989,3352 @@ if (verifyForm) {
                 resultView.style.display = 'block';
             }
         } catch (err) {
-            showToast('Error', err.message, 'error');
+            alert(`Error: ${err.message}`);
         } finally {
             btn.innerHTML = originalText;
             btn.disabled = false;
         }
     });
 }
+
+// Recover confirmation button to go back to sign in
+document.getElementById('btn-recovery-confirm').addEventListener('click', () => {
+    const resultView = document.getElementById('recovery-result-view');
+    const loginView = document.getElementById('login-form-view');
+
+    document.getElementById('recovery-identifier').value = '';
+
+    if (window.gsap) {
+        gsap.to(resultView, {
+            opacity: 0,
+            y: 10,
+            duration: 0.3,
+            onComplete: () => {
+                resultView.style.display = 'none';
+                loginView.style.display = 'block';
+                gsap.fromTo(loginView, { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.3 });
+            }
+        });
+    } else {
+        resultView.style.display = 'none';
+        loginView.style.display = 'block';
+        loginView.style.opacity = '1';
+    }
+});
+
+// Show dashboard panel based on role
+function showPortalDashboard() {
+    const role = appState.currentUser.role;
+    const container = document.querySelector('.app-container');
+    const badge = document.getElementById('user-role-badge');
+    
+    badge.textContent = role === 'admin' ? 'Admin console' : 'Student member';
+    badge.className = `badge-subdomain ${role === 'admin' ? 'text-gold' : 'text-blue'}`;
+
+    // Hide all tab contents first
+    document.querySelectorAll('.tab-content').forEach(el => {
+        el.style.display = 'none';
+        el.classList.remove('active');
+    });
+
+    // Hide all role-specific navigation tabs
+    document.querySelectorAll('.nav-tab').forEach(btn => {
+        if (btn.id !== 'btn-logout') {
+            btn.style.display = 'none';
+        }
+    });
+
+    if (role === 'admin') {
+        // Show admin navigation tabs ONLY
+        document.querySelectorAll('.nav-tab.admin-only').forEach(el => {
+            el.style.display = 'inline-flex';
+        });
+        
+        // Reset nav button active states
+        document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+        
+        // Set first admin tab active
+        const activeTabBtn = document.querySelector('.nav-tab[data-target="admin-students"]');
+        if (activeTabBtn) activeTabBtn.classList.add('active');
+        
+        const content = document.getElementById('admin-students');
+        if (content) {
+            content.style.display = 'block';
+            content.classList.add('active');
+        }
+
+        loadAdminStudents();
+        initAdminFAQs();
+    } else {
+        // Show student navigation tabs ONLY
+        document.querySelectorAll('.nav-tab.student-only').forEach(el => {
+            el.style.display = 'inline-flex';
+        });
+
+        // Reset nav button active states
+        document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+        
+        // Set first student tab active
+        const activeTabBtn = document.querySelector('.nav-tab[data-target="overview"]');
+        if (activeTabBtn) activeTabBtn.classList.add('active');
+        
+        const content = document.getElementById('overview');
+        if (content) {
+            content.style.display = 'block';
+            content.classList.add('active');
+        }
+
+        loadUserProfile(appState.currentUser.user_id);
+    }
+
+    container.style.display = 'block';
+    if (window.gsap) {
+        gsap.fromTo(container, 
+            { opacity: 0, y: 25 }, 
+            { opacity: 1, y: 0, duration: 0.8, ease: "power4.out" }
+        );
+    } else {
+        container.style.opacity = '1';
+    }
+}
+
+function handleLogout() {
+    appState.currentUser = null;
+    appState.userProfile = null;
+    appState.adminUser = null;
+    const banner = document.getElementById('impersonation-bar');
+    if (banner) banner.style.display = 'none';
+    
+    if (window.gsap) {
+        gsap.to('.app-container', {
+            opacity: 0,
+            y: 15,
+            duration: 0.4,
+            onComplete: () => {
+                document.querySelector('.app-container').style.display = 'none';
+                const overlay = document.getElementById('login-overlay');
+                overlay.style.display = 'block';
+                document.body.classList.add('landing-active');
+                gsap.fromTo(overlay, { opacity: 0 }, { 
+                    opacity: 1, 
+                    duration: 0.5,
+                    onComplete: () => {
+                        if (typeof ScrollTrigger !== 'undefined') {
+                            ScrollTrigger.refresh();
+                        }
+                    }
+                });
+            }
+        });
+    } else {
+        document.querySelector('.app-container').style.display = 'none';
+        const overlay = document.getElementById('login-overlay');
+        overlay.style.display = 'block';
+        overlay.style.opacity = '1';
+        document.body.classList.add('landing-active');
+        if (typeof ScrollTrigger !== 'undefined') {
+            ScrollTrigger.refresh();
+        }
+    }
+}
+
+document.getElementById('btn-logout').addEventListener('click', handleLogout);
+document.getElementById('dashboard-logo').addEventListener('click', handleLogout);
+
+// Student Portal Attendance Check-In handler
+const btnCheckin = document.getElementById('btn-daily-checkin');
+if (btnCheckin) {
+    btnCheckin.addEventListener('click', async () => {
+        if (!appState.currentUser) return;
+        const msg = document.getElementById('checkin-status-msg');
+        btnCheckin.disabled = true;
+        msg.textContent = 'Verifying attendance check-in...';
+        msg.style.color = '#ffffff';
+
+        try {
+            const response = await fetch(`${API_BASE}/students/daily-checkin`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: appState.currentUser.user_id })
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'Check-in failed');
+
+            msg.style.color = '#14b8a6';
+            msg.textContent = `🎉 Attendance reward claimed successfully! (+15 pts)`;
+
+            // Update user balance and refresh dashboard elements
+            await loadUserProfile(appState.currentUser.user_id);
+        } catch (err) {
+            msg.style.color = '#ef4444';
+            msg.textContent = err.message;
+            btnCheckin.disabled = false;
+        }
+    });
+}
+// STUDENT PORTAL LOGIC
+// ----------------------------------------------------
+
+let maintenanceCountdownInterval = null;
+
+function startMaintenanceCountdown(remainingSeconds) {
+    if (maintenanceCountdownInterval) {
+        clearInterval(maintenanceCountdownInterval);
+    }
+    
+    const container = document.getElementById('maint-countdown-container');
+    const timer = document.getElementById('maint-countdown-timer');
+    if (!container || !timer) return;
+    
+    if (remainingSeconds <= 0) {
+        container.style.display = 'none';
+        return;
+    }
+    
+    container.style.display = 'flex';
+    let currentSeconds = remainingSeconds;
+    
+    const updateDisplay = () => {
+        const mins = Math.floor(currentSeconds / 60);
+        const secs = currentSeconds % 60;
+        timer.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    };
+    
+    updateDisplay();
+    
+    maintenanceCountdownInterval = setInterval(() => {
+        currentSeconds--;
+        if (currentSeconds <= 0) {
+            clearInterval(maintenanceCountdownInterval);
+            container.style.display = 'none';
+            window.location.reload();
+        } else {
+            updateDisplay();
+        }
+    }, 1000);
+}
+
+async function loadUserProfile(userId) {
+    try {
+        const response = await fetch(`${API_BASE}/users/${userId}/profile`);
+        if (!response.ok) {
+            if (response.status === 503) {
+                const data = await response.json();
+                if (data.error === 'MAINTENANCE_MODE_ACTIVE') {
+                    document.getElementById('maintenance-overlay').style.display = 'flex';
+                    if (data.remaining_seconds && data.remaining_seconds > 0) {
+                        startMaintenanceCountdown(data.remaining_seconds);
+                    } else {
+                        const container = document.getElementById('maint-countdown-container');
+                        if (container) container.style.display = 'none';
+                    }
+                    return;
+                }
+            }
+            throw new Error('Failed to load profile');
+        }
+        const data = await response.json();
+        
+        const oldPoints = appState.userProfile ? appState.userProfile.points_balance : 0;
+        
+        appState.userProfile = data.user;
+        if (appState.currentUser && appState.currentUser.user_id === data.user.user_id) {
+            appState.currentUser.points_balance = data.user.points_balance;
+        }
+        appState.ledger = data.ledger;
+        appState.referrals = data.referrals;
+
+        if (Object.keys(appState.settings).length === 0) {
+            await fetchSettings();
+        }
+
+        renderProfile(oldPoints);
+        renderReferralsQueue();
+        renderLedger();
+        populateDashboardPartners();
+        await loadStudentVouchers(userId);
+    } catch (err) {
+        console.error('Error loading profile:', err);
+    }
+}
+
+async function fetchSettings() {
+    try {
+        const response = await fetch(`${API_BASE}/settings`);
+        if (!response.ok) throw new Error('Failed to load settings');
+        const data = await response.json();
+        
+        appState.settings = {};
+        data.forEach(s => {
+            if (s.key === "maintenance_mode" || s.key === "maintenance_end_time" || s.key === "welcome_points") return;
+            appState.settings[s.key] = parseFloat(s.value) || s.value;
+        });
+
+        document.getElementById('bronze-mult-lbl').textContent = `1.0x`;
+        document.getElementById('silver-mult-lbl').textContent = `${appState.settings.silver_multiplier}x`;
+        document.getElementById('gold-mult-lbl').textContent = `${appState.settings.gold_multiplier}x`;
+        document.getElementById('plat-mult-lbl').textContent = `${appState.settings.platinum_multiplier}x`;
+
+        const pointsForAED = 100;
+        const aedValue = pointsForAED * appState.settings.point_aed_value;
+        document.getElementById('lbl-conversion-ratio').textContent = `${pointsForAED} pts = AED ${aedValue}`;
+    } catch (err) {
+        console.error('Error fetching settings:', err);
+    }
+}
+
+function renderProfile(oldPoints) {
+    const user = appState.userProfile;
+    const settings = appState.settings;
+
+    document.getElementById('user-name').textContent = user.name;
+    document.getElementById('tier-name').textContent = user.current_tier;
+    document.getElementById('lbl-student-id').textContent = `Student ID: ${user.student_id || 'N/A'}`;
+    
+    // Toggle active tier theme class on the main container for dynamic CSS transitions
+    const appContainer = document.querySelector('.app-container');
+    if (appContainer) {
+        appContainer.classList.remove('tier-theme-bronze', 'tier-theme-silver', 'tier-theme-gold', 'tier-theme-platinum');
+        appContainer.classList.add(`tier-theme-${user.current_tier.toLowerCase()}`);
+    }
+
+    const ptsElement = document.getElementById('points-balance');
+    if (window.gsap) {
+        gsap.fromTo(ptsElement, 
+            { textContent: oldPoints },
+            { 
+                textContent: user.points_balance,
+                duration: 1.2,
+                ease: "power2.out",
+                snap: { textContent: 1 },
+                onUpdate: function() {
+                    ptsElement.textContent = formatNumber(parseInt(ptsElement.textContent));
+                }
+            }
+        );
+    } else {
+        ptsElement.textContent = formatNumber(user.points_balance);
+    }
+
+    const badge = document.getElementById('user-tier-badge');
+    if (badge) {
+        badge.className = `medal-tier-badge-label ${user.current_tier.toLowerCase()}`;
+    }
+
+    document.querySelectorAll('.minimal-tier-item').forEach(item => item.classList.remove('active'));
+    const activeTierCard = document.getElementById(`tier-${user.current_tier.toLowerCase()}-card`);
+    if (activeTierCard) activeTierCard.classList.add('active');
+
+    let progressPercent = 0;
+    let nextTierName = "Silver";
+    let nextTierPoints = settings.silver_threshold;
+    let helpText = "";
+    const curPoints = user.points_balance;
+
+    if (curPoints < settings.silver_threshold) {
+        progressPercent = (curPoints / settings.silver_threshold) * 100;
+        nextTierName = "Silver";
+        nextTierPoints = settings.silver_threshold;
+        const diff = settings.silver_threshold - curPoints;
+        helpText = `Earn ${formatNumber(diff)} more points to unlock Silver Tier!`;
+    } else if (curPoints < settings.gold_threshold) {
+        progressPercent = 33 + ((curPoints - settings.silver_threshold) / (settings.gold_threshold - settings.silver_threshold)) * 33;
+        nextTierName = "Gold";
+        nextTierPoints = settings.gold_threshold;
+        const diff = settings.gold_threshold - curPoints;
+        helpText = `Earn ${formatNumber(diff)} more points to unlock Gold Tier (Get AED 250 Voucher!)`;
+    } else if (curPoints < settings.platinum_threshold) {
+        progressPercent = 66 + ((curPoints - settings.gold_threshold) / (settings.platinum_threshold - settings.gold_threshold)) * 34;
+        nextTierName = "Platinum";
+        nextTierPoints = settings.platinum_threshold;
+        const diff = settings.platinum_threshold - curPoints;
+        helpText = `Earn ${formatNumber(diff)} more points to unlock Elite Platinum Status!`;
+    }
+
+    const ring = document.getElementById('progress-circle-ring');
+    const percentText = document.getElementById('progress-circle-percent');
+    const upsellText = document.getElementById('upsell-text');
+
+    // Dynamic upsell templates
+    const upsellTemplates = {
+        bronze: "On track! Level up to Silver to unlock a 3% course discount.",
+        silver: "Keep going! Level up to Gold to unlock a 4% course discount.",
+        gold: "Almost there! Level up to Platinum to unlock the maximum 5% discount.",
+        platinum: "Elite Tier! You have locked in the maximum 5% course discount."
+    };
+
+    if (upsellText) {
+        upsellText.textContent = upsellTemplates[user.current_tier.toLowerCase()] || "";
+    }
+
+    if (ring && percentText) {
+        const circumference = 213.6;
+        const targetOffset = circumference - (progressPercent / 100) * circumference;
+
+        if (window.gsap) {
+            gsap.to(ring, {
+                strokeDashoffset: targetOffset,
+                duration: 1.5,
+                ease: "power2.out"
+            });
+            gsap.fromTo(percentText, 
+                { textContent: parseInt(percentText.textContent) || 0 },
+                { 
+                    textContent: Math.round(progressPercent),
+                    duration: 1.5,
+                    ease: "power2.out",
+                    snap: { textContent: 1 },
+                    onUpdate: function() {
+                        percentText.textContent = `${percentText.textContent}%`;
+                    }
+                }
+            );
+        } else {
+            ring.style.strokeDashoffset = targetOffset;
+            percentText.textContent = `${Math.round(progressPercent)}%`;
+        }
+    }
+
+    document.getElementById('next-tier-target').textContent = nextTierName === "Max Tier Achieved" ? nextTierName : `Next: ${nextTierName} (${formatNumber(nextTierPoints)} pts)`;
+    document.getElementById('progress-help').textContent = helpText;
+
+    // Sync quick-stat pills with latest data
+    syncQuickStats();
+    
+    // Render dynamic career recommendation widgets (upsell/cross-sell)
+    renderCareerUpgrades();
+
+    // Render milestones badges
+    renderMilestones();
+
+    // Load student announcements banner
+    loadStudentAnnouncements();
+}
+
+function renderMilestones() {
+    const user = appState.userProfile;
+    const referrals = appState.referrals || [];
+    const ledger = appState.ledger || [];
+    
+    // 1. Welcome Pioneer: Always active since they have successfully logged in/registered
+    unlockMilestoneBadge('badge-welcome', 'Welcome Pioneer');
+    
+    // 2. First Referral: Check if they have at least one referral
+    if (referrals.length > 0) {
+        unlockMilestoneBadge('badge-first-ref', 'First Referral');
+    } else {
+        lockMilestoneBadge('badge-first-ref', 'First Referral');
+    }
+    
+    // 3. Loyalty Champion: Unlocks if points_balance >= 1000 (Silver tier minimum)
+    if (user.points_balance >= 1000) {
+        unlockMilestoneBadge('badge-champion', 'Loyalty Champion');
+    } else {
+        lockMilestoneBadge('badge-champion', 'Loyalty Champion');
+    }
+    
+    // 4. Voucher Pioneer: Unlocks if they have a ledger entry containing 'voucher' or 'claim'
+    const claimedVoucher = ledger.some(e => 
+        (e.event_type && e.event_type.toLowerCase().includes('voucher')) || 
+        (e.description && e.description.toLowerCase().includes('voucher')) ||
+        (e.description && e.description.toLowerCase().includes('claim'))
+    );
+    if (claimedVoucher) {
+        unlockMilestoneBadge('badge-voucher', 'Voucher Pioneer');
+    } else {
+        lockMilestoneBadge('badge-voucher', 'Voucher Pioneer');
+    }
+}
+
+function unlockMilestoneBadge(badgeId, title) {
+    const el = document.getElementById(badgeId);
+    if (!el) return;
+    el.style.background = 'rgba(223, 177, 91, 0.08)';
+    el.style.borderColor = 'rgba(223, 177, 91, 0.35)';
+    
+    const icon = el.querySelector('.badge-icon');
+    if (icon) {
+        icon.style.filter = 'none';
+        icon.style.opacity = '1';
+    }
+    
+    const text = el.querySelector('.badge-title');
+    if (text) {
+        text.style.color = 'var(--text-main)';
+    }
+    
+    const status = el.querySelector('.badge-status');
+    if (status) {
+        status.textContent = 'Unlocked';
+        status.style.color = '#4ade80';
+    }
+}
+
+function lockMilestoneBadge(badgeId, title) {
+    const el = document.getElementById(badgeId);
+    if (!el) return;
+    el.style.background = 'rgba(255, 255, 255, 0.02)';
+    el.style.borderColor = 'rgba(255, 255, 255, 0.05)';
+    
+    const icon = el.querySelector('.badge-icon');
+    if (icon) {
+        icon.style.filter = 'grayscale(1)';
+        icon.style.opacity = '0.35';
+    }
+    
+    const text = el.querySelector('.badge-title');
+    if (text) {
+        text.style.color = 'var(--text-muted)';
+    }
+    
+    const status = el.querySelector('.badge-status');
+    if (status) {
+        status.textContent = 'Locked';
+        status.style.color = 'rgba(255, 255, 255, 0.35)';
+    }
+}
+
+function renderReferralsQueue() {
+    const queue = document.getElementById('leads-queue');
+    if (!queue) return;
+    queue.innerHTML = '';
+
+    const pendingRefs = appState.referrals.filter(r => r.status === 'Pending');
+
+    if (pendingRefs.length === 0) {
+        queue.innerHTML = `<p class="no-data">No pending referrals found.</p>`;
+        return;
+    }
+
+    pendingRefs.forEach(ref => {
+        const div = document.createElement('div');
+        div.className = 'lead-item';
+        div.innerHTML = `
+            <div class="lead-meta">
+                <h5>${ref.referee_name}</h5>
+                <p>${ref.referee_email} | Program: <strong>${ref.program}</strong></p>
+            </div>
+            <div style="display: flex; gap: 0.35rem; align-items: center;">
+                <button class="btn btn-success btn-sm" onclick="verifyReferralPayment(${ref.referral_id})">
+                    <i class="fa-solid fa-receipt"></i> Verify Payment
+                </button>
+                <button class="btn btn-danger btn-sm" onclick="deleteReferralAdmin(this, ${ref.referral_id})" style="background:#ef4444; border:none; padding:0.35rem 0.5rem; height:auto; font-size:0.68rem;" title="Delete Referral">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </div>
+        `;
+        queue.appendChild(div);
+    });
+}
+
+// Student forms & webhooks
+document.getElementById('btn-submit-lead').addEventListener('click', async () => {
+    const name = document.getElementById('referee-name').value.trim();
+    const email = document.getElementById('referee-email').value.trim();
+    const program = document.getElementById('referee-program').value;
+
+    if (!name || !email) {
+        alert('Please fill out referee details.');
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE}/referrals`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ referrer_id: appState.currentUser.user_id, referee_name: name, referee_email: email, program })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Failed to submit referral');
+
+        alert('Referral lead registered successfully!');
+        document.getElementById('referee-name').value = '';
+        document.getElementById('referee-email').value = '';
+        
+        loadUserProfile(appState.currentUser.user_id);
+    } catch (err) {
+        alert(`Error: ${err.message}`);
+    }
+});
+
+async function verifyReferralPayment(referralId) {
+    try {
+        const response = await fetch(`${API_BASE}/referrals/${referralId}/verify-payment`, {
+            method: 'POST'
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Verification failed');
+
+        alert('Payment verified and points credited!');
+        loadUserProfile(appState.currentUser.user_id);
+    } catch (err) {
+        alert(`Error: ${err.message}`);
+    }
+}
+
+document.getElementById('btn-simulate-lms').addEventListener('click', async () => {
+    const courseSelect = document.getElementById('lms-course');
+    const option = courseSelect.options[courseSelect.selectedIndex];
+    const points = parseInt(option.getAttribute('data-points'));
+    const desc = option.text.split('(')[0].trim();
+
+    try {
+        const response = await fetch(`${API_BASE}/lms/complete-course`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: appState.currentUser.user_id, course_name: desc, base_points: points })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Simulation failed');
+
+        alert(`LMS credited ${data.points_awarded} points.`);
+        loadUserProfile(appState.currentUser.user_id);
+    } catch (err) {
+        alert(`Error: ${err.message}`);
+    }
+});
+
+document.getElementById('btn-calculate-discount').addEventListener('click', async () => {
+    const fee = parseFloat(document.getElementById('course-fee').value);
+    const points = parseInt(document.getElementById('points-to-redeem').value);
+
+    try {
+        const response = await fetch(`${API_BASE}/redeem/calculate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: appState.currentUser.user_id, course_fee: fee, points_requested: points })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Calculation failed');
+
+        appState.currentCalculation = data;
+
+        document.getElementById('cap-percent-label').textContent = `${data.cap_percent}%`;
+        document.getElementById('max-discount-val').textContent = `AED ${formatNumber(data.max_discount_aed)}`;
+        document.getElementById('points-applied-val').textContent = `${formatNumber(data.points_applied)} pts`;
+        document.getElementById('net-discount-val').textContent = `AED ${formatNumber(data.discount_aed)}`;
+        document.getElementById('final-payable-val').textContent = `AED ${formatNumber(data.final_fee)}`;
+        
+        const resultsBox = document.getElementById('redemption-results');
+        resultsBox.style.display = 'block';
+        if (window.gsap) {
+            gsap.fromTo(resultsBox, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.4 });
+        } else {
+            resultsBox.style.opacity = '1';
+        }
+    } catch (err) {
+        alert(`Error: ${err.message}`);
+    }
+});
+
+document.getElementById('btn-confirm-redemption').addEventListener('click', async () => {
+    if (!appState.currentCalculation) return;
+
+    try {
+        const response = await fetch(`${API_BASE}/redeem/confirm`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                user_id: appState.currentUser.user_id,
+                points_deducted: appState.currentCalculation.points_applied,
+                discount_aed: appState.currentCalculation.discount_aed
+            })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Redemption failed');
+
+        alert('Redemption completed!');
+        document.getElementById('redemption-results').style.display = 'none';
+        appState.currentCalculation = null;
+
+        loadUserProfile(appState.currentUser.user_id);
+    } catch (err) {
+        alert(`Error: ${err.message}`);
+    }
+});
+
+// Obsolete btn-redeem-adnoc listener removed to prevent null selector errors.
+// Functionality is now handled dynamically by btn-redeem-collaborator-voucher.
+
+document.getElementById('btn-trigger-cron').addEventListener('click', async () => {
+    try {
+        const response = await fetch(`${API_BASE}/cron/process-expiry`, { method: 'POST' });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Sweep failed');
+
+        alert(`Cron Sweep processed! Expired points decayed: ${data.points_decayed || 0}`);
+        loadUserProfile(appState.currentUser.user_id);
+    } catch (err) {
+        alert(`Error: ${err.message}`);
+    }
+});
+
+// ----------------------------------------------------
+// ADMIN CONSOLE LOGIC
+// ----------------------------------------------------
+
+async function loadAdminStudents() {
+    const tbody = document.getElementById('student-directory-body');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="4" class="no-data">Loading student directory...</td></tr>';
+
+    try {
+        const response = await fetch(`${API_BASE}/admin/students`);
+        if (!response.ok) throw new Error('Failed to load students');
+        const data = await response.json();
+        
+        appState.students = data;
+        tbody.innerHTML = '';
+
+        if (data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="no-data">No students registered yet.</td></tr>';
+            return;
+        }
+
+        data.forEach(s => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>
+                    <div class="student-directory-name" onclick="showStudentDetailModal(${s.user_id})" style="font-weight: 600; cursor: pointer; color: #dfb15b; transition: color 0.15s ease;" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='#dfb15b'">${s.name}</div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted); word-break: break-all;">${s.email}</div>
+                    <div style="font-size: 0.66rem; color: rgba(255, 255, 255, 0.35); margin-top: 0.15rem;">ID: ${s.student_id}</div>
+                </td>
+                <td><span class="tier-badge ${s.current_tier.toLowerCase()}" style="padding: 0.15rem 0.4rem; font-size: 0.7rem;">${s.current_tier}</span></td>
+                <td style="font-weight: 700; font-family: 'Outfit';">${formatNumber(s.points_balance)} pts</td>
+                <td>
+                    <button class="btn btn-secondary btn-sm" onclick="openAdjustmentModal(${s.user_id}, '${s.name}')">
+                        <i class="fa-solid fa-calculator"></i> Adjust
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+    } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="4" class="no-data" style="color: #ef4444;">Error: ${err.message}</td></tr>`;
+    }
+}
+
+// Enroll new student form
+document.getElementById('create-student-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('reg-name').value.trim();
+    const email = document.getElementById('reg-email').value.trim();
+    const student_id = document.getElementById('reg-student-id').value.trim();
+    const password = document.getElementById('reg-password').value;
+    const programme = document.getElementById('reg-programme')?.value || 'General';
+
+    try {
+        const response = await fetch(`${API_BASE}/admin/create-student`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, student_id, password, programme })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Failed to register student');
+
+        showToast('Enrolled successfully! 🎉', `${name} enrolled in ${programme}. Welcome bonus: ${data.welcome_points} pts. Referral Code: ${data.referral_code}`, 'success');
+        document.getElementById('reg-name').value = '';
+        document.getElementById('reg-email').value = '';
+        document.getElementById('reg-student-id').value = '';
+        document.getElementById('reg-password').value = '';
+        if (document.getElementById('reg-programme')) document.getElementById('reg-programme').value = 'MBA';
+
+        loadAdminStudents();
+        loadProgrammeOverview();
+    } catch (err) {
+        showToast('Enrollment Error', err.message, 'error');
+    }
+});
+
+// ══════════════════════════════════════════════════
+// ENGAGEMENT REPORT
+// ══════════════════════════════════════════════════
+async function loadEngagementReport() {
+    const tbody = document.getElementById('engagement-table-body');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="7" class="no-data"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</td></tr>';
+    try {
+        const res = await fetch(`${API_BASE}/admin/engagement`);
+        if (!res.ok) throw new Error('Failed to load engagement data.');
+        const students = await res.json();
+
+        const active   = students.filter(s => s.status === 'active').length;
+        const atRisk   = students.filter(s => s.status === 'at_risk').length;
+        const inactive = students.filter(s => s.status === 'inactive').length;
+
+        const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+        setEl('eng-active-count', active);
+        setEl('eng-atrisk-count', atRisk);
+        setEl('eng-inactive-count', inactive);
+
+        if (students.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="no-data">No student data found.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = students.map(s => {
+            const statusColor = s.status === 'active' ? '#4ade80' : s.status === 'at_risk' ? '#dfb15b' : '#ef4444';
+            const statusLabel = s.status === 'active' ? 'Active' : s.status === 'at_risk' ? 'At Risk' : 'Inactive';
+            const lastSeen = s.last_seen ? cleanDate(s.last_seen) : 'Never';
+            const dayText = s.days_since_login >= 999 ? 'Never logged in' : `${s.days_since_login}d ago`;
+            return `
+                <tr>
+                    <td><strong style="color:#fff;">${s.name}</strong><br><span style="font-size:0.68rem;color:rgba(255,255,255,0.4);">${s.email}</span></td>
+                    <td style="font-size:0.78rem;">${s.programme || '—'}</td>
+                    <td><span class="tier-badge ${(s.current_tier||'Bronze').toLowerCase()}">${s.current_tier || 'Bronze'}</span></td>
+                    <td style="font-family:'Outfit'; font-weight:700; color:#dfb15b;">${formatNumber(s.points_balance || 0)}</td>
+                    <td style="text-align:center;">${s.referral_count || 0}</td>
+                    <td style="font-size:0.72rem; color:rgba(255,255,255,0.5);">${lastSeen}<br><span style="color:rgba(255,255,255,0.3);">${dayText}</span></td>
+                    <td><span style="font-size:0.7rem; font-weight:700; color:${statusColor}; background:${statusColor}18; padding:0.2rem 0.55rem; border-radius:4px; border:1px solid ${statusColor}33;">${statusLabel}</span></td>
+                </tr>`;
+        }).join('');
+    } catch (err) {
+        if (tbody) tbody.innerHTML = `<tr><td colspan="7" class="no-data" style="color:#ef4444;">Error: ${err.message}</td></tr>`;
+    }
+}
+window.loadEngagementReport = loadEngagementReport;
+
+// ══════════════════════════════════════════════════
+// PROGRAMME OVERVIEW CARD
+// ══════════════════════════════════════════════════
+async function loadProgrammeOverview() {
+    const container = document.getElementById('programme-overview-body');
+    if (!container) return;
+    container.innerHTML = '<p style="color:rgba(255,255,255,0.4);font-size:0.8rem;"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</p>';
+    try {
+        const res = await fetch(`${API_BASE}/admin/programmes`);
+        if (!res.ok) throw new Error();
+        const programmes = await res.json();
+        if (programmes.length === 0) {
+            container.innerHTML = '<p style="color:rgba(255,255,255,0.4);font-size:0.8rem;">No programmes found.</p>';
+            return;
+        }
+        const maxCount = Math.max(...programmes.map(p => p.student_count), 1);
+        const totalEnrolled = programmes.reduce((sum, p) => sum + p.student_count, 0);
+
+        // HSL program color map
+        const programColors = {
+            'MBA': '#8052ff', // Electric Iris
+            'DBA': '#dfb15b', // Saffron Gold
+            'Digital Marketing': '#15846e', // Deep Emerald
+            'Leadership in Practice': '#ff6b35', // Fire Orange
+            'Finance & Accounting': '#4ade80', // Mint Green
+            'Project Management': '#0077b5', // LinkedIn Blue
+            'General': '#86868b' // Cool Gray
+        };
+
+        container.innerHTML = programmes.map(p => {
+            const color = programColors[p.programme] || '#dfb15b';
+            const percentage = totalEnrolled > 0 ? Math.round((p.student_count / totalEnrolled) * 100) : 0;
+            const barWidth = Math.round((p.student_count / maxCount) * 100);
+
+            return `
+                <div style="padding:0.95rem; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:10px; transition: background 0.3s ease;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                        <div style="display:flex; align-items:center; gap:0.5rem;">
+                            <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${color};"></span>
+                            <span style="font-size:0.85rem; font-weight:700; color:var(--text-main);">${p.programme}</span>
+                        </div>
+                        <div style="text-align:right;">
+                            <span style="font-size:0.8rem; color:${color}; font-weight:800; display:block;">${p.student_count} student${p.student_count !== 1 ? 's' : ''}</span>
+                            <span style="font-size:0.62rem; color:var(--text-muted); font-weight:500;">${percentage}% share</span>
+                        </div>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.04); height:6px; border-radius:3px; overflow:hidden; margin-bottom:0.4rem;">
+                        <div style="background:${color}; width:${barWidth}%; height:100%; border-radius:3px; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);"></div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:0.65rem; color:var(--text-muted);">${formatNumber(p.total_points || 0)} total points issued</span>
+                        <span style="font-size:0.65rem; color:var(--text-muted); font-weight:700;">Avg: ${p.student_count > 0 ? formatNumber(Math.round(p.total_points / p.student_count)) : 0} pts/student</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    } catch {
+        container.innerHTML = '<p style="color:rgba(255,255,255,0.4);font-size:0.8rem;">Could not load programme data.</p>';
+    }
+}
+window.loadProgrammeOverview = loadProgrammeOverview;
+
+// ══════════════════════════════════════════════════
+// BULK POINTS AWARD
+// ══════════════════════════════════════════════════
+(function setupBulkPointsForm() {
+    const form = document.getElementById('bulk-points-form');
+    if (!form) return;
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const programme = document.getElementById('bulk-programme').value;
+        const points = parseInt(document.getElementById('bulk-points-amount').value);
+        const reason = document.getElementById('bulk-points-reason').value.trim() || `Bulk award to ${programme} cohort`;
+        const btn = form.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Awarding...';
+        try {
+            const res = await fetch(`${API_BASE}/admin/bulk-points`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ programme, points, reason })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Failed to award points.');
+            showToast('Bulk Award Complete ⚡', `${points} pts awarded to ${data.students_updated} students in ${programme}.`, 'success');
+            document.getElementById('bulk-points-amount').value = '';
+            document.getElementById('bulk-points-reason').value = '';
+            loadAdminStudents();
+            loadProgrammeOverview();
+        } catch (err) {
+            showToast('Error', err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-bolt"></i> Award to Cohort';
+        }
+    });
+})();
+
+// ══════════════════════════════════════════════════
+// ANNOUNCEMENTS
+// ══════════════════════════════════════════════════
+async function loadAnnouncements() {
+    const list = document.getElementById('announcements-list');
+    if (!list) return;
+    try {
+        const res = await fetch(`${API_BASE}/announcements`);
+        if (!res.ok) throw new Error();
+        const items = await res.json();
+        if (items.length === 0) {
+            list.innerHTML = '<p style="color:rgba(255,255,255,0.35);font-size:0.82rem;">No active announcements. Post one using the form.</p>';
+            return;
+        }
+        const typeIcon = { info: '💬', success: '✅', warning: '⚠️' };
+        const typeColor = { info: 'rgba(96,165,250,0.15)', success: 'rgba(74,222,128,0.1)', warning: 'rgba(251,191,36,0.1)' };
+        const typeBorder = { info: 'rgba(96,165,250,0.25)', success: 'rgba(74,222,128,0.2)', warning: 'rgba(251,191,36,0.2)' };
+        list.innerHTML = items.map(item => `
+            <div style="background:${typeColor[item.type]||typeColor.info}; border:1px solid ${typeBorder[item.type]||typeBorder.info}; border-radius:8px; padding:0.9rem 1rem; display:flex; justify-content:space-between; align-items:flex-start; gap:0.75rem;">
+                <div style="flex:1;">
+                    <div style="display:flex; align-items:center; gap:0.4rem; margin-bottom:0.2rem;">
+                        <span>${typeIcon[item.type]||typeIcon.info}</span>
+                        <strong style="color:#fff; font-size:0.88rem;">${item.title}</strong>
+                    </div>
+                    <p style="color:rgba(255,255,255,0.6); font-size:0.78rem; margin:0; line-height:1.4;">${item.body}</p>
+                    <span style="font-size:0.64rem; color:rgba(255,255,255,0.3); margin-top:0.3rem; display:block;">Posted ${cleanDate(item.created_at)}${item.expires_at ? ` · Expires ${cleanDate(item.expires_at)}` : ''}</span>
+                </div>
+                <button onclick="deleteAnnouncement(${item.announcement_id})" style="background:none; border:none; color:rgba(239,68,68,0.5); cursor:pointer; font-size:0.9rem; flex-shrink:0; transition:color 0.15s;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='rgba(239,68,68,0.5)'" title="Delete">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+            </div>`).join('');
+    } catch {
+        list.innerHTML = '<p style="color:rgba(255,255,255,0.35);font-size:0.82rem;">Could not load announcements.</p>';
+    }
+}
+
+async function deleteAnnouncement(id) {
+    try {
+        const res = await fetch(`${API_BASE}/admin/announcements/${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error();
+        showToast('Deleted', 'Announcement removed.', 'success');
+        loadAnnouncements();
+        loadStudentAnnouncements();
+    } catch { showToast('Error', 'Could not delete announcement.', 'error'); }
+}
+window.deleteAnnouncement = deleteAnnouncement;
+
+(function setupAnnouncementForm() {
+    const form = document.getElementById('announcement-form');
+    if (!form) return;
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const title = document.getElementById('ann-title').value.trim();
+        const body  = document.getElementById('ann-body').value.trim();
+        const type  = document.getElementById('ann-type').value;
+        const expiresInput = document.getElementById('ann-expires').value;
+        const expires_at = expiresInput ? new Date(expiresInput).toISOString() : null;
+        const btn = form.querySelector('button[type="submit"]');
+        btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Publishing...';
+        try {
+            const res = await fetch(`${API_BASE}/admin/announcements`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, body, type, expires_at })
+            });
+            if (!res.ok) throw new Error((await res.json()).error || 'Failed.');
+            showToast('Published! 📢', `"${title}" is now live on all student dashboards.`, 'success');
+            form.reset();
+            loadAnnouncements();
+            loadStudentAnnouncements();
+        } catch (err) {
+            showToast('Error', err.message, 'error');
+        } finally {
+            btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Publish Announcement';
+        }
+    });
+})();
+
+// Student-facing: load announcements banner on overview
+async function loadStudentAnnouncements() {
+    const banner = document.getElementById('student-announcements-banner');
+    if (!banner) return;
+    try {
+        const res = await fetch(`${API_BASE}/announcements`);
+        if (!res.ok) return;
+        const items = await res.json();
+        if (items.length === 0) {
+            banner.innerHTML = `
+                <div class="card glassmorphic spotlight-card" style="padding: 1rem 1.25rem; border-radius: 12px; border: 1px dashed rgba(255,255,255,0.06); background: rgba(255,255,255,0.01); display: flex; align-items: center; justify-content: center; gap: 0.85rem; width: 100%; box-sizing: border-box; margin-bottom: 1.25rem;">
+                    <span class="sleepy-coffee-icon" style="font-size: 1.4rem;">☕</span>
+                    <span style="font-size: 0.8rem; color: rgba(255,255,255,0.45); font-weight: 300; text-align: left;">
+                        <strong>All quiet!</strong> No active announcements today. BIA deans are searching for reading glasses 👓, and professors are busy drinking espresso. Carry on! ✨
+                    </span>
+                </div>
+            `;
+            return;
+        }
+        const typeIcon   = { info: 'fa-circle-info', success: 'fa-circle-check', warning: 'fa-triangle-exclamation' };
+        const cleanDate = (dStr) => {
+            if(!dStr) return 'Recently';
+            const d = new Date(dStr.replace(' ', 'T'));
+            return isNaN(d.getTime()) ? 'Recently' : d.toLocaleDateString('en-US', {month:'short', day:'numeric'});
+        };
+        banner.innerHTML = items.map(item => `
+            <div class="public-ann-card type-${item.type}" style="opacity: 0; transform: translateY(20px); margin-bottom: 0.75rem; width: 100%;">
+                <div class="public-ann-glow-layer"></div>
+                <div class="public-ann-icon-wrap">
+                    <i class="fa-solid ${typeIcon[item.type]||typeIcon.info}"></i>
+                    <span class="ping-wave"></span>
+                </div>
+                <div class="public-ann-content">
+                    <span class="public-ann-badge">${item.type} BROADCAST</span>
+                    <h5>${item.title}</h5>
+                    <p style="margin-bottom: 0.35rem; color: rgba(255,255,255,0.72);">${item.body}</p>
+                    <span class="public-ann-date"><i class="fa-regular fa-clock"></i> Posted ${cleanDate(item.created_at)}</span>
+                </div>
+            </div>`).join('');
+
+        if (window.gsap) {
+            gsap.fromTo(banner.querySelectorAll('.public-ann-card'), 
+                { opacity: 0, y: 20, scale: 0.97 },
+                { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "power2.out", stagger: 0.1 }
+            );
+        } else {
+            banner.querySelectorAll('.public-ann-card').forEach(el => {
+                el.style.opacity = '1';
+                el.style.transform = 'translateY(0) scale(1)';
+            });
+        }
+    } catch { /* silent fail */ }
+}
+window.loadStudentAnnouncements = loadStudentAnnouncements;
+
+// ══════════════════════════════════════════════════
+// VOUCHER MANAGEMENT (admin view of all vouchers)
+// ══════════════════════════════════════════════════
+async function loadAdminVoucherReport() {
+    const tbody = document.getElementById('admin-vouchers-body');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="7" class="no-data"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</td></tr>';
+    try {
+        // Use the existing admin ledger which has voucher info, or the students endpoint
+        const studentsRes = await fetch(`${API_BASE}/admin/students`);
+        const students = studentsRes.ok ? await studentsRes.json() : [];
+        const studentMap = {};
+        students.forEach(s => { studentMap[s.user_id] = s.name; });
+
+        // Fetch all vouchers via the system ledger
+        const res = await fetch(`${API_BASE}/admin/ledger`);
+        if (!res.ok) throw new Error('Failed to load voucher data.');
+        const ledger = await res.json();
+        const voucherEntries = ledger.filter(e => e.event_type && (e.event_type.toLowerCase().includes('voucher') || e.description?.toLowerCase().includes('voucher')));
+
+        const totalEl = document.getElementById('voucher-stat-total');
+        const valueEl = document.getElementById('voucher-stat-value');
+        const avgEl   = document.getElementById('voucher-stat-avg');
+
+        if (totalEl) totalEl.textContent = voucherEntries.length;
+
+        if (voucherEntries.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="no-data">No vouchers have been claimed yet.</td></tr>';
+            if (valueEl) valueEl.textContent = '0';
+            if (avgEl) avgEl.textContent = '0';
+            return;
+        }
+
+        // Also fetch the actual tuition vouchers
+        const allVouchersPromises = students.map(s =>
+            fetch(`${API_BASE}/users/${s.user_id}/vouchers`).then(r => r.ok ? r.json() : []).catch(() => [])
+        );
+        const allVouchersArrays = await Promise.all(allVouchersPromises);
+        const allVouchers = allVouchersArrays.flat().map((v, i) => ({
+            ...v,
+            studentName: studentMap[v.user_id] || 'Unknown'
+        }));
+
+        const totalValue = allVouchers.reduce((sum, v) => sum + (v.discount_aed || 0), 0);
+        const avgValue = allVouchers.length ? (totalValue / allVouchers.length).toFixed(1) : 0;
+        if (totalEl) totalEl.textContent = allVouchers.length;
+        if (valueEl) valueEl.textContent = `${totalValue.toFixed(0)} AED`;
+        if (avgEl) avgEl.textContent = `${avgValue} AED`;
+
+        if (allVouchers.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="no-data">No vouchers have been claimed yet.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = allVouchers.map(v => `
+            <tr>
+                <td style="font-family:'Outfit'; font-size:0.8rem; color:#dfb15b; font-weight:700;">${v.voucher_code || '—'}</td>
+                <td><strong class="clickable-student-name" onclick="showStudentDetailModal(${v.user_id})" style="color: var(--text-main); cursor: pointer; text-decoration: underline;">${v.studentName}</strong></td>
+                <td style="color:#4ade80; font-weight:700;">${v.discount_aed || 0} AED</td>
+                <td style="font-family:'Outfit';">${formatNumber(v.points_deducted || 0)} pts</td>
+                <td><span style="font-size:0.7rem; padding:0.2rem 0.5rem; border-radius:4px; background:${v.status === 'Used' ? 'rgba(74,222,128,0.1)' : 'rgba(255,255,255,0.05)'}; border:1px solid ${v.status === 'Used' ? 'rgba(74,222,128,0.2)' : 'rgba(255,255,255,0.1)'}; color:${v.status === 'Used' ? '#4ade80' : 'rgba(255,255,255,0.5)'}; font-weight:700;">${v.status || 'Unused'}</span></td>
+                <td style="font-size:0.72rem; color:rgba(255,255,255,0.5);">${v.created_at ? cleanDate(v.created_at) : '—'}</td>
+                <td>
+                    <button onclick="adminDeleteVoucher(${v.voucher_id})" style="background:none; border:none; color:rgba(239,68,68,0.4); cursor:pointer; font-size:0.8rem; transition:color 0.15s;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='rgba(239,68,68,0.4)'" title="Delete voucher">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </td>
+            </tr>`).join('');
+    } catch (err) {
+        if (tbody) tbody.innerHTML = `<tr><td colspan="7" class="no-data" style="color:#ef4444;">Error: ${err.message}</td></tr>`;
+    }
+}
+window.loadAdminVoucherReport = loadAdminVoucherReport;
+
+async function adminDeleteVoucher(id) {
+    if (!confirm('Delete this voucher record?')) return;
+    try {
+        const res = await fetch(`${API_BASE}/admin/vouchers/${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error();
+        showToast('Deleted', 'Voucher record removed.', 'success');
+        loadAdminVoucherReport();
+    } catch { showToast('Error', 'Could not delete voucher.', 'error'); }
+}
+window.adminDeleteVoucher = adminDeleteVoucher;
+
+// ══════════════════════════════════════════════════
+// CSV EXPORT UTILITIES
+// ══════════════════════════════════════════════════
+async function exportStudentsCSV() {
+    try {
+        const res = await fetch(`${API_BASE}/admin/students`);
+        if (!res.ok) throw new Error();
+        const students = await res.json();
+        const headers = ['Name', 'Email', 'Student ID', 'Programme', 'Tier', 'Points Balance', 'Referrals', 'Referral Code'];
+        const rows = students.map(s => [
+            `"${s.name}"`, `"${s.email}"`, `"${s.student_id || ''}"`,
+            `"${s.programme || 'General'}"`, `"${s.current_tier || 'Bronze'}"`,
+            s.points_balance || 0, s.referral_count || 0, `"${s.referral_code || ''}"`
+        ]);
+        downloadCSV([headers, ...rows], `BIA_Students_${new Date().toISOString().slice(0,10)}.csv`);
+        showToast('Exported! 📥', `${students.length} student records downloaded as CSV.`, 'success');
+    } catch { showToast('Error', 'Could not export student data.', 'error'); }
+}
+window.exportStudentsCSV = exportStudentsCSV;
+
+async function exportVouchersCSV() {
+    try {
+        const studentsRes = await fetch(`${API_BASE}/admin/students`);
+        const students = studentsRes.ok ? await studentsRes.json() : [];
+        const studentMap = {};
+        students.forEach(s => { studentMap[s.user_id] = s.name; });
+
+        const allVouchers = (await Promise.all(
+            students.map(s => fetch(`${API_BASE}/users/${s.user_id}/vouchers`).then(r => r.ok ? r.json() : []).catch(() => []))
+        )).flat().map(v => ({ ...v, studentName: studentMap[v.user_id] || 'Unknown' }));
+
+        const headers = ['Voucher Code', 'Student', 'Discount (AED)', 'Points Used', 'Status', 'Date'];
+        const rows = allVouchers.map(v => [
+            `"${v.voucher_code || ''}"`, `"${v.studentName}"`,
+            v.discount_aed || 0, v.points_deducted || 0,
+            `"${v.status || 'Unused'}"`, `"${v.created_at ? cleanDate(v.created_at) : ''}"`
+        ]);
+        downloadCSV([headers, ...rows], `BIA_Vouchers_${new Date().toISOString().slice(0,10)}.csv`);
+        showToast('Exported! 📥', `${allVouchers.length} voucher records downloaded.`, 'success');
+    } catch { showToast('Error', 'Could not export voucher data.', 'error'); }
+}
+window.exportVouchersCSV = exportVouchersCSV;
+
+function downloadCSV(rows, filename) {
+    const csv = rows.map(r => r.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename; a.click();
+    URL.revokeObjectURL(url);
+}
+
+// ══════════════════════════════════════════════════
+// TAB LOAD HOOKS — trigger data loads on tab switch
+// ══════════════════════════════════════════════════
+const _origNavHandler = document.querySelectorAll('.nav-tab');
+document.querySelectorAll('.nav-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const target = btn.dataset.target;
+        if (target === 'admin-engagement') loadEngagementReport();
+        if (target === 'admin-announcements') { loadAnnouncements(); }
+        if (target === 'admin-vouchers-mgmt') loadAdminVoucherReport();
+        if (target === 'admin-students') loadProgrammeOverview();
+        if (target === 'overview') loadStudentAnnouncements();
+          if (target === 'admin-faqs') initAdminFAQs();
+      });
+});
+
+
+
+// Manual Adjustments Modals
+function openAdjustmentModal(userId, userName) {
+    appState.selectedUserIdForAdjustment = userId;
+    
+    // Find student to show current points balance in the modal
+    const student = appState.students ? appState.students.find(s => s.user_id === userId) : null;
+    const balanceText = student 
+        ? `<span style="color: #dfb15b; font-weight: 700; font-size: 0.85rem; display: block; margin-top: 0.5rem; background: rgba(223, 177, 91, 0.08); padding: 0.35rem 0.65rem; border-radius: 6px; border: 1px solid rgba(223, 177, 91, 0.2); width: fit-content; margin-left: auto; margin-right: auto;">Current Balance: ${formatNumber(student.points_balance)} pts</span>`
+        : '';
+
+    document.getElementById('adjust-modal-desc').innerHTML = `
+        Adjusting points wallet balance for student: <strong>${userName}</strong>.
+        ${balanceText}
+    `;
+    
+    const modal = document.getElementById('adjust-points-modal');
+    modal.style.display = 'flex';
+    if (window.gsap) {
+        gsap.fromTo(modal.querySelector('.adjust-card'), { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3 });
+    }
+}
+
+function closeAdjustmentModal() {
+    appState.selectedUserIdForAdjustment = null;
+    document.getElementById('adjust-amount').value = '';
+    document.getElementById('adjust-reason').value = '';
+    document.getElementById('adjust-points-modal').style.display = 'none';
+}
+window.closeAdjustmentModal = closeAdjustmentModal;
+
+document.getElementById('adjust-points-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const targetUserId = appState.selectedUserIdForAdjustment;
+    const points_change = parseInt(document.getElementById('adjust-amount').value);
+    const description = document.getElementById('adjust-reason').value.trim();
+
+    if (!targetUserId || isNaN(points_change) || !description) {
+        showToast('Invalid Entries', 'Please enter a valid points adjustment and audit reason.', 'error');
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE}/admin/adjust-points`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                user_id: targetUserId,
+                points_change,
+                description
+            })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Adjustment failed');
+
+        showToast('Points Adjusted! ⚡', `Successfully adjusted balance by ${points_change > 0 ? '+' : ''}${formatNumber(points_change)} pts.`, 'success');
+        
+        closeAdjustmentModal();
+        await loadAdminStudents();
+
+        // Check if the Student Spotlight Details Modal is currently open
+        const detailModal = document.getElementById('student-detail-modal');
+        if (detailModal && detailModal.style.display === 'flex') {
+            // Re-render student details modal in real time behind the closing adjust modal!
+            await showStudentDetailModal(targetUserId);
+        }
+    } catch (err) {
+        showToast('Adjustment Error', err.message, 'error');
+    }
+});
+
+// Admin System-wide Ledger
+async function loadAdminLedger() {
+    const tbody = document.getElementById('admin-ledger-body');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="6" class="no-data">Loading audit logs...</td></tr>';
+
+    try {
+        const response = await fetch(`${API_BASE}/admin/ledger`);
+        if (!response.ok) throw new Error('Failed to load ledger');
+        const data = await response.json();
+
+        tbody.innerHTML = '';
+        if (data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="no-data">No transactions logged across BIA.</td></tr>';
+            return;
+        }
+
+        data.forEach(entry => {
+            const tr = document.createElement('tr');
+            const isEarn = entry.points_change >= 0;
+            const ptsClass = isEarn ? 'ledger-pts-earn' : 'ledger-pts-spend';
+            const ptsSign = isEarn ? `+${formatNumber(entry.points_change)}` : formatNumber(entry.points_change);
+
+            tr.innerHTML = `
+                <td>${cleanDate(entry.created_at)}</td>
+                <td><strong class="clickable-student-name" onclick="showStudentDetailModal(${entry.user_id})" style="color: var(--text-main); cursor: pointer; text-decoration: underline;">${entry.user_name}</strong></td>
+                <td>${entry.description}</td>
+                <td class="${ptsClass}">${ptsSign}</td>
+                <td>${cleanDate(entry.expires_at)}</td>
+                <td>
+                    <button class="btn btn-danger btn-sm" onclick="deleteLedgerEntryAdmin(this, ${entry.ledger_id})" style="background:#ef4444; border:none; padding:0.25rem 0.45rem; height:auto; font-size:0.75rem;" title="Delete Ledger Entry">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+    } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="6" class="no-data" style="color: #ef4444;">Error: ${err.message}</td></tr>`;
+    }
+}
+
+const CLIENT_SETTINGS_LIMITS = {
+    point_aed_value: { min: 0.01, max: 2.0, step: 0.01 },
+    first_referral_points: { min: 0, max: 10000, step: 1 },
+    subsequent_referral_points: { min: 0, max: 10000, step: 1 },
+    new_joiner_points: { min: 0, max: 10000, step: 1 },
+    premium_program_bonus: { min: 0, max: 10000, step: 1 },
+    bronze_cap: { min: 0.0, max: 1.0, step: 0.01 },
+    silver_cap: { min: 0.0, max: 1.0, step: 0.01 },
+    gold_cap: { min: 0.0, max: 1.0, step: 0.01 },
+    platinum_cap: { min: 0.0, max: 1.0, step: 0.01 },
+    silver_multiplier: { min: 1.0, max: 5.0, step: 0.1 },
+    gold_multiplier: { min: 1.0, max: 5.0, step: 0.1 },
+    platinum_multiplier: { min: 1.0, max: 5.0, step: 0.1 },
+    silver_threshold: { min: 100, max: 100000, step: 100 },
+    gold_threshold: { min: 100, max: 100000, step: 100 },
+    platinum_threshold: { min: 100, max: 100000, step: 100 }
+};
+
+// Admin settings page loaders
+async function loadAdminSettings() {
+    loadAdminEvents();
+    const container = document.getElementById('admin-settings-container');
+    if (!container) return;
+    container.innerHTML = '<p class="no-data">Loading DB settings...</p>';
+
+    try {
+        const response = await fetch(`${API_BASE}/settings`);
+        if (!response.ok) throw new Error('Failed to load settings');
+        const data = await response.json();
+
+        container.innerHTML = '';
+        data.forEach(s => {
+            if (s.key === "maintenance_mode" || s.key === "maintenance_end_time" || s.key === "welcome_points") return;
+            const limit = CLIENT_SETTINGS_LIMITS[s.key];
+            const group = document.createElement('div');
+            group.className = 'settings-input-group';
+            
+            let inputHtml = '';
+            let rangeLabel = '';
+            if (limit) {
+                rangeLabel = `<span style="font-size: 0.72rem; color: #86868b; display: block; margin-top: 0.2rem;">Range: ${limit.min} - ${limit.max} (Step: ${limit.step})</span>`;
+                inputHtml = `<input type="number" id="setting-${s.key}" name="${s.key}" value="${s.value}" min="${limit.min}" max="${limit.max}" step="${limit.step}" required>`;
+            } else {
+                inputHtml = `<input type="text" id="setting-${s.key}" name="${s.key}" value="${s.value}" required>`;
+            }
+
+            group.innerHTML = `
+                <label for="setting-${s.key}">${s.key.replace(/_/g, ' ').toUpperCase()}</label>
+                <p style="margin-bottom: 0.25rem;">${s.description}</p>
+                ${rangeLabel}
+                ${inputHtml}
+            `;
+            container.appendChild(group);
+        });
+    } catch (err) {
+        container.innerHTML = `<p class="no-data" style="color: #ef4444;">Error: ${err.message}</p>`;
+    }
+}
+
+document.getElementById('admin-settings-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const inputs = document.querySelectorAll('#admin-settings-container input');
+    const settingsList = [];
+
+    inputs.forEach(input => {
+        settingsList.push({
+            key: input.name,
+            value: input.value
+        });
+    });
+
+    try {
+        const response = await fetch(`${API_BASE}/settings`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ settings: settingsList })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Save failed');
+
+        alert('Rules successfully saved to Database! Point math is now updated.');
+        await fetchSettings();
+    } catch (err) {
+        alert(`Error saving rules: ${err.message}`);
+    }
+});
+
+// Play intro preloader and boot application
+function bootApplication() {
+    playIntroPreloader();
+    setupPixelGridBackground();
+    setupProximityBoxes();
+    setupScrollReveals();
+    setupMagneticButtons();
+    setupM3Buttons();
+    setupLandingParticles();
+    setup3DGlobe();
+    setupSpotlightCards();
+    setupBenefitsCarousel();
+    setupLiveFeedSimulator();
+    setup3DTilts();
+    setupTeamScrollAnimation();
+    loadDynamicPartners();
+    setupLogoCarousel();
+    setupLogoAnimation();
+    setupCustomSelects();
+    setupQuickStatsPillsNavigation();
+    initRedemptionModalEvents();
+    loadPublicEvents();
+    setupAdminEventsManagement();
+    initThemeToggle();
+}
+
+// Theme Toggle System (Light/Dark switch)
+function initThemeToggle() {
+    const toggleBtn = document.getElementById('theme-toggle-btn');
+    if (!toggleBtn) return;
+    
+    // Check saved theme or default to Light
+    const savedTheme = localStorage.getItem('portal-theme') || 'light';
+    
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-theme');
+        toggleBtn.innerHTML = '<i class="fa-solid fa-sun" style="color: var(--amber);"></i>';
+    } else {
+        document.body.classList.remove('dark-theme');
+        toggleBtn.innerHTML = '<i class="fa-solid fa-moon"></i>';
+    }
+    
+    toggleBtn.addEventListener('click', () => {
+        // Subtle GSAP bounce animation on toggle click
+        if (window.gsap) {
+            gsap.fromTo(toggleBtn, { scale: 0.8, rotate: -15 }, { scale: 1, rotate: 0, duration: 0.3, ease: "back.out(2)" });
+        }
+        
+        const isDark = document.body.classList.toggle('dark-theme');
+        if (isDark) {
+            localStorage.setItem('portal-theme', 'dark');
+            toggleBtn.innerHTML = '<i class="fa-solid fa-sun" style="color: var(--amber);"></i>';
+        } else {
+            localStorage.setItem('portal-theme', 'light');
+            toggleBtn.innerHTML = '<i class="fa-solid fa-moon"></i>';
+        }
+        
+        // Refresh ScrollTrigger values so alignment boundaries match background swaps
+        if (typeof ScrollTrigger !== 'undefined') {
+            ScrollTrigger.refresh();
+        }
+    });
+}
+
+
+// ----------------------------------------------------
+// QUICK STATS PILLS ACCESSIBILITY & SMOOTH NAVIGATION
+// ----------------------------------------------------
+function setupQuickStatsPillsNavigation() {
+    const pillStreak = document.getElementById('pill-streak');
+    const pillTier = document.getElementById('pill-tier');
+    const pillVouchers = document.getElementById('pill-vouchers');
+    const pillPts = document.getElementById('pill-pts');
+
+    const pills = [pillStreak, pillTier, pillVouchers, pillPts];
+
+    if (pillStreak) {
+        pillStreak.addEventListener('click', () => {
+            // switch to overview tab first if not active
+            const tabBtn = document.querySelector('.nav-tab[data-target="overview"]');
+            if (tabBtn) tabBtn.click();
+            
+            // scroll to daily checkin widget
+            const target = document.getElementById('widget-checkin');
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // Draw emphasis using a GSAP glow ring highlight
+                if (window.gsap) {
+                    gsap.fromTo(target, 
+                        { boxShadow: '0 0 0px rgba(255, 107, 53, 0)' }, 
+                        { boxShadow: '0 0 30px rgba(255, 107, 53, 0.45)', duration: 0.5, yoyo: true, repeat: 1, ease: 'power2.out' }
+                    );
+                }
+            }
+        });
+    }
+
+    if (pillTier) {
+        pillTier.addEventListener('click', () => {
+            const tabBtn = document.querySelector('.nav-tab[data-target="overview"]');
+            if (tabBtn) tabBtn.click();
+            
+            // scroll to loyalty progression widget
+            const target = document.getElementById('widget-progression');
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                if (window.gsap) {
+                    gsap.fromTo(target, 
+                        { boxShadow: '0 0 0px rgba(255, 184, 41, 0)' }, 
+                        { boxShadow: '0 0 30px rgba(255, 184, 41, 0.45)', duration: 0.5, yoyo: true, repeat: 1, ease: 'power2.out' }
+                    );
+                }
+            }
+        });
+    }
+
+    if (pillVouchers) {
+        pillVouchers.addEventListener('click', () => {
+            // switch to redeem tab
+            const tabBtn = document.querySelector('.nav-tab[data-target="redeem"]');
+            if (tabBtn) tabBtn.click();
+            
+            // scroll to BIA Partner Vouchers Redemption card
+            const target = document.getElementById('dynamic-dashboard-redemption-card');
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                if (window.gsap) {
+                    gsap.fromTo(target, 
+                        { boxShadow: '0 0 0px rgba(128, 82, 255, 0)' }, 
+                        { boxShadow: '0 0 30px rgba(128, 82, 255, 0.45)', duration: 0.5, yoyo: true, repeat: 1, ease: 'power2.out' }
+                    );
+                }
+            }
+        });
+    }
+
+    if (pillPts) {
+        pillPts.addEventListener('click', () => {
+            // switch to ledger tab
+            const tabBtn = document.querySelector('.nav-tab[data-target="ledger"]');
+            if (tabBtn) tabBtn.click();
+        });
+    }
+
+    // Keyboard controls for role="button" elements
+    pills.forEach(pill => {
+        if (!pill) return;
+        pill.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                pill.click();
+            }
+        });
+    });
+}
+
+// ----------------------------------------------------
+// GLOSSY CUSTOM SELECT DROPDOWNS (replaces native <select>)
+// ----------------------------------------------------
+function setupCustomSelects() {
+    document.querySelectorAll('.form-group select').forEach(nativeSelect => {
+        // Build wrapper
+        const wrapper = document.createElement('div');
+        wrapper.className = 'custom-select-wrapper';
+
+        // Build trigger button
+        const trigger = document.createElement('div');
+        trigger.className = 'custom-select-trigger';
+        trigger.setAttribute('role', 'button');
+        trigger.setAttribute('tabindex', '0');
+
+        const label = document.createElement('span');
+        label.className = 'select-label';
+        label.textContent = nativeSelect.options[nativeSelect.selectedIndex]?.text || 'Select…';
+
+        const arrowSVG = `<svg class="select-arrow" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>`;
+        trigger.appendChild(label);
+        trigger.insertAdjacentHTML('beforeend', arrowSVG);
+
+        // Build dropdown panel
+        const dropdown = document.createElement('div');
+        dropdown.className = 'custom-select-dropdown';
+
+        function updateOptionsList() {
+            dropdown.innerHTML = '';
+            Array.from(nativeSelect.options).forEach((opt, i) => {
+                const item = document.createElement('div');
+                item.className = 'custom-select-option' + (i === nativeSelect.selectedIndex ? ' selected' : '');
+                item.textContent = opt.text;
+                item.dataset.value = opt.value;
+
+                item.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    // Update native select value for form compatibility
+                    nativeSelect.value = opt.value;
+                    nativeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+
+                    // Update UI
+                    label.textContent = opt.text;
+                    dropdown.querySelectorAll('.custom-select-option').forEach(o => o.classList.remove('selected'));
+                    item.classList.add('selected');
+
+                    isOpen = false;
+                    closeDropdown();
+                });
+                dropdown.appendChild(item);
+            });
+        }
+
+        // Initialize options
+        updateOptionsList();
+
+        // Sync custom dropdown when native select is updated dynamically (mutation observer)
+        const observer = new MutationObserver(() => {
+            updateOptionsList();
+            label.textContent = nativeSelect.options[nativeSelect.selectedIndex]?.text || 'Select…';
+        });
+        observer.observe(nativeSelect, { childList: true });
+
+        // Inject into DOM — insert wrapper before the native select
+        nativeSelect.parentNode.insertBefore(wrapper, nativeSelect);
+        wrapper.appendChild(trigger);
+        document.body.appendChild(dropdown);
+        wrapper.appendChild(nativeSelect); // keep native select inside for forms
+
+        function updatePosition() {
+            const rect = trigger.getBoundingClientRect();
+            const top = rect.bottom + window.scrollY;
+            const left = rect.left + window.scrollX;
+            const width = rect.width;
+            
+            dropdown.style.position = 'absolute';
+            dropdown.style.top = `${top + 6}px`;
+            dropdown.style.left = `${left}px`;
+            dropdown.style.width = `${width}px`;
+            dropdown.style.zIndex = '99999';
+        }
+
+        // ── GSAP open/close animations ──
+        function openDropdown() {
+            // Close any other open custom selects
+            document.querySelectorAll('.custom-select-trigger.open').forEach(openTrig => {
+                if (openTrig !== trigger) {
+                    openTrig.click();
+                }
+            });
+
+            trigger.classList.add('open');
+            dropdown.classList.add('open');
+            updatePosition();
+
+            // Listen for window resize or scroll to reposition/close
+            window.addEventListener('resize', closeDropdown);
+            window.addEventListener('scroll', closeDropdown, { capture: true, passive: true });
+
+            if (window.gsap) {
+                gsap.fromTo(dropdown,
+                    { opacity: 0, scaleY: 0.85, y: -6 },
+                    { opacity: 1, scaleY: 1, y: 0, duration: 0.28, ease: 'back.out(1.8)' }
+                );
+                // Stagger the option items in
+                gsap.fromTo(dropdown.querySelectorAll('.custom-select-option'),
+                    { opacity: 0, x: -8 },
+                    { opacity: 1, x: 0, stagger: 0.04, duration: 0.22, ease: 'power2.out', delay: 0.06 }
+                );
+            } else {
+                dropdown.style.opacity = '1';
+            }
+        }
+
+        function closeDropdown() {
+            if (!trigger.classList.contains('open')) return;
+            trigger.classList.remove('open');
+            window.removeEventListener('resize', closeDropdown);
+            window.removeEventListener('scroll', closeDropdown, { capture: true });
+
+            if (window.gsap) {
+                gsap.to(dropdown, {
+                    opacity: 0, scaleY: 0.9, y: -4, duration: 0.2, ease: 'power2.in',
+                    onComplete: () => {
+                        dropdown.classList.remove('open');
+                    }
+                });
+            } else {
+                dropdown.classList.remove('open');
+            }
+            isOpen = false;
+        }
+
+        let isOpen = false;
+        trigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            isOpen = !isOpen;
+            isOpen ? openDropdown() : closeDropdown();
+        });
+
+        trigger.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); isOpen = !isOpen; isOpen ? openDropdown() : closeDropdown(); }
+            if (e.key === 'Escape') { isOpen = false; closeDropdown(); }
+        });
+
+        // Close when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!wrapper.contains(e.target) && !dropdown.contains(e.target) && isOpen) {
+                isOpen = false;
+                closeDropdown();
+            }
+        });
+    });
+}
+
+// ----------------------------------------------------
+// CURSOR-TRACKING SPOTLIGHT CARDS & INTERACTIVE DEMO PROFILES
+// ----------------------------------------------------
+function setupSpotlightCards() {
+    // 1. Mouse-Tracking spotlight-card cursor coordinates updates
+    const updateSpotlight = (e, card) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        card.style.setProperty('--mouse-x', `${x}px`);
+        card.style.setProperty('--mouse-y', `${y}px`);
+    };
+
+    // Dynamically update spotlight variables on move
+    const bindSpotlightEvents = () => {
+        document.querySelectorAll('.spotlight-card').forEach(card => {
+            // Remove previous to avoid duplicates
+            card.removeEventListener('mousemove', card._spotlightHandler);
+            
+            card._spotlightHandler = (e) => updateSpotlight(e, card);
+            card.addEventListener('mousemove', card._spotlightHandler);
+        });
+    };
+
+    // Run initially
+    bindSpotlightEvents();
+
+    // Re-bind when tabs or DOM changes if needed
+    const observer = new MutationObserver(bindSpotlightEvents);
+    const contentFrame = document.querySelector('.focused-content-frame');
+    if (contentFrame) {
+        observer.observe(contentFrame, { childList: true, subtree: true });
+    }
+
+    // 2. Click-to-Autofill Demo Profiles logic
+    document.querySelectorAll('.demo-profile-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const email = item.getAttribute('data-email');
+            const pass = item.getAttribute('data-pass');
+
+            const emailInput = document.getElementById('login-email');
+            const passInput = document.getElementById('login-password');
+
+            if (emailInput && passInput) {
+                // Populate fields
+                emailInput.value = email;
+                passInput.value = pass;
+
+                // Add active highlight animation class
+                document.querySelectorAll('.demo-profile-item').forEach(p => p.classList.remove('active-click'));
+                item.classList.add('active-click');
+
+                // Trigger a cool focus visual glow on the inputs
+                emailInput.focus();
+                setTimeout(() => {
+                    passInput.focus();
+                }, 200);
+            }
+        });
+    });
+}
+
+// ----------------------------------------------------
+// AUTO-PLAY BENEFITS & PROGRAMS CAROUSEL (SHUKRAN-STYLE)
+// ----------------------------------------------------
+function setupBenefitsCarousel() {
+    const slides = document.querySelectorAll('.carousel-slide');
+    const dotsContainer = document.getElementById('carousel-dots-container');
+    const progressLine = document.getElementById('carousel-progress');
+    const prevBtn = document.getElementById('btn-prev-slide');
+    const nextBtn = document.getElementById('btn-next-slide');
+
+    if (slides.length === 0) return;
+
+    let currentIndex = 0;
+    const duration = 5000; // 5 seconds per slide
+
+    // 1. Generate Navigation Dots dynamically
+    slides.forEach((slide, index) => {
+        const dot = document.createElement('button');
+        dot.className = `carousel-dot ${index === 0 ? 'active' : ''}`;
+        dot.setAttribute('aria-label', `Go to slide ${index + 1}`);
+        dot.addEventListener('click', () => {
+            goToSlide(index);
+        });
+        dotsContainer.appendChild(dot);
+    });
+
+    const dots = document.querySelectorAll('.carousel-dot');
+
+    // 2. Active Slide Switcher with GSAP Slide, Fade & Stagger
+    function goToSlide(index, userTriggered = false) {
+        const newIndex = ((index % slides.length) + slides.length) % slides.length;
+        if (newIndex === currentIndex && !userTriggered) return;
+
+        const prevIndex = currentIndex;
+        currentIndex = newIndex;
+
+        if (prevIndex === currentIndex) return;
+
+        // Determine direction (forward vs backward)
+        let isNext = index > prevIndex;
+        if (prevIndex === slides.length - 1 && currentIndex === 0) isNext = true;
+        if (prevIndex === 0 && currentIndex === slides.length - 1) isNext = false;
+        const direction = isNext ? 1 : -1;
+
+        const prevSlide = slides[prevIndex];
+        const nextSlide = slides[currentIndex];
+
+        // Update dot states
+        dots[prevIndex].classList.remove('active');
+        dots[currentIndex].classList.add('active');
+
+        // Set z-index + pointer-events via classes BEFORE animation
+        prevSlide.classList.remove('active');
+        nextSlide.classList.add('active');
+
+        if (window.gsap) {
+            // Kill any running tweens on these elements to prevent conflicts
+            gsap.killTweensOf(prevSlide);
+            gsap.killTweensOf(nextSlide);
+
+            // Animate the outgoing slide
+            gsap.to(prevSlide, {
+                opacity: 0,
+                x: -40 * direction,
+                duration: 0.55,
+                ease: 'power2.inOut',
+                onComplete: () => gsap.set(prevSlide, { x: 0 })
+            });
+
+            // Animate the incoming slide
+            gsap.fromTo(nextSlide,
+                { opacity: 0, x: 40 * direction },
+                { opacity: 1, x: 0, duration: 0.55, ease: 'power2.inOut' }
+            );
+
+            // Stagger-reveal text elements inside the new slide
+            const textEls = nextSlide.querySelectorAll(
+                '.slide-badge, h3, p, .points-indicator-widget'
+            );
+            if (textEls.length > 0) {
+                gsap.killTweensOf(textEls);
+                gsap.fromTo(textEls,
+                    { opacity: 0, y: 12 },
+                    { opacity: 1, y: 0, stagger: 0.07, duration: 0.45, ease: 'power2.out', delay: 0.12 }
+                );
+            }
+
+            // Animate graphic with a springy pop
+            const graphicEl = nextSlide.querySelector('.slide-graphic');
+            if (graphicEl) {
+                gsap.killTweensOf(graphicEl);
+                gsap.fromTo(graphicEl,
+                    { opacity: 0, scale: 0.75, rotation: -8 * direction },
+                    { opacity: 1, scale: 1, rotation: 0, duration: 0.6, ease: 'back.out(1.5)', delay: 0.2 }
+                );
+            }
+        }
+
+        // Reset the progress bar animation
+        resetTimer();
+    }
+
+    // 3. Arrow Controllers
+    if (prevBtn) {
+        prevBtn.addEventListener('click', () => goToSlide(currentIndex - 1, true));
+    }
+    if (nextBtn) {
+        nextBtn.addEventListener('click', () => goToSlide(currentIndex + 1, true));
+    }
+
+    // 4. Progress bar + Auto-advance (simple setInterval, no rAF drift)
+    let intervalId = null;
+
+    function startProgress() {
+        if (!progressLine) return;
+        gsap.killTweensOf(progressLine);
+        gsap.fromTo(progressLine,
+            { width: '0%' },
+            { width: '100%', duration: duration / 1000, ease: 'none' }
+        );
+    }
+
+    function resetTimer() {
+        clearInterval(intervalId);
+        startProgress();
+        intervalId = setInterval(() => {
+            goToSlide(currentIndex + 1);
+        }, duration);
+    }
+
+    // Initial kickoff — set first slide visible immediately
+    gsap.set(slides[0], { opacity: 1 });
+    resetTimer();
+}
+
+// ----------------------------------------------------
+// 3D GLOBE CONSTELLATION CANVAS ANIMATOR
+// ----------------------------------------------------
+function setup3DGlobe() {
+    const canvas = document.getElementById('globe-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    const particles = [];
+    const numParticles = 460;
+    const radius = 95;
+    const fov = 350;
+    
+    // Accumulators for rotations
+    let rotX = 0;
+    let rotY = 0;
+    const rotSpeedY = 0.0035;
+    const rotSpeedX = 0.0015;
+
+    // Generate targets for each particle
+    for (let i = 0; i < numParticles; i++) {
+        // 1. Sphere Targets (Target state for scroll down)
+        const theta = Math.acos(Math.random() * 2 - 1);
+        const phi = Math.random() * 2 * Math.PI;
+        const sphereX = radius * 1.35 * Math.sin(theta) * Math.cos(phi);
+        const sphereY = radius * 1.35 * Math.sin(theta) * Math.sin(phi);
+        const sphereZ = radius * 1.35 * Math.cos(theta);
+
+        // 2. Realistic Multi-Lobe Brain Targets (Initial state for hero)
+        let brainX = 0, brainY = 0, brainZ = 0;
+        const lobeSelector = Math.random();
+        
+        if (lobeSelector < 0.45) {
+            // Frontal / Parietal Lobe (Large upper front segment)
+            const t = Math.acos(Math.random() * 2 - 1);
+            const p = Math.random() * 2 * Math.PI;
+            const r = radius * (0.85 + Math.random() * 0.15);
+            brainX = r * 1.15 * Math.sin(t) * Math.cos(p) + 20;
+            brainY = r * 0.95 * Math.cos(t) - 25;
+            brainZ = r * 1.0 * Math.sin(t) * Math.sin(p);
+        } else if (lobeSelector < 0.72) {
+            // Occipital / Cerebellum Lobe (Back lower segment)
+            const t = Math.acos(Math.random() * 2 - 1);
+            const p = Math.random() * 2 * Math.PI;
+            const r = radius * (0.75 + Math.random() * 0.15);
+            brainX = r * 0.95 * Math.sin(t) * Math.cos(p) - 50;
+            brainY = r * 0.85 * Math.cos(t) + 20;
+            brainZ = r * 0.9 * Math.sin(t) * Math.sin(p);
+        } else if (lobeSelector < 0.88) {
+            // Temporal Lobes (Side flaps)
+            const t = Math.acos(Math.random() * 2 - 1);
+            const p = Math.random() * 2 * Math.PI;
+            const r = radius * (0.65 + Math.random() * 0.15);
+            const side = Math.random() < 0.5 ? -1 : 1;
+            brainX = r * 0.85 * Math.sin(t) * Math.cos(p) + 15;
+            brainY = r * 0.65 * Math.cos(t) + 10;
+            brainZ = r * 0.75 * Math.sin(t) * Math.sin(p) + (side * 35);
+        } else {
+            // Brain Stem (Trailing downwards)
+            const progress = Math.random();
+            brainX = (Math.random() - 0.5) * 10 - 20;
+            brainY = 55 + progress * 90;
+            brainZ = (Math.random() - 0.5) * 10;
+        }
+        
+        // Add realistic fold undulations (gyri/sulci ripples)
+        if (lobeSelector < 0.88) {
+            const foldVal = 1.0 + (Math.sin(brainX * 0.08) * Math.cos(brainY * 0.08) * Math.sin(brainZ * 0.08)) * 0.09;
+            brainX *= foldVal;
+            brainY *= foldVal;
+            brainZ *= foldVal;
+        }
+
+        particles.push({
+            sphereX, sphereY, sphereZ,
+            brainX, brainY, brainZ,
+            x: brainX, y: brainY, z: brainZ,
+            color: getRandomBrandColor(),
+            size: Math.random() * 1.8 + 1.2
+        });
+    }
+
+    function getRandomBrandColor() {
+        // Return an index 0-3 instead of hardcoded strings to allow dynamic theme switching
+        return Math.floor(Math.random() * 4);
+    }
+
+    const scrollContainer = document.getElementById('login-overlay');
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+
+        // Calculate scroll ratio (morphing completes over 550px scroll height)
+        const scrollRatio = scrollContainer ? Math.min(1.0, scrollContainer.scrollTop / 550) : 0;
+
+        // Apply slow continuous spin rotations
+        rotY += rotSpeedY;
+        rotX += rotSpeedX;
+        const cosY = Math.cos(rotY);
+        const sinY = Math.sin(rotY);
+        const cosX = Math.cos(rotX);
+        const sinX = Math.sin(rotX);
+
+        // Interpolate target coordinates & project to 3D rotated space
+        const projected = [];
+        for (let i = 0; i < particles.length; i++) {
+            const p = particles[i];
+            
+            // Interpolate target based on scroll position
+            const tx = p.brainX + (p.sphereX - p.brainX) * scrollRatio;
+            const ty = p.brainY + (p.sphereY - p.brainY) * scrollRatio;
+            const tz = p.brainZ + (p.sphereZ - p.brainZ) * scrollRatio;
+
+            // Apply 3D rotation coordinates on interpolated targets
+            const rx1 = tx * cosY - tz * sinY;
+            const rz1 = tz * cosY + tx * sinY;
+            const ry2 = ty * cosX - rz1 * sinX;
+            const rz2 = rz1 * cosX + ty * sinX;
+
+            const scale = fov / (fov + rz2 + 180);
+            const x2d = centerX + rx1 * scale;
+            const y2d = centerY + ry2 * scale;
+            const depthAlpha = (rz2 + radius) / (2 * radius);
+
+            projected.push({
+                x2d, y2d, scale, depthAlpha, color: p.color, size: p.size,
+                x3d: rx1, y3d: ry2, z3d: rz2
+            });
+        }
+
+        // Sort projected particles by Z axis for depth drawing ordering
+        projected.sort((a, b) => b.z3d - a.z3d);
+
+        // Draw mesh constellation lines
+        const maxDist = 38; // connection threshold
+        for (let i = 0; i < projected.length; i++) {
+            const p = projected[i];
+            
+            const isDark = document.body.classList.contains('dark-theme');
+            // Provide dynamically evaluated color palette based on current theme
+            const colorPalette = isDark 
+                ? ['#8052ff', '#ffb829', '#15846e', '#ffffff'] 
+                : ['#5c2bbd', '#d68b00', '#0f6151', '#1d1c16'];
+            const actualColor = colorPalette[p.color];
+            
+            for (let j = i + 1; j < projected.length; j++) {
+                const other = projected[j];
+                const dx = p.x3d - other.x3d;
+                const dy = p.y3d - other.y3d;
+                const dz = p.z3d - other.z3d;
+                const dist = Math.hypot(dx, dy, dz);
+
+                if (dist < maxDist) {
+                    ctx.strokeStyle = actualColor;
+                    ctx.globalAlpha = (1.0 - (dist / maxDist)) * (isDark ? 0.12 : 0.25) * p.depthAlpha;
+                    ctx.lineWidth = 0.5;
+                    ctx.beginPath();
+                    ctx.moveTo(p.x2d, p.y2d);
+                    ctx.lineTo(other.x2d, other.y2d);
+                    ctx.stroke();
+                }
+            }
+
+            // Draw triangles
+            ctx.fillStyle = actualColor;
+            ctx.globalAlpha = (isDark ? 0.15 : 0.4) + p.depthAlpha * (isDark ? 0.85 : 0.6);
+            ctx.beginPath();
+            const sz = p.size * p.scale;
+            ctx.moveTo(p.x2d, p.y2d - sz);
+            ctx.lineTo(p.x2d - sz, p.y2d + sz);
+            ctx.lineTo(p.x2d + sz, p.y2d + sz);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        ctx.globalAlpha = 1.0;
+        requestAnimationFrame(animate);
+    }
+
+    animate();
+}
+
+// ----------------------------------------------------
+// SCROLL-DRIVEN 3D TEAM CARD ROTATION ANIMATION (120HZ COMPLIANT)
+// ----------------------------------------------------
+function setupTeamScrollAnimation() {
+    if (typeof gsap === 'undefined') return;
+    
+    // Register GSAP ScrollTrigger plugin
+    if (typeof ScrollTrigger !== 'undefined') {
+        gsap.registerPlugin(ScrollTrigger);
+    }
+    
+    const members = gsap.utils.toArray('.team-member-item');
+    if (members.length === 0) return;
+    
+    // Staggered slide up with 3D tilt (120hz compliant)
+    gsap.fromTo(members, 
+        {
+            opacity: 0,
+            y: 50,
+            rotationX: 12,
+            scale: 0.94,
+            transformOrigin: "center bottom"
+        },
+        {
+            opacity: 1,
+            y: 0,
+            rotationX: 0,
+            scale: 1,
+            stagger: 0.12,
+            ease: "power2.out",
+            scrollTrigger: {
+                trigger: ".team-members-grid",
+                scroller: "#login-overlay",
+                start: "top 85%",
+                end: "top 50%",
+                scrub: 0.5,
+                markers: false
+            }
+        }
+    );
+}
+
+// ----------------------------------------------------
+// HOMEPAGE ONLY: ScrollTrigger Animations for Collaborators list (Cipher Digital inspired)
+// ----------------------------------------------------
+function setupLandingScrollAnimations() {
+    if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
+
+    // Loop through each dynamic collaborator section to setup ScrollTrigger timelines
+    document.querySelectorAll('.partnerships-section').forEach((sec) => {
+        // 1. Brand logo rotation (supporting vector and circle badges)
+        const brandLogo = sec.querySelector('.adnoc-brand-logo .adnoc-svg-logo, .adnoc-brand-logo .partner-circle-logo');
+        if (brandLogo) {
+            gsap.fromTo(brandLogo, 
+                { rotation: -90, scale: 0.85 },
+                {
+                    rotation: 360,
+                    scale: 1.15,
+                    ease: "none",
+                    scrollTrigger: {
+                        trigger: sec,
+                        scroller: "#login-overlay",
+                        start: 'top 85%',
+                        end: 'bottom 40%',
+                        scrub: 0.5
+                    }
+                }
+            );
+        }
+
+        // 2. Banner Image Zoom & Clip-Path Inset Reveal (Cipher Digital Style)
+        const promoImg = sec.querySelector('.partnerships-promo-img');
+        if (promoImg) {
+            gsap.fromTo(promoImg, 
+                { clipPath: "inset(100% 0% 0% 0%)", scale: 1.18, y: 30 },
+                {
+                    clipPath: "inset(0% 0% 0% 0%)",
+                    scale: 1,
+                    y: 0,
+                    ease: "power2.out",
+                    scrollTrigger: {
+                        trigger: sec,
+                        scroller: "#login-overlay",
+                        start: 'top 85%',
+                        end: 'bottom 25%',
+                        scrub: 1
+                    }
+                }
+            );
+        }
+
+        // 3. Text Column reveal
+        const textChildren = gsap.utils.toArray(sec.querySelectorAll('.partnerships-text-col > *:not(.partnerships-rewards-row)'));
+        if (textChildren.length > 0) {
+            gsap.fromTo(textChildren,
+                { opacity: 0, y: 35, skewY: 1.5 },
+                {
+                    opacity: 1,
+                    y: 0,
+                    skewY: 0,
+                    stagger: 0.14,
+                    duration: 0.95,
+                    ease: "power3.out",
+                    scrollTrigger: {
+                        trigger: sec,
+                        scroller: "#login-overlay",
+                        start: 'top 75%'
+                    }
+                }
+            );
+        }
+
+        // 4. Rewards cards entrance stagger
+        const rewardCards = gsap.utils.toArray(sec.querySelectorAll('.partnerships-rewards-row .partnership-reward-card'));
+        if (rewardCards.length > 0) {
+            gsap.fromTo(rewardCards,
+                { opacity: 0, y: 25, scale: 0.94 },
+                {
+                    opacity: 1,
+                    y: 0,
+                    scale: 1,
+                    stagger: 0.1,
+                    duration: 0.75,
+                    ease: "back.out(1.3)",
+                    scrollTrigger: {
+                        trigger: sec.querySelector('.partnerships-rewards-row'),
+                        scroller: "#login-overlay",
+                        start: 'top 92%'
+                    }
+                }
+            );
+        }
+
+        // 5. ScrollTrigger Blueprint Grid Line drawing
+        const horLines = sec.querySelectorAll('.blueprint-line.line-top, .blueprint-line.line-bottom');
+        const verLines = sec.querySelectorAll('.blueprint-line.line-center-ver');
+        const nodes = sec.querySelectorAll('.grid-node');
+
+        gsap.fromTo(horLines, { width: '0%' }, {
+            width: '100%',
+            scrollTrigger: {
+                trigger: sec,
+                scroller: "#login-overlay",
+                start: 'top 95%',
+                end: 'top 60%',
+                scrub: 0.8
+            }
+        });
+        gsap.fromTo(verLines, { height: '0%' }, {
+            height: '100%',
+            scrollTrigger: {
+                trigger: sec,
+                scroller: "#login-overlay",
+                start: 'top 95%',
+                end: 'top 50%',
+                scrub: 0.8
+            }
+        });
+        gsap.fromTo(nodes, { scale: 0 }, {
+            scale: 1,
+            scrollTrigger: {
+                trigger: sec,
+                scroller: "#login-overlay",
+                start: 'top 90%',
+                end: 'top 65%',
+                scrub: 0.5
+            }
+        });
+    });
+
+    // 6. ScrollTrigger Blueprint Grid Line drawing for Manifesto
+    const mGrid = document.querySelector('#manifesto');
+    if (mGrid) {
+        const horLines = mGrid.querySelectorAll('.blueprint-line.line-top, .blueprint-line.line-bottom');
+        const verLines = mGrid.querySelectorAll('.blueprint-line.line-card-split-1, .blueprint-line.line-card-split-2');
+        const nodes = mGrid.querySelectorAll('.grid-node');
+
+        gsap.fromTo(horLines, { width: '0%' }, {
+            width: '100%',
+            scrollTrigger: {
+                trigger: '#manifesto',
+                scroller: "#login-overlay",
+                start: 'top 95%',
+                end: 'top 60%',
+                scrub: 0.8
+            }
+        });
+        gsap.fromTo(verLines, { height: '0%' }, {
+            height: '100%',
+            scrollTrigger: {
+                trigger: '#manifesto',
+                scroller: "#login-overlay",
+                start: 'top 95%',
+                end: 'top 50%',
+                scrub: 0.8
+            }
+        });
+        gsap.fromTo(nodes, { scale: 0 }, {
+            scale: 1,
+            scrollTrigger: {
+                trigger: '#manifesto',
+                scroller: "#login-overlay",
+                start: 'top 90%',
+                end: 'top 65%',
+                scrub: 0.5
+            }
+        });
+    }
+}
+
+// ----------------------------------------------------
+// BIA BRAND LOGO: Animates the boxes to shift on hover (Cipher Digital inspired)
+// ----------------------------------------------------
+function setupLogoAnimation() {
+    if (typeof gsap === 'undefined') return;
+    const logo = document.getElementById('landing-logo');
+    if (!logo) return;
+
+    const logoBoxes = logo.querySelectorAll('.logo-box');
+    const svgEl = logo.querySelector('.bia-logo-svg');
+    
+    // Set initial transform state
+    gsap.set(svgEl, { rotation: 45 });
+
+    // Auto entrance intro
+    gsap.fromTo(logoBoxes, 
+        { scale: 0 },
+        { scale: 1, duration: 0.8, stagger: 0.08, ease: "back.out(2)" }
+    );
+
+    // Create the automatic periodic loop timeline (repeats indefinitely every 4.5s)
+    const loopTl = gsap.timeline({ repeat: -1, repeatDelay: 4.5 });
+
+    // Step 1: Expand boxes and spin 180 degrees (from 45 to 225)
+    loopTl.to(logoBoxes, {
+        x: (i, el) => {
+            if (el.classList.contains('box-purple')) return -4;
+            if (el.classList.contains('box-white')) return -4;
+            if (el.classList.contains('box-green')) return 4;
+            if (el.classList.contains('box-amber')) return 4;
+            return 0;
+        },
+        y: (i, el) => {
+            if (el.classList.contains('box-purple')) return -4;
+            if (el.classList.contains('box-green')) return -4;
+            if (el.classList.contains('box-white')) return 4;
+            if (el.classList.contains('box-amber')) return 4;
+            return 0;
+        },
+        duration: 0.5,
+        ease: "power2.out"
+    })
+    .to(svgEl, { 
+        rotation: 225, 
+        duration: 0.6, 
+        ease: "power2.inOut" 
+    }, "<")
+
+    // Step 2: Hold expanded state for a short moment
+    .to({}, { duration: 0.8 })
+
+    // Step 3: Collapse boxes back and complete the spin to 405deg (360 + 45)
+    .to(logoBoxes, {
+        x: 0,
+        y: 0,
+        duration: 0.5,
+        ease: "power2.inOut"
+    })
+    .to(svgEl, { 
+        rotation: 405, 
+        duration: 0.6, 
+        ease: "power2.inOut",
+        onComplete: () => {
+            // Reset rotation back to 45deg silently for infinite loop integrity
+            gsap.set(svgEl, { rotation: 45 });
+        }
+    }, "<");
+}
+
+// ----------------------------------------------------
+// DYNAMIC COLLABORATOR PARTNERSHIP ENGINE
+// ----------------------------------------------------
+let appPartners = [];
+
+function setupLogoCarousel() {
+    const container = document.getElementById('logo-carousel-root');
+    if (!container) return;
+
+    // ── Partner Brand SVGs (BIA ecosystem) ──────────────────────────────────
+    const allLogos = [
+        {
+            name: 'ADNOC', id: 1,
+            svg: `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" width="80" height="80">
+                <circle cx="60" cy="60" r="56" fill="#005B9A"/>
+                <path d="M60 14 C80 34 80 86 60 106 C40 86 40 34 60 14Z" fill="#DC2626"/>
+                <circle cx="60" cy="60" r="24" fill="#005B9A" stroke="#fff" stroke-width="3"/>
+                <text x="60" y="66" text-anchor="middle" font-family="Arial Black" font-weight="900" font-size="16" fill="#FFFFFF">A</text>
+            </svg>`
+        },
+        {
+            name: 'VISA', id: 2,
+            svg: `<svg viewBox="0 0 160 52" xmlns="http://www.w3.org/2000/svg" width="110" height="36">
+                <text x="0" y="44" font-family="Arial Black,sans-serif" font-weight="900" font-size="48" fill="#1A1F71" letter-spacing="-2">VISA</text>
+            </svg>`
+        },
+        {
+            name: 'TOYOTA', id: 3,
+            svg: `<svg viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg" width="90" height="60">
+                <ellipse cx="60" cy="40" rx="56" ry="24" stroke="#EB0A1E" stroke-width="5" fill="none"/>
+                <ellipse cx="60" cy="40" rx="32" ry="16" stroke="#EB0A1E" stroke-width="5" fill="none"/>
+                <ellipse cx="60" cy="40" rx="11" ry="24" stroke="#EB0A1E" stroke-width="5" fill="none"/>
+            </svg>`
+        },
+        {
+            name: 'IKEA', id: 4,
+            svg: `<svg viewBox="0 0 140 56" xmlns="http://www.w3.org/2000/svg" width="110" height="44">
+                <rect width="140" height="56" rx="6" fill="#003399"/>
+                <text x="70" y="40" text-anchor="middle" font-family="Arial Black,sans-serif" font-weight="900" font-size="32" fill="#FFCC00">IKEA</text>
+            </svg>`
+        },
+        {
+            name: 'EBAY', id: 5,
+            svg: `<svg viewBox="0 0 148 60" xmlns="http://www.w3.org/2000/svg" width="110" height="44">
+                <text x="0" y="50" font-family="Arial Black,sans-serif" font-weight="900" font-size="56">
+                    <tspan fill="#E53238">e</tspan><tspan fill="#0064D2">b</tspan><tspan fill="#F5AF02">a</tspan><tspan fill="#86B817">y</tspan>
+                </text>
+            </svg>`
+        },
+        {
+            name: 'BOSE', id: 6,
+            svg: `<svg viewBox="0 0 130 40" xmlns="http://www.w3.org/2000/svg" width="110" height="34">
+                <text x="0" y="34" font-family="Arial Black,sans-serif" font-weight="900" font-size="38" fill="#dfb15b" letter-spacing="3">BOSE</text>
+            </svg>`
+        },
+        {
+            name: 'H&M', id: 7,
+            svg: `<svg viewBox="0 0 120 56" xmlns="http://www.w3.org/2000/svg" width="100" height="46">
+                <rect width="120" height="56" rx="6" fill="#E50010"/>
+                <text x="60" y="40" text-anchor="middle" font-family="Arial Black,sans-serif" font-weight="900" font-size="28" fill="#FFFFFF">H&amp;M</text>
+            </svg>`
+        },
+        {
+            name: 'SHUKRAN', id: 8,
+            svg: `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" width="76" height="76">
+                <circle cx="60" cy="60" r="56" fill="#C8102E"/>
+                <polygon points="60,18 68,46 98,46 74,64 82,92 60,74 38,92 46,64 22,46 52,46" fill="#FFD700"/>
+                <text x="60" y="108" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="9" fill="#FFFFFF" letter-spacing="0.8">SHUKRAN</text>
+            </svg>`
+        },
+    ];
+
+    // ── Replicate React template logic exactly ───────────────────────────────
+    // shuffleArray
+    const shuffled = [...allLogos].sort(() => Math.random() - 0.5);
+
+    const columnCount = 4;
+
+    // distributeLogos
+    const columns = Array.from({ length: columnCount }, () => []);
+    shuffled.forEach((logo, i) => columns[i % columnCount].push(logo));
+    const maxLen = Math.max(...columns.map(c => c.length));
+    columns.forEach(col => {
+        while (col.length < maxLen) col.push(shuffled[Math.floor(Math.random() * shuffled.length)]);
+    });
+
+    container.innerHTML = '';
+
+    // Build column slots
+    const colStates = columns.map((logos, colIdx) => {
+        const col = document.createElement('div');
+        col.className = 'logo-carousel-col';
+
+        const slot = document.createElement('div');
+        slot.className = 'logo-slot';
+        col.appendChild(slot);
+        container.appendChild(col);
+
+        return { slot, logos, prevIndex: -1, currentItem: null };
+    });
+
+    // Create a logo DOM item (hidden by default — JS animates it in)
+    function createItem(logo) {
+        const item = document.createElement('div');
+        item.className = 'logo-slot-item';
+        item.innerHTML = `<div class="logo-slot-svg">${logo.svg}</div><span class="logo-slot-name">${logo.name}</span>`;
+        // Start state: y+10%, blur(8px), opacity:0  →  matches template initial
+        item.style.cssText = 'position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.5rem;opacity:0;transform:translateY(10%);filter:blur(8px);';
+        return item;
+    }
+
+    // Seed first item visible immediately (no animation)
+    colStates.forEach(({ slot, logos }) => {
+        const item = createItem(logos[0]);
+        slot.appendChild(item);
+        // Instantly show first logo — matches React's initial mount
+        item.style.opacity = '1';
+        item.style.transform = 'translateY(0)';
+        item.style.filter = 'blur(0px)';
+    });
+    colStates.forEach(s => {
+        s.currentItem = s.slot.querySelector('.logo-slot-item');
+        s.prevIndex = 0;
+    });
+
+    // ── Shared ticker: exactly matches React's setInterval(updateTime, 100) ──
+    const cycleInterval = 2000; // ms per logo — same as template
+    let currentTime = 0;
+
+    setInterval(() => {
+        currentTime += 100;
+
+        colStates.forEach((state, colIdx) => {
+            const columnDelay = colIdx * 200; // same as template: index * 200
+            const adjustedTime = (currentTime + columnDelay) % (cycleInterval * state.logos.length);
+            const newIndex = Math.floor(adjustedTime / cycleInterval);
+
+            if (newIndex === state.prevIndex) return;
+            state.prevIndex = newIndex;
+
+            // ── EXIT: y → -20%, opacity → 0, blur(6px) [tween ease-in 0.3s] ──
+            const exiting = state.currentItem;
+            if (exiting) {
+                exiting.style.transition = 'opacity 0.3s ease-in, transform 0.3s ease-in, filter 0.3s ease-in';
+                exiting.style.opacity = '0';
+                exiting.style.transform = 'translateY(-20%)';
+                exiting.style.filter = 'blur(6px)';
+                setTimeout(() => exiting.remove(), 340);
+            }
+
+            // ── ENTER: spring cubic-bezier simulates stiffness:300, damping:20, bounce:0.2 ──
+            const entering = createItem(state.logos[newIndex]);
+            state.slot.appendChild(entering);
+            state.currentItem = entering;
+
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    entering.style.transition =
+                        'opacity 0.5s ease,' +
+                        'transform 0.5s cubic-bezier(0.34,1.56,0.64,1),' +
+                        'filter 0.5s ease';
+                    entering.style.opacity = '1';
+                    entering.style.transform = 'translateY(0)';
+                    entering.style.filter = 'blur(0px)';
+                });
+            });
+        });
+    }, 100);
+}
+
+async function loadDynamicPartners() {
+    try {
+        const response = await fetch(`${API_BASE}/partners`);
+        const data = await response.json();
+        appPartners = data;
+
+        const container = document.getElementById('dynamic-partnerships-container');
+        if (container) {
+            container.innerHTML = data.map((partner, index) => {
+                const isAdnoc = partner.id === 'adnoc';
+                const logoHtml = isAdnoc ? `
+                    <svg class="adnoc-svg-logo" viewBox="0 0 100 100" width="38" height="38">
+                        <circle cx="50" cy="50" r="46" fill="#005A9C" />
+                        <path d="M50,15 C68,35 68,65 50,85 C32,65 32,35 50,15 Z" fill="#E30613" />
+                        <polygon points="50,28 58,48 78,48 62,60 68,80 50,68 32,80 38,60 22,48 42,48" fill="#FFFFFF" />
+                    </svg>
+                ` : `
+                    <div class="partner-circle-logo" style="background-color: ${partner.logoColor};">
+                        <i class="fa-solid fa-handshake"></i>
+                    </div>
+                `;
+
+                return `
+                    <section class="landing-section reveal-on-scroll partnerships-section" id="partnerships-${partner.id}">
+                        <!-- Blueprint lines and nodes (Cipher Digital style) -->
+                        <div class="section-blueprint-grid">
+                            <div class="blueprint-line line-top"></div>
+                            <div class="blueprint-line line-bottom"></div>
+                            <div class="blueprint-line line-center-ver"></div>
+                            <div class="grid-node bnode-tl"></div>
+                            <div class="grid-node bnode-tr"></div>
+                            <div class="grid-node bnode-bl"></div>
+                            <div class="grid-node bnode-br"></div>
+                        </div>
+                        
+                        <div class="partnerships-layout-container">
+                            <!-- Image Column -->
+                            <div class="partnerships-image-col">
+                                <img src="${partner.image}" alt="${partner.name}" class="partnerships-promo-img">
+                                <div class="image-overlay-glow"></div>
+                            </div>
+
+                            <!-- Text & Rewards Column -->
+                            <div class="partnerships-text-col">
+                                <div class="adnoc-header-branding">
+                                    <div class="adnoc-brand-logo">
+                                        ${logoHtml}
+                                        <span class="adnoc-logo-text">${partner.name}</span>
+                                    </div>
+                                    <span class="section-badge badge-blue">${partner.badge}</span>
+                                </div>
+
+                                <h2 class="partnerships-title">${partner.title}</h2>
+                                <p class="partnerships-subtitle">${partner.subtitle}</p>
+                                
+                                <div class="partnership-disclosure">
+                                    <i class="fa-solid fa-circle-info"></i>
+                                    <span>${partner.disclosure}</span>
+                                </div>
+
+                                <!-- Rewards Cards Row -->
+                                <div class="partnerships-rewards-row">
+                                    ${partner.rewards.map(r => `
+                                        <div class="partnership-reward-card">
+                                            <div class="reward-icon-badge"><i class="fa-solid ${r.icon || 'fa-gift'}"></i></div>
+                                            <h4>${r.name}</h4>
+                                            <span class="reward-cost notranslate">${r.cost} Points <span class="reward-cash">(${r.cash})</span></span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                `;
+            }).join('');
+        }
+
+        // Populate dashboard components if active
+        populateDashboardPartners();
+
+        // Run ScrollTrigger setup now that DOM components exist
+        setupLandingScrollAnimations();
+        setupScrollReveals();
+    } catch (err) {
+        console.error('Error loading dynamic partners:', err);
+    }
+}
+
+let selectedRedemption = null;
+
+function populateDashboardPartners() {
+    const catalog = document.getElementById('dashboard-rewards-catalog');
+    if (!catalog) return;
+
+    catalog.innerHTML = '';
+
+    if (!appPartners.length) {
+        catalog.innerHTML = '<p class="no-data">No partner vouchers registered yet.</p>';
+        return;
+    }
+
+    const currentPoints = appState.userProfile ? appState.userProfile.points_balance : 0;
+
+    appPartners.forEach(partner => {
+        const isAdnoc = partner.id === 'adnoc';
+        
+        // Brand logo markup
+        const logoHtml = isAdnoc ? `
+            <svg class="adnoc-svg-logo" viewBox="0 0 100 100" width="16" height="16">
+                <circle cx="50" cy="50" r="46" fill="#005A9C" />
+                <path d="M50,15 C68,35 68,65 50,85 C32,65 32,35 50,15 Z" fill="#E30613" />
+                <polygon points="50,28 58,48 78,48 62,60 68,80 50,68 32,80 38,60 22,48 42,48" fill="#FFFFFF" />
+            </svg>
+        ` : `
+            <div class="partner-circle-logo" style="background-color: ${partner.logoColor}; width: 16px; height: 16px; font-size: 0.6rem; line-height: 16px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%;">
+                <i class="fa-solid fa-handshake" style="font-size: 8px;"></i>
+            </div>
+        `;
+
+        partner.rewards.forEach(reward => {
+            const pointsNeeded = reward.cost;
+            const isLocked = currentPoints < pointsNeeded;
+
+            const card = document.createElement('div');
+            card.className = 'reward-catalog-card';
+            card.innerHTML = `
+                <div class="reward-card-image-wrap">
+                    <img src="${reward.image || partner.image}" alt="${partner.name}" class="reward-card-img">
+                    <div class="reward-card-image-overlay"></div>
+                    <div class="reward-card-brand-badge">
+                        ${logoHtml}
+                        <span>${partner.name}</span>
+                    </div>
+                </div>
+                <div class="reward-card-body">
+                    <div class="reward-card-title">${reward.name}</div>
+                    <div class="reward-card-pts">
+                        ${formatNumber(pointsNeeded)} <span style="font-size: 0.75rem; font-weight: 500; color: rgba(236,235,227,0.5); margin-right: 0.25rem;">pts</span>
+                        <span class="reward-card-cash">(${reward.cash})</span>
+                    </div>
+                    <button class="reward-card-btn" ${isLocked ? 'disabled' : ''}>
+                        ${isLocked ? '<i class="fa-solid fa-lock" style="margin-right: 4px;"></i> Locked' : 'Redeem'}
+                    </button>
+                </div>
+            `;
+
+            // Action click
+            const btn = card.querySelector('.reward-card-btn');
+            if (!isLocked && btn) {
+                btn.addEventListener('click', () => {
+                    openRedemptionModal(partner, reward);
+                });
+            }
+
+            catalog.appendChild(card);
+        });
+    });
+
+    // Staggered GSAP entrance animation for rewards catalog cards
+    if (window.gsap) {
+        gsap.fromTo(catalog.querySelectorAll('.reward-catalog-card'),
+            { opacity: 0, y: 15, scale: 0.96 },
+            { opacity: 1, y: 0, scale: 1, duration: 0.45, stagger: 0.05, ease: 'power2.out', overwrite: 'auto' }
+        );
+    }
+}
+
+// ──────────────────────────────────────────────────────────
+// BEAUTIFUL CUSTOM REDEMPTION MODAL LOGIC
+// ──────────────────────────────────────────────────────────
+function openRedemptionModal(partner, reward) {
+    selectedRedemption = { partner, reward };
+
+    // Set texts
+    document.getElementById('redemption-partner-name').textContent = partner.name;
+    document.getElementById('redemption-reward-name').textContent = reward.name;
+    document.getElementById('redemption-points-cost').textContent = `${formatNumber(reward.cost)} Points`;
+    document.getElementById('redemption-cash-value').textContent = reward.cash;
+
+    // Reset success state
+    document.getElementById('redemption-success-box').style.display = 'none';
+    document.getElementById('redemption-modal-notice-text').style.display = 'block';
+    document.getElementById('redemption-modal-footer').style.display = 'flex';
+    document.getElementById('redemption-modal-title').textContent = 'Confirm Voucher Redemption';
+
+    const modal = document.getElementById('redemption-modal');
+    modal.style.display = 'flex';
+    if (window.gsap) {
+        gsap.fromTo(modal, { opacity: 0 }, { opacity: 1, duration: 0.25 });
+        gsap.fromTo(modal.querySelector('.custom-modal-card'), { scale: 0.85, y: 15 }, { scale: 1, y: 0, duration: 0.35, ease: 'back.out(1.5)' });
+    } else {
+        modal.style.opacity = '1';
+    }
+}
+
+function closeRedemptionModal() {
+    selectedRedemption = null;
+    const modal = document.getElementById('redemption-modal');
+    if (window.gsap) {
+        gsap.to(modal, {
+            opacity: 0, duration: 0.2, onComplete: () => {
+                modal.style.display = 'none';
+            }
+        });
+    } else {
+        modal.style.display = 'none';
+    }
+}
+
+function initRedemptionModalEvents() {
+    const closeBtn = document.getElementById('redemption-modal-close');
+    const cancelBtn = document.getElementById('btn-redemption-cancel');
+    const confirmBtn = document.getElementById('btn-redemption-confirm');
+    const copyBtn = document.getElementById('btn-copy-voucher-code');
+
+    if (closeBtn) closeBtn.addEventListener('click', closeRedemptionModal);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeRedemptionModal);
+
+    if (confirmBtn) {
+        confirmBtn.addEventListener('click', async () => {
+            if (!selectedRedemption || !appState.currentUser) return;
+            
+            const { partner, reward } = selectedRedemption;
+            const pointsNeeded = reward.cost;
+            const cashVal = parseInt(reward.cash.replace(/[^0-9]/g, '')) || 0;
+
+            confirmBtn.disabled = true;
+            confirmBtn.textContent = 'Processing...';
+
+            try {
+                const response = await fetch(`${API_BASE}/redeem/collaborator`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: appState.currentUser.user_id,
+                        partner_id: partner.id,
+                        reward_name: reward.name,
+                        points_deducted: pointsNeeded,
+                        discount_aed: cashVal
+                    })
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Redemption failed');
+
+                // Render success details
+                document.getElementById('generated-voucher-code').textContent = data.voucher_code;
+                document.getElementById('redemption-voucher-instructions-text').textContent = `Show this code at any ${partner.name} checkout counter to redeem.`;
+
+                // Animate showing success box
+                document.getElementById('redemption-modal-notice-text').style.display = 'none';
+                document.getElementById('redemption-modal-footer').style.display = 'none';
+                document.getElementById('redemption-modal-title').textContent = 'Voucher Redeemed!';
+                
+                const successBox = document.getElementById('redemption-success-box');
+                successBox.style.display = 'flex';
+                if (window.gsap) {
+                    gsap.fromTo(successBox, { opacity: 0, scale: 0.9, y: 5 }, { opacity: 1, scale: 1, y: 0, duration: 0.35, ease: 'power2.out' });
+                }
+
+                showToast('Redemption Successful! 🛍️', `Deducted ${formatNumber(pointsNeeded)} pts for ${reward.name}.`, 'success');
+
+                // Refresh state
+                await loadUserProfile(appState.currentUser.user_id);
+            } catch (err) {
+                showToast('Redemption Error', err.message, 'error');
+            } finally {
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = 'Deduct & Redeem';
+            }
+        });
+    }
+
+    if (copyBtn) {
+        copyBtn.addEventListener('click', () => {
+            const code = document.getElementById('generated-voucher-code').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                showToast('Code Copied! 📋', 'Voucher code copied to clipboard.', 'info');
+                copyBtn.innerHTML = '<i class="fa-solid fa-check" style="color: #10b981;"></i>';
+                setTimeout(() => {
+                    copyBtn.innerHTML = '<i class="fa-solid fa-copy"></i>';
+                }, 2000);
+            });
+        });
+    }
+}
+
+// Bind admin panel collaborator registration form submission
+const partnerForm = document.getElementById('admin-new-partner-form');
+if (partnerForm) {
+    partnerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const fileInput = document.getElementById('partner-form-image');
+        const file = fileInput.files[0];
+        let base64Image = "";
+
+        if (file) {
+            try {
+                base64Image = await convertFileToBase64(file);
+            } catch (err) {
+                showToast('Upload Error', 'Failed to read image file.', 'error');
+                return;
+            }
+        }
+        
+                    const rawRewards = [
+                {
+                    name: document.getElementById('reward-1-name').value.trim(),
+                    cost: document.getElementById('reward-1-cost').value.trim(),
+                    cash: document.getElementById('reward-1-cash').value.trim(),
+                    icon: "fa-mug-hot"
+                },
+                {
+                    name: document.getElementById('reward-2-name').value.trim(),
+                    cost: document.getElementById('reward-2-cost').value.trim(),
+                    cash: document.getElementById('reward-2-cash').value.trim(),
+                    icon: "fa-gift"
+                },
+                {
+                    name: document.getElementById('reward-3-name').value.trim(),
+                    cost: document.getElementById('reward-3-cost').value.trim(),
+                    cash: document.getElementById('reward-3-cash').value.trim(),
+                    icon: "fa-car-side"
+                }
+            ];
+
+            const rewards = [];
+            for (let i = 0; i < rawRewards.length; i++) {
+                const r = rawRewards[i];
+                const isFilled = r.name !== "" || r.cost !== "" || r.cash !== "";
+                const isComplete = r.name !== "" && r.cost !== "" && r.cash !== "";
+                
+                if (isFilled && !isComplete) {
+                    showToast('Validation Error', `Reward ${i+1} is partially filled. Please fill out all fields for this reward, or clear them all.`, 'error');
+                    return;
+                }
+                
+                if (isComplete) {
+                    rewards.push({
+                        name: r.name,
+                        cost: parseInt(r.cost),
+                        cash: r.cash,
+                        icon: r.icon
+                    });
+                }
+            }
+
+            if (rewards.length === 0) {
+                showToast('Validation Error', 'You must provide at least 1 complete reward.', 'error');
+                return;
+            }
+
+            const payload = {
+                name: document.getElementById('partner-form-name').value.trim(),
+                title: document.getElementById('partner-form-title').value.trim(),
+                subtitle: document.getElementById('partner-form-subtitle').value.trim(),
+                image: base64Image,
+                logoColor: document.getElementById('partner-form-color').value,
+                rewards: rewards
+            };
+
+        try {
+            const response = await fetch(`${API_BASE}/partners`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'Failed to register collaborator');
+
+            alert('Collaborator successfully registered! Refreshing public catalog.');
+            partnerForm.reset();
+            loadDynamicPartners();
+        } catch (err) {
+            alert(`Error: ${err.message}`);
+        }
+    });
+}
+
+// Scroll Indicator Button click action binding
+const scrollDownBtn = document.getElementById('btn-scroll-down');
+if (scrollDownBtn) {
+    scrollDownBtn.addEventListener('click', () => {
+        const overlay = document.getElementById('login-overlay');
+        const target = document.getElementById('dynamic-partnerships-container');
+        if (overlay && target) {
+            overlay.scrollTo({
+                top: target.offsetTop - 40,
+                behavior: 'smooth'
+            });
+        }
+    });
+}
+
+// ──────────────────────────────────────────────────────────
+// GLOBAL TOAST NOTIFICATION SYSTEM
+// ──────────────────────────────────────────────────────────
+const TOAST_ICONS = {
+    success: '<i class="fa-solid fa-circle-check"></i>',
+    error:   '<i class="fa-solid fa-circle-xmark"></i>',
+    info:    '<i class="fa-solid fa-circle-info"></i>',
+    points:  '<i class="fa-solid fa-coins"></i>'
+};
+
+function showToast(title, message, type = 'success', duration = 4000, action = null) {
+    const container = document.getElementById('bia-toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `bia-toast toast-${type}`;
+    toast.innerHTML = `
+        <div class="bia-toast-icon">${TOAST_ICONS[type] || TOAST_ICONS.info}</div>
+        <div class="bia-toast-body">
+            <div class="bia-toast-title">${title}</div>
+            ${message ? `<div class="bia-toast-msg">${message}</div>` : ''}
+        </div>
+        ${action ? `<button type="button" class="bia-toast-action">${action.label}</button>` : ''}
+        ${action ? '<div class="bia-toast-progress" aria-hidden="true"></div>' : ''}
+    `;
+
+    container.appendChild(toast);
+
+    let dismissed = false;
+    const dismiss = () => {
+        if (dismissed) return;
+        dismissed = true;
+        if (window.gsap) {
+            gsap.to(toast, {
+                opacity: 0, x: 60, scale: 0.9, duration: 0.28, ease: 'power2.in',
+                onComplete: () => toast.remove()
+            });
+        } else {
+            toast.classList.add('bia-toast-leaving');
+            setTimeout(() => toast.remove(), 280);
+        }
+    };
+
+    const actionButton = toast.querySelector('.bia-toast-action');
+    if (actionButton) {
+        actionButton.addEventListener('click', async () => {
+            if (actionButton.disabled) return;
+            actionButton.disabled = true;
+            actionButton.textContent = 'Undoing...';
+            try {
+                await action.onClick();
+                dismiss();
+            } catch (err) {
+                dismiss();
+                showToast('Undo Failed', err.message || 'The change could not be reverted.', 'error');
+            }
+        });
+    }
+
+    if (window.gsap) {
+        gsap.fromTo(toast,
+            { opacity: 0, x: 60, scale: 0.92 },
+            { opacity: 1, x: 0, scale: 1, duration: 0.38, ease: 'back.out(1.6)' }
+        );
+    }
+
+    setTimeout(dismiss, duration);
+    return toast;
+}
+
+function showPointsUndoToast(message, ledgerId, userId) {
+    showToast('Points Adjusted! ⚡', message, 'points', 2000, {
+        label: 'Undo',
+        onClick: async () => {
+            const response = await fetch(`${API_BASE}/admin/adjust-points/${ledgerId}/undo`, { method: 'POST' });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'Failed to undo adjustment.');
+
+            await loadAdminStudents();
+            const detailModal = document.getElementById('student-detail-modal');
+            if (detailModal && detailModal.style.display === 'flex') {
+                await showStudentDetailModal(userId);
+            }
+            showToast('Adjustment Undone', 'The student\'s points balance has been restored.', 'success', 2500);
+        }
+    });
+}
+
+// ──────────────────────────────────────────────────────────
+// HERO STAT COUNTERS ANIMATION (fires when landing page loads)
+// ──────────────────────────────────────────────────────────
+function animateHeroStats() {
+    const statNums = document.querySelectorAll('.hero-stat-num[data-target]');
+    if (!statNums.length) return;
+
+    statNums.forEach(el => {
+        const target = parseInt(el.dataset.target);
+        if (window.gsap) {
+            gsap.fromTo(el,
+                { textContent: 0 },
+                {
+                    textContent: target,
+                    duration: 2.2,
+                    ease: 'power3.out',
+                    snap: { textContent: 1 },
+                    delay: 0.3,
+                    onUpdate: function() {
+                        el.textContent = formatNumber(Math.round(parseFloat(el.textContent)));
+                    }
+                }
+            );
+        } else {
+            el.textContent = formatNumber(target);
+        }
+    });
+}
+
+// Fire hero stats on first page load (after loader screen clears)
+// We observe when #login-overlay becomes visible
+const loginOverlayObserver = new MutationObserver(() => {
+    const overlay = document.getElementById('login-overlay');
+    if (overlay && overlay.style.display !== 'none' && overlay.style.opacity !== '0') {
+        setTimeout(() => {
+            setupScrollReveals();
+            animateHeroStats();
+        }, 300);
+        loginOverlayObserver.disconnect();
+    }
+});
+loginOverlayObserver.observe(document.getElementById('login-overlay'), {
+    attributes: true, attributeFilter: ['style']
+});
+
+// ──────────────────────────────────────────────────────────
+// QUICK STAT PILLS — sync with live profile data
+// ──────────────────────────────────────────────────────────
+function syncQuickStats() {
+    if (!appState.userProfile) return;
+    const u = appState.userProfile;
+
+    const streak = document.getElementById('qs-streak');
+    const tier   = document.getElementById('qs-tier');
+    const pts    = document.getElementById('qs-pts');
+
+    if (streak) streak.textContent = u.checkin_streak || 0;
+    if (tier)   tier.textContent   = u.current_tier || 'Bronze';
+    if (pts)    pts.textContent    = formatNumber(u.points_balance || 0);
+    // Vouchers count is static for now — driven by partner count
+}
+
+
+
+// ──────────────────────────────────────────────────────────
+// QUEST COMPLETION — award real points via LMS webhook
+// ──────────────────────────────────────────────────────────
+async function completeQuest(btn, points, description) {
+    if (!appState.currentUser) return;
+    btn.disabled = true;
+    btn.textContent = '✓ Done';
+
+    const questItem = btn.closest('.quest-item');
+
+    try {
+        const response = await fetch(`${API_BASE}/lms/complete-course`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                user_id: appState.currentUser.user_id,
+                course_name: description,
+                base_points: points
+            })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Quest completion failed');
+
+        showToast('Quest Completed! 🎉', `+${formatNumber(data.points_awarded)} loyalty points credited to your wallet.`, 'points');
+
+        if (questItem) {
+            if (window.gsap) {
+                gsap.to(questItem, {
+                    opacity: 0.4, scale: 0.97, duration: 0.4, ease: 'power2.out',
+                    onComplete: () => questItem.classList.add('quest-done')
+                });
+            } else {
+                questItem.classList.add('quest-done');
+            }
+        }
+
+        await loadUserProfile(appState.currentUser.user_id);
+    } catch (err) {
+        showToast('Quest Error', err.message, 'error');
+        btn.disabled = false;
+        btn.textContent = 'Claim';
+    }
+}
+
+// ──────────────────────────────────────────────────────────
+// REPLACE alert() ON REDEMPTION CONFIRM WITH TOAST
+// ──────────────────────────────────────────────────────────
+// Patch btn-confirm-redemption to use toast
+const _confirmBtn = document.getElementById('btn-confirm-redemption');
+if (_confirmBtn) {
+    const newConfirmBtn = _confirmBtn.cloneNode(true);
+    _confirmBtn.parentNode.replaceChild(newConfirmBtn, _confirmBtn);
+
+    newConfirmBtn.addEventListener('click', async () => {
+        if (!appState.currentCalculation) return;
+        try {
+            const response = await fetch(`${API_BASE}/redeem/confirm`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_id: appState.currentUser.user_id,
+                    points_deducted: appState.currentCalculation.points_applied,
+                    discount_aed: appState.currentCalculation.discount_aed
+                })
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'Redemption failed');
+
+            showToast('Redemption Confirmed 🎟️', `AED ${formatNumber(appState.currentCalculation.discount_aed)} discount voucher generated successfully!`, 'success');
+            document.getElementById('redemption-results').style.display = 'none';
+            
+            // Pop open the gorgeous BIA certificate voucher modal
+            openTuitionVoucherModal(data.voucher);
+            
+            appState.currentCalculation = null;
+            await loadUserProfile(appState.currentUser.user_id);
+        } catch (err) {
+            showToast('Redemption Error', err.message, 'error');
+        }
+    });
+}
+
+// Patch referral submit to use toast
+const _submitLeadBtn = document.getElementById('btn-submit-lead');
+if (_submitLeadBtn) {
+    const newLeadBtn = _submitLeadBtn.cloneNode(true);
+    _submitLeadBtn.parentNode.replaceChild(newLeadBtn, _submitLeadBtn);
+    newLeadBtn.addEventListener('click', async () => {
+        const name    = document.getElementById('referee-name').value.trim();
+        const email   = document.getElementById('referee-email').value.trim();
+        const program = document.getElementById('referee-program').value;
+        if (!name || !email) { showToast('Missing Info', 'Please fill out both referee name and email.', 'error'); return; }
+        try {
+            const response = await fetch(`${API_BASE}/referrals`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ referrer_id: appState.currentUser.user_id, referee_name: name, referee_email: email, program })
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'Failed to submit referral');
+            showToast('Referral Submitted', `${name} has been registered as a pending referral. Points release upon payment verification.`, 'info');
+            document.getElementById('referee-name').value = '';
+            document.getElementById('referee-email').value = '';
+            await loadUserProfile(appState.currentUser.user_id);
+        } catch (err) {
+            showToast('Referral Error', err.message, 'error');
+        }
+    });
+}
+
+// Patch admin adjust to use toast
+const _adjustForm = document.getElementById('adjust-points-form');
+if (_adjustForm) {
+    const newAdjForm = _adjustForm.cloneNode(true);
+    _adjustForm.parentNode.replaceChild(newAdjForm, _adjustForm);
+    newAdjForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const points_change = parseInt(document.getElementById('adjust-amount').value);
+        const description   = document.getElementById('adjust-reason').value.trim();
+        if (!appState.selectedUserIdForAdjustment || isNaN(points_change) || !description) {
+            showToast('Invalid Input', 'Please fill all adjustment fields.', 'error'); return;
+        }
+        try {
+            const response = await fetch(`${API_BASE}/admin/adjust-points`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: appState.selectedUserIdForAdjustment, points_change, description })
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'Adjustment failed');
+            const sign = points_change > 0 ? '+' : '';
+            showPointsUndoToast(`${sign}${formatNumber(points_change)} pts applied to student wallet.`, data.ledger_id, appState.selectedUserIdForAdjustment);
+            closeAdjustmentModal();
+            loadAdminStudents();
+        } catch (err) {
+            showToast('Adjustment Error', err.message, 'error');
+        }
+    });
+}
+
+
+// ----------------------------------------------------
+// BIA CAMPUS EVENTS DYNAMIC LOADING & PARALLAX EFFECT
+// ----------------------------------------------------
+async function loadPublicEvents() {
+    const container = document.getElementById('public-events-container');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    try {
+        const response = await fetch(`${API_BASE}/events`);
+        const data = await response.json();
+
+        if (data.length === 0) {
+            // Humorous aesthetic empty state (no events published yet)
+            container.innerHTML = `
+                <div class="empty-events-humor-card reveal-on-scroll">
+                    <div class="humor-card-content">
+                        <span class="humor-badge">404 // EVENTS VACANCY</span>
+                        <h4 class="humor-card-title">Where did everyone go?</h4>
+                        <p class="humor-card-desc">Our event coordinators are currently recharging their brain batteries with double-shot espressos. Stay tuned for upcoming campus hackathons, study mixers, and guest lectures!</p>
+                    </div>
+                    <div class="humor-card-img-wrap">
+                        <img src="images/shukran_students.png" alt="Aesthetic empty state" class="humor-card-img">
+                    </div>
+                </div>
+            `;
+            setupScrollReveals();
+            return;
+        }
+
+        data.forEach(event => {
+            const card = document.createElement('div');
+            card.className = 'event-parallax-card reveal-on-scroll';
+            card.innerHTML = `
+                <div class="event-card-bg-wrap">
+                    <img src="${event.image_url || 'images/adnoc_students.png'}" alt="${event.title}" class="event-card-bg-img">
+                </div>
+                <div class="event-card-overlay"></div>
+                <div class="event-card-content">
+                    <div class="event-card-pts-badge">
+                        <i class="fa-solid fa-fire-flame-curved"></i>
+                        <span>+${event.points} Points</span>
+                    </div>
+                    <h4 class="event-card-title">${event.title}</h4>
+                    <p class="event-card-desc">${event.description}</p>
+                </div>
+            `;
+
+            // Mouse hover parallax translation calculation
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const xc = rect.width / 2;
+                const yc = rect.height / 2;
+                const dx = (x - xc) / (rect.width / 2);
+                const dy = (y - yc) / (rect.height / 2);
+
+                const bgWrap = card.querySelector('.event-card-bg-wrap');
+                if (bgWrap) {
+                    bgWrap.style.transform = `translate(${dx * -15}px, ${dy * -15}px) scale(1.08)`;
+                }
+            });
+
+            card.addEventListener('mouseleave', () => {
+                const bgWrap = card.querySelector('.event-card-bg-wrap');
+                if (bgWrap) {
+                    bgWrap.style.transform = 'translate(0px, 0px) scale(1.02)';
+                }
+            });
+
+            container.appendChild(card);
+        });
+
+        // Trigger landing reveal scroll trigger refresh now that DOM elements exist
+        if (typeof ScrollTrigger !== 'undefined') {
+            ScrollTrigger.refresh();
+        }
+        setupScrollReveals();
+    } catch (err) {
+        console.error('Error loading public events:', err);
+    }
+}
+
+async function loadAdminEvents() {
+    const listContainer = document.getElementById('admin-events-list');
+    if (!listContainer) return;
+
+    listContainer.innerHTML = '<p class="no-data">Loading events catalogue...</p>';
+
+    try {
+        const response = await fetch(`${API_BASE}/events`);
+        const data = await response.json();
+
+        if (data.length === 0) {
+            listContainer.innerHTML = '<p class="no-data">No active campus events published.</p>';
+            return;
+        }
+
+        listContainer.innerHTML = '';
+        data.forEach(event => {
+            const item = document.createElement('div');
+            item.className = 'admin-event-item';
+            item.innerHTML = `
+                <div class="admin-event-details">
+                    <h5>${event.title}</h5>
+                    <p>${event.description} <strong class="text-gold">(+${event.points} pts)</strong></p>
+                </div>
+                <button class="btn-delete-event" data-id="${event.event_id}">Delete</button>
+            `;
+
+            const btn = item.querySelector('.btn-delete-event');
+            btn.addEventListener('click', async () => {
+                if (!confirm(`Are you sure you want to delete the event "${event.title}"?`)) return;
+                try {
+                    const delRes = await fetch(`${API_BASE}/events/${event.event_id}`, { method: 'DELETE' });
+                    if (!delRes.ok) throw new Error('Deletion failed');
+                    showToast('Event Deleted 🗑️', `Event "${event.title}" successfully removed.`, 'info');
+                    loadAdminEvents();
+                    loadPublicEvents();
+                } catch (err) {
+                    showToast('Error', err.message, 'error');
+                }
+            });
 
             listContainer.appendChild(item);
         });
