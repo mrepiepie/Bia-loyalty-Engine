@@ -2789,30 +2789,38 @@
     </div>
 
     <!-- Answer FAQ Modal -->
-    <div id="answer-faq-modal" class="modal-overlay" style="display: none; z-index: 2000;">
-        <div class="modal-content glassmorphic" style="max-width: 500px; width: 90%;">
-            <div class="modal-header">
-                <h3><i class="fa-solid fa-reply" style="color: #dfb15b;"></i> Answer Question</h3>
-                <button class="modal-close" onclick="closeAnswerFaqModal()"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="modal-body" style="display: flex; flex-direction: column; gap: 1rem;">
-                <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 1rem;">
-                    <strong style="color: #dfb15b; display: block; margin-bottom: 0.4rem; font-size: 0.95rem;">Question:</strong>
-                    <p id="answer-faq-question-text" style="color: rgba(255,255,255,0.9); font-size: 0.95rem; margin: 0;"></p>
+    <div id="answer-faq-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(10, 11, 14, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 25000; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease;">
+        <div class="card glassmorphic spotlight-card" style="max-width: 600px; width: 90%; padding: 2.25rem; border: 1px solid rgba(223, 177, 91, 0.15); border-radius: 16px; position: relative; background: #0c0d12; box-shadow: 0 20px 50px rgba(0,0,0,0.6); max-height: 85vh; display: flex; flex-direction: column;">
+            
+            <button onclick="closeAnswerFaqModal()" style="position: absolute; top: 1.25rem; right: 1.25rem; background: none; border: none; color: rgba(255,255,255,0.4); cursor: pointer; font-size: 1.25rem; transition: color 0.15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.4)'">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            
+            <h3 style="margin-top: 0; color: #EFECE3; font-family: 'DM Serif Display', serif; font-size: 1.75rem; margin-bottom: 1.5rem;"><i class="fa-solid fa-reply" style="color: #dfb15b; font-size: 1.3rem; margin-right: 0.5rem;"></i> Answer Question</h3>
+            
+            <div style="flex: 1; overflow-y: auto; padding-right: 0.5rem; display: flex; flex-direction: column; gap: 1.5rem;">
+                
+                <div style="background: rgba(223, 177, 91, 0.05); border: 1px solid rgba(223, 177, 91, 0.2); border-radius: 12px; padding: 1.25rem;">
+                    <strong style="color: #dfb15b; display: block; margin-bottom: 0.5rem; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Student Question:</strong>
+                    <p id="answer-faq-question-text" style="color: rgba(255,255,255,0.95); font-size: 1.05rem; margin: 0; line-height: 1.5; font-weight: 500;"></p>
                 </div>
                 
-                <div class="input-group">
-                    <label>Official Answer</label>
-                    <textarea id="answer-faq-text" placeholder="Type your official answer here..." style="min-height: 100px; resize: vertical;"></textarea>
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <label style="color: rgba(255,255,255,0.7); font-size: 0.9rem; font-weight: 600;">Official Response</label>
+                    <textarea id="answer-faq-text" placeholder="Type your official answer here... This will be sent or displayed publicly." style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 1rem; color: #fff; font-family: inherit; font-size: 0.95rem; min-height: 140px; resize: vertical; box-sizing: border-box; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='rgba(223,177,91,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'"></textarea>
                 </div>
                 
-                <div class="form-check" style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem;">
-                    <input type="checkbox" id="answer-faq-public" style="width: 18px; height: 18px;" checked>
-                    <label for="answer-faq-public" style="margin: 0; color: rgba(255,255,255,0.8); font-size: 0.9rem; cursor: pointer;">Publish to Public Knowledge Base</label>
+                <div style="display: flex; align-items: center; gap: 0.75rem; background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                    <input type="checkbox" id="answer-faq-public" style="width: 20px; height: 20px; accent-color: #dfb15b; cursor: pointer;">
+                    <div style="display: flex; flex-direction: column;">
+                        <label for="answer-faq-public" style="margin: 0; color: #EFECE3; font-size: 0.95rem; font-weight: 600; cursor: pointer;">Publish to Public Knowledge Base</label>
+                        <span style="font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-top: 0.25rem;">If checked, this FAQ will be visible on the public landing page.</span>
+                    </div>
                 </div>
-                <p style="margin: 0; font-size: 0.8rem; color: rgba(255,255,255,0.5);">If checked, this question and answer will be visible on the public landing page before login.</p>
                 
-                <button id="btn-submit-faq-answer" class="btn btn-primary" style="margin-top: 1rem; width: 100%;">Submit Answer</button>
+                <button id="btn-submit-faq-answer" class="btn btn-primary" style="margin-top: 0.5rem; padding: 1rem; font-size: 1.05rem; font-weight: 700; width: 100%; display: flex; justify-content: center; gap: 0.5rem; align-items: center;">
+                    <i class="fa-solid fa-paper-plane"></i> Submit Answer
+                </button>
             </div>
         </div>
     </div>
