@@ -7701,13 +7701,19 @@ async function initAdminFAQs() {
                     <span style="font-size: 0.75rem; color: rgba(255,255,255,0.5); font-weight: normal;">${escapeHTML(sub.email && sub.email !== 'N/A' ? sub.email : 'No email provided')}</span>
                 </td>
                 <td style="color: #dfb15b; font-family: monospace;">${escapeHTML(sub.student_id || sub.studentId || 'N/A')}</td>
-                <td style="color: rgba(255,255,255,0.85); max-width: 300px; word-wrap: break-word;">${escapeHTML(sub.question)}</td>
-                <td style="display: flex; gap: 0.5rem;">
+                <td style="color: rgba(255,255,255,0.85); max-width: 300px; word-wrap: break-word;">
+                    ${escapeHTML(sub.question)}
+                    ${sub.answer ? `<div style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.1); color: #dfb15b; font-size: 0.8rem;"><i class="fa-solid fa-reply"></i> ${escapeHTML(sub.answer)} ${sub.is_public ? '<span class="status-pill status-enrolled" style="font-size: 0.6rem; padding: 0.1rem 0.3rem;">PUBLIC</span>' : ''}</div>` : ''}
+                </td>
+                <td style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <button class="btn btn-secondary btn-sm" onclick="openAnswerFaqModal('${sub.id}', \`${escapeHTML(sub.question).replace(/`/g, '')}\`, \`${escapeHTML(sub.answer || '').replace(/`/g, '')}\`, ${sub.is_public || 0})" title="Answer question" style="font-size: 0.8rem; padding: 0.4rem 0.6rem; border-color: rgba(255, 255, 255, 0.3); color: #fff;">
+                        <i class="fa-solid fa-reply"></i>
+                    </button>
                     <button class="btn btn-secondary btn-sm" onclick="bookmarkFAQ('${sub.id}', ${sub.bookmarked || false})" title="Bookmark this question" style="font-size: 0.8rem; padding: 0.4rem 0.6rem; border-color: rgba(223, 177, 91, 0.3); color: #dfb15b; background: transparent;">
                         ${starIcon}
                     </button>
                     <button class="btn btn-secondary btn-sm" onclick="removeFAQ('${sub.id}')" title="Remove question" style="font-size: 0.7rem; padding: 0.4rem 0.6rem; border-color: rgba(235, 76, 66, 0.3); color: #EB4C42;">
-                        <i class="fa-solid fa-trash"></i> Remove
+                        <i class="fa-solid fa-trash"></i>
                     </button>
                 </td>
             `;
@@ -7753,6 +7759,62 @@ window.removeFAQ = async function(id) {
 };
 
 
+
+// Admin Action: Open Answer Modal
+let currentAnsweringFaqId = null;
+window.openAnswerFaqModal = function(id, questionText, currentAnswer, isPublic) {
+    currentAnsweringFaqId = id;
+    document.getElementById('answer-faq-question-text').textContent = questionText;
+    document.getElementById('answer-faq-text').value = currentAnswer || '';
+    document.getElementById('answer-faq-public').checked = isPublic === 1;
+    document.getElementById('answer-faq-modal').style.display = 'flex';
+    setTimeout(() => document.getElementById('answer-faq-modal').style.opacity = '1', 10);
+};
+
+window.closeAnswerFaqModal = function() {
+    currentAnsweringFaqId = null;
+    document.getElementById('answer-faq-modal').style.opacity = '0';
+    setTimeout(() => document.getElementById('answer-faq-modal').style.display = 'none', 300);
+};
+
+const btnSubmitFaqAnswer = document.getElementById('btn-submit-faq-answer');
+if (btnSubmitFaqAnswer) {
+    btnSubmitFaqAnswer.addEventListener('click', async () => {
+        if (!currentAnsweringFaqId) return;
+        const answerText = document.getElementById('answer-faq-text').value.trim();
+        const isPublic = document.getElementById('answer-faq-public').checked;
+        
+        if (!answerText) {
+            showToast('Please provide an answer', 'error');
+            return;
+        }
+
+        try {
+            const btn = document.getElementById('btn-submit-faq-answer');
+            const ogText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving...';
+            btn.disabled = true;
+
+            const response = await fetch('/api/admin/faqs/' + currentAnsweringFaqId + '/answer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ answer: answerText, is_public: isPublic })
+            });
+            
+            btn.innerHTML = ogText;
+            btn.disabled = false;
+
+            if (!response.ok) throw new Error('Failed to save answer');
+            
+            showToast('Answer saved successfully!', 'success');
+            closeAnswerFaqModal();
+            initAdminFAQs();
+        } catch (error) {
+            console.error('Error answering FAQ:', error);
+            showToast('Failed to save answer', 'error');
+        }
+    });
+}
 
 // ----------------------------------------------------
 // PARTNER BRANDS ADMIN LOGIC

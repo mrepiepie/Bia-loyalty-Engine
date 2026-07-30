@@ -279,6 +279,9 @@ async function initializeDatabase() {
             await runQuery(`ALTER TABLE faq_submissions ADD COLUMN email TEXT`);
         } catch (e) {}
 
+        try { await runQuery(`ALTER TABLE faq_submissions ADD COLUMN answer TEXT`); } catch (e) {}
+        try { await runQuery(`ALTER TABLE faq_submissions ADD COLUMN is_public INTEGER DEFAULT 0`); } catch (e) {}
+
         await runQuery(`CREATE TABLE IF NOT EXISTS partners (
             id TEXT PRIMARY KEY,
             name TEXT NOT NULL,
@@ -1787,7 +1790,28 @@ app.post('/api/admin/faqs/:id/bookmark', async (req, res) => {
         res.json({ success: true });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Database error' });
+        res.status(500).json({ error: 'Failed to bookmark FAQ' });
+    }
+});
+
+app.post('/api/admin/faqs/:id/answer', async (req, res) => {
+    try {
+        const { answer, is_public } = req.body;
+        await runQuery('UPDATE faq_submissions SET answer = ?, is_public = ?, status = ? WHERE id = ?', [answer, is_public ? 1 : 0, 'answered', req.params.id]);
+        res.json({ success: true });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to save FAQ answer' });
+    }
+});
+
+app.get('/api/public/faqs', async (req, res) => {
+    try {
+        const faqs = await allQuery('SELECT question, answer FROM faq_submissions WHERE is_public = 1 AND answer IS NOT NULL ORDER BY timestamp DESC');
+        res.json({ faqs });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to fetch public FAQs' });
     }
 });
 
