@@ -7978,13 +7978,10 @@ async function loadPublicFAQs() {
         }
         
         container.innerHTML = data.faqs.map((faq, index) => `
-            <div class="gsap-faq-item" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 1.5rem; cursor: pointer; transition: background 0.3s ease, border-color 0.3s ease; opacity: 0; transform: translateY(20px);" onclick="this.classList.toggle('expanded'); const ans = this.querySelector('.faq-answer'); const icon = this.querySelector('.faq-icon'); if(ans.style.maxHeight){ans.style.maxHeight = null; ans.style.opacity = 0; ans.style.marginTop = '0'; icon.style.transform = 'rotate(0deg)';} else {ans.style.maxHeight = ans.scrollHeight + 'px'; ans.style.opacity = 1; ans.style.marginTop = '1rem'; icon.style.transform = 'rotate(180deg)';}">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <strong style="color: #dfb15b; font-size: 1.1rem; font-weight: 600;">${escapeHTML(faq.question)}</strong>
-                    <i class="fa-solid fa-chevron-down faq-icon" style="color: rgba(255,255,255,0.4); font-size: 0.9rem; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"></i>
-                </div>
-                <div class="faq-answer" style="max-height: 0; opacity: 0; overflow: hidden; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); border-top: 1px solid rgba(255,255,255,0.05); color: rgba(255,255,255,0.85); font-size: 0.95rem; line-height: 1.6;">
-                    <div style="padding-top: 1rem;">${escapeHTML(faq.answer).replace(/\\n/g, '<br>')}</div>
+            <div class="gsap-faq-item" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 1.5rem; opacity: 0; transform: translateY(20px);">
+                <strong style="color: #dfb15b; font-size: 1.1rem; font-weight: 600; display: block; margin-bottom: 0.75rem;">${escapeHTML(faq.question)}</strong>
+                <div style="color: rgba(255,255,255,0.85); font-size: 0.95rem; line-height: 1.6;">
+                    ${escapeHTML(faq.answer).replace(/\\n/g, '<br>')}
                 </div>
             </div>
         `).join('');
