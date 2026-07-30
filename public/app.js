@@ -7724,15 +7724,7 @@ async function initAdminFAQs() {
                         <i class="fa-solid fa-eye-slash"></i>
                     </button>
                     ` : ''}
-                    ${sub.is_public ? `
-                    <button class="btn btn-secondary btn-sm" 
-                        data-id="${sub.id}"
-                        data-answer="${escapeHTML(sub.answer || '')}"
-                        onclick="unpublishFAQ(this.getAttribute('data-id'), this.getAttribute('data-answer'))" 
-                        title="Unpublish from Home Page" style="font-size: 0.8rem; padding: 0.4rem 0.6rem; border-color: rgba(223, 177, 91, 0.3); color: #dfb15b; background: rgba(223, 177, 91, 0.1);">
-                        <i class="fa-solid fa-eye-slash"></i>
-                    </button>
-                    ` : ''}
+
                     <button class="btn btn-secondary btn-sm" onclick="bookmarkFAQ('${sub.id}', ${sub.bookmarked || false})" title="Bookmark this question" style="font-size: 0.8rem; padding: 0.4rem 0.6rem; border-color: rgba(223, 177, 91, 0.3); color: #dfb15b; background: transparent;">
                         ${starIcon}
                     </button>
