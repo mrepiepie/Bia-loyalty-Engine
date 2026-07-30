@@ -7987,20 +7987,17 @@ async function loadPublicFAQs() {
         `).join('');
 
         // Apply GSAP Animation Safely
-        if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
-            gsap.registerPlugin(ScrollTrigger);
+        /*
+        if (typeof gsap !== 'undefined') {
             gsap.from('.gsap-faq-item', {
                 y: 20,
                 opacity: 0,
                 duration: 0.6,
                 stagger: 0.1,
-                ease: "power3.out",
-                scrollTrigger: {
-                    trigger: "#public-faq-container",
-                    start: "top 85%"
-                }
+                ease: "power3.out"
             });
         }
+        */
     } catch (err) {
         console.error('Error loading public FAQs:', err);
         container.innerHTML = '<div style="text-align: center; color: rgba(255,255,255,0.4); padding: 2rem;">Failed to load FAQs. Please try again later.</div>';
