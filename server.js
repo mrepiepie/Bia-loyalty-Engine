@@ -1197,6 +1197,9 @@ app.delete('/api/admin/users/:id', async (req, res) => {
         await runQuery(`DELETE FROM referrals WHERE referrer_id = ?`, [userId]);
         await runQuery(`DELETE FROM tuition_vouchers WHERE user_id = ?`, [userId]);
         await runQuery(`DELETE FROM executive_leads WHERE user_id = ?`, [userId]);
+        await runQuery(`DELETE FROM password_resets WHERE user_id = ?`, [userId]);
+        await runQuery(`DELETE FROM event_claims WHERE user_id = ?`, [userId]);
+        await runQuery(`DELETE FROM promo_claims WHERE user_id = ?`, [userId]);
         
         // Delete the user record
         await runQuery(`DELETE FROM users WHERE user_id = ?`, [userId]);
