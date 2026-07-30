@@ -7715,6 +7715,24 @@ async function initAdminFAQs() {
                         title="Answer question" style="font-size: 0.8rem; padding: 0.4rem 0.6rem; border-color: rgba(255, 255, 255, 0.3); color: #fff;">
                         <i class="fa-solid fa-reply"></i>
                     </button>
+                    ${sub.is_public ? `
+                    <button class="btn btn-secondary btn-sm" 
+                        data-id="${sub.id}"
+                        data-answer="${escapeHTML(sub.answer || '')}"
+                        onclick="unpublishFAQ(this.getAttribute('data-id'), this.getAttribute('data-answer'))" 
+                        title="Unpublish from Home Page" style="font-size: 0.8rem; padding: 0.4rem 0.6rem; border-color: rgba(223, 177, 91, 0.3); color: #dfb15b; background: rgba(223, 177, 91, 0.1);">
+                        <i class="fa-solid fa-eye-slash"></i>
+                    </button>
+                    ` : ''}
+                    ${sub.is_public ? `
+                    <button class="btn btn-secondary btn-sm" 
+                        data-id="${sub.id}"
+                        data-answer="${escapeHTML(sub.answer || '')}"
+                        onclick="unpublishFAQ(this.getAttribute('data-id'), this.getAttribute('data-answer'))" 
+                        title="Unpublish from Home Page" style="font-size: 0.8rem; padding: 0.4rem 0.6rem; border-color: rgba(223, 177, 91, 0.3); color: #dfb15b; background: rgba(223, 177, 91, 0.1);">
+                        <i class="fa-solid fa-eye-slash"></i>
+                    </button>
+                    ` : ''}
                     <button class="btn btn-secondary btn-sm" onclick="bookmarkFAQ('${sub.id}', ${sub.bookmarked || false})" title="Bookmark this question" style="font-size: 0.8rem; padding: 0.4rem 0.6rem; border-color: rgba(223, 177, 91, 0.3); color: #dfb15b; background: transparent;">
                         ${starIcon}
                     </button>
@@ -7744,6 +7762,25 @@ window.bookmarkFAQ = async function(id, currentState) {
     } catch (error) {
         console.error('Error bookmarking FAQ:', error);
         showToast('Failed to update bookmark.', 'error');
+    }
+};
+
+// Admin Action: Unpublish FAQ
+window.unpublishFAQ = async function(id, currentAnswer) {
+    if (!confirm('Are you sure you want to remove this FAQ from the public site?')) return;
+    try {
+        const response = await fetch('/api/admin/faqs/' + id + '/answer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ answer: currentAnswer, is_public: false })
+        });
+        if (!response.ok) throw new Error('Unpublish failed');
+        showToast('Question removed from public knowledge base.', 'success');
+        initAdminFAQs();
+        if(typeof loadPublicFAQs === 'function') loadPublicFAQs();
+    } catch (error) {
+        console.error('Error unpublishing FAQ:', error);
+        showToast('Failed to unpublish question.', 'error');
     }
 };
 
