@@ -7978,7 +7978,7 @@ async function loadPublicFAQs() {
         }
         
         container.innerHTML = data.faqs.map((faq, index) => `
-            <div class="gsap-faq-item" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 1.5rem; opacity: 0; transform: translateY(20px);">
+            <div class="gsap-faq-item" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 1.5rem;">
                 <strong style="color: #dfb15b; font-size: 1.1rem; font-weight: 600; display: block; margin-bottom: 0.75rem;">${escapeHTML(faq.question)}</strong>
                 <div style="color: rgba(255,255,255,0.85); font-size: 0.95rem; line-height: 1.6;">
                     ${escapeHTML(faq.answer).replace(/\\n/g, '<br>')}
@@ -7986,11 +7986,12 @@ async function loadPublicFAQs() {
             </div>
         `).join('');
 
-        // Apply GSAP Animation
-        if (typeof gsap !== 'undefined') {
-            gsap.to('.gsap-faq-item', {
-                y: 0,
-                opacity: 1,
+        // Apply GSAP Animation Safely
+        if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+            gsap.registerPlugin(ScrollTrigger);
+            gsap.from('.gsap-faq-item', {
+                y: 20,
+                opacity: 0,
                 duration: 0.6,
                 stagger: 0.1,
                 ease: "power3.out",
