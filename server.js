@@ -1807,6 +1807,7 @@ app.post('/api/admin/faqs/:id/answer', async (req, res) => {
 
 app.get('/api/public/faqs', async (req, res) => {
     try {
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
         const faqs = await allQuery('SELECT question, answer FROM faq_submissions WHERE is_public = 1 AND answer IS NOT NULL ORDER BY timestamp DESC');
         res.json({ faqs });
     } catch (err) {

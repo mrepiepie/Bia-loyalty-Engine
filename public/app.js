@@ -7920,6 +7920,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 showToast('Answer saved successfully!', 'success');
                 closeAnswerFaqModal();
                 if(typeof initAdminFAQs === 'function') initAdminFAQs();
+                if(typeof loadPublicFAQs === 'function') loadPublicFAQs();
             } catch (error) {
                 console.error('Error answering FAQ:', error);
                 showToast('Failed to save answer', 'error');
