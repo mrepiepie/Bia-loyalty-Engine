@@ -7706,7 +7706,13 @@ async function initAdminFAQs() {
                     ${sub.answer ? `<div style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.1); color: #dfb15b; font-size: 0.8rem;"><i class="fa-solid fa-reply"></i> ${escapeHTML(sub.answer)} ${sub.is_public ? '<span class="status-pill status-enrolled" style="font-size: 0.6rem; padding: 0.1rem 0.3rem;">PUBLIC</span>' : ''}</div>` : ''}
                 </td>
                 <td style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                    <button class="btn btn-secondary btn-sm" onclick="openAnswerFaqModal('${sub.id}', \`${escapeHTML(sub.question).replace(/`/g, '')}\`, \`${escapeHTML(sub.answer || '').replace(/`/g, '')}\`, ${sub.is_public || 0})" title="Answer question" style="font-size: 0.8rem; padding: 0.4rem 0.6rem; border-color: rgba(255, 255, 255, 0.3); color: #fff;">
+                    <button class="btn btn-secondary btn-sm" 
+                        data-id="${sub.id}" 
+                        data-question="${escapeHTML(sub.question)}" 
+                        data-answer="${escapeHTML(sub.answer || '')}" 
+                        data-public="${sub.is_public || 0}"
+                        onclick="openAnswerFaqModal(this.getAttribute('data-id'), this.getAttribute('data-question'), this.getAttribute('data-answer'), parseInt(this.getAttribute('data-public')))" 
+                        title="Answer question" style="font-size: 0.8rem; padding: 0.4rem 0.6rem; border-color: rgba(255, 255, 255, 0.3); color: #fff;">
                         <i class="fa-solid fa-reply"></i>
                     </button>
                     <button class="btn btn-secondary btn-sm" onclick="bookmarkFAQ('${sub.id}', ${sub.bookmarked || false})" title="Bookmark this question" style="font-size: 0.8rem; padding: 0.4rem 0.6rem; border-color: rgba(223, 177, 91, 0.3); color: #dfb15b; background: transparent;">
