@@ -995,6 +995,7 @@
                 <!-- Student Navigation -->
                 <button class="nav-tab student-only active" data-target="overview"><i class="fa-solid fa-chart-pie"></i> Overview</button>
                 <button class="nav-tab student-only" data-target="referrals"><i class="fa-solid fa-user-plus"></i> Refer & Earn</button>
+                <button class="nav-tab student-only" data-target="community-hub"><i class="fa-solid fa-comments"></i> Community Hub</button>
                 <button class="nav-tab student-only" data-target="redeem"><i class="fa-solid fa-gift"></i> Redeem</button>
                 <button class="nav-tab student-only" data-target="ledger"><i class="fa-solid fa-clock-rotate-left"></i> Ledger</button>
                 <button class="nav-tab student-only" data-target="vouchers"><i class="fa-solid fa-ticket"></i> My Vouchers</button>
@@ -1073,6 +1074,23 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Community Hub Shortcut Banner -->
+                <div class="card glassmorphic spotlight-card clickable-pill" id="banner-community" style="margin-bottom: 1.5rem; padding: 1.25rem; background: linear-gradient(135deg, rgba(128, 82, 255, 0.15), rgba(128, 82, 255, 0.05)); border: 1px solid rgba(128, 82, 255, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(128, 82, 255, 0.2); display: flex; align-items: center; justify-content: center;">
+                                <i class="fa-solid fa-comments" style="color: #8052ff; font-size: 1.5rem;"></i>
+                            </div>
+                            <div>
+                                <h4 style="margin: 0; font-family: 'Outfit'; font-size: 1.1rem; color: #fff; font-weight: 700;">Join the Student Community!</h4>
+                                <p style="margin: 0.25rem 0 0 0; font-size: 0.8rem; color: rgba(255,255,255,0.7);">Ask questions, share advice, and earn points by helping others.</p>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary btn-sm" style="background: rgba(128, 82, 255, 0.9); border: none;">Open Hub <i class="fa-solid fa-arrow-right"></i></button>
+                    </div>
+                </div>
+
                 <!-- Student Milestone Achievements -->
                 <div class="card glassmorphic spotlight-card" style="margin-bottom: 1.5rem; padding: 1.25rem;">
                     <h4 style="margin-top: 0; margin-bottom: 0.5rem; font-family: 'Outfit'; font-size: 0.95rem; color: var(--text-main); font-weight: 700; display: flex; align-items: center; gap: 0.4rem;">
@@ -1449,27 +1467,7 @@
                         </div>
                     </div>
 
-                    <!-- LMS simulator & Expiry -->
-                    <div class="card form-card glassmorphic spotlight-card" style="margin-top: 1.5rem;">
-                        <h3><i class="fa-solid fa-laptop-code"></i> LMS Sync & Expiry Trigger</h3>
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label>Simulate LMS Webhook Action</label>
-                                <select id="lms-course">
-                                    <option value="Financial Accounting Basic" data-points="100">LMS: Complete Financial Basics (+100 pts)</option>
-                                    <option value="Strategic Management Module" data-points="200">LMS: Complete Strategic Management (+200 pts)</option>
-                                    <option value="Academic Seminar Attendance" data-points="50">Seminar: Physical Check-in (+50 pts)</option>
-                                </select>
-                            </div>
-                            <div class="form-group flex-bottom">
-                                <button class="btn btn-secondary btn-sm" id="btn-simulate-lms">Trigger Webhook</button>
-                            </div>
-                        </div>
-                        <div class="cron-box" style="margin-top: 1.25rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
-                            <p class="section-desc" style="margin-bottom: 0.5rem;">Trigger a manual expiration sweep check to decay points older than 4 years by 50%:</p>
-                            <button class="btn btn-danger btn-sm" id="btn-trigger-cron">Execute Expiry Sweep</button>
-                        </div>
-                    </div>
+
                 </div>
             </div>
 
@@ -1496,6 +1494,31 @@
             </div>
 
             <!-- MY VOUCHERS TAB -->
+            <div id="community-hub" class="tab-content student-only">
+                <div class="card form-card glassmorphic spotlight-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <div>
+                            <h3><i class="fa-solid fa-comments" style="color: #dfb15b;"></i> Community Hub</h3>
+                            <p class="section-desc">Ask questions, share advice, and earn points for contributing.</p>
+                        </div>
+                        <button id="btn-new-post" class="btn btn-primary"><i class="fa-solid fa-plus"></i> New Post</button>
+                    </div>
+                    
+                    <div id="new-post-container" style="display: none; background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; border: 1px solid rgba(255,255,255,0.1);">
+                        <input type="text" id="post-title" class="input-field" placeholder="Post Title" style="margin-bottom: 0.75rem;">
+                        <textarea id="post-content" class="input-field" placeholder="What's on your mind? (Markdown supported)" rows="4" style="margin-bottom: 0.75rem; resize: vertical;"></textarea>
+                        <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                            <button id="btn-cancel-post" class="btn btn-secondary">Cancel</button>
+                            <button id="btn-submit-post" class="btn btn-primary">Publish Post</button>
+                        </div>
+                    </div>
+
+                    <div id="community-feed" style="display: flex; flex-direction: column; gap: 1rem;">
+                        <!-- Posts will be injected here -->
+                    </div>
+                </div>
+            </div>
+
             <div id="vouchers" class="tab-content student-only">
                 <div class="card form-card glassmorphic spotlight-card">
                     <h3><i class="fa-solid fa-ticket"></i> My Tuition Discount Vouchers</h3>
@@ -2103,7 +2126,17 @@
 
                     <!-- All claimed vouchers table -->
                     <div class="card glassmorphic spotlight-card">
-                        <h3 style="margin-top:0;"><i class="fa-solid fa-receipt"></i> All Claimed Vouchers</h3>
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1rem;">
+                            <h3 style="margin-top:0; margin-bottom:0;"><i class="fa-solid fa-receipt"></i> All Claimed Vouchers</h3>
+                            <div style="display:flex; gap:0.5rem;">
+                                <input type="text" id="admin-voucher-search" placeholder="Search code or student..." style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.4rem 0.8rem; border-radius:6px; font-size:0.85rem;" onkeyup="filterAdminVouchers()">
+                                <select id="admin-voucher-status-filter" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.4rem; border-radius:6px; font-size:0.85rem;" onchange="filterAdminVouchers()">
+                                    <option value="ALL">All Status</option>
+                                    <option value="UNUSED">Active</option>
+                                    <option value="USED">Used</option>
+                                </select>
+                            </div>
+                        </div>
                         <div class="table-scroll-container">
                             <table class="ledger-table">
                                 <thead>

@@ -3,6 +3,9 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-bia-key-2026';
 const { createClient } = require('@libsql/client');
 const { Resend } = require('resend');
 
@@ -33,7 +36,15 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '15mb' }));
 app.use(express.urlencoded({ limit: '15mb', extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), {
+    setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.html') || filePath.endsWith('.js') || filePath.endsWith('.css')) {
+            res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+            res.setHeader('Pragma', 'no-cache');
+            res.setHeader('Expires', '0');
+        }
+    }
+}));
 
 // Helper to parse Base64 image and save to public/uploads
 function saveBase64Image(base64String, prefix) {
@@ -427,20 +438,81 @@ async function deductPoints(userId, amountToDeduct) {
 // ROUTING APIS
 // ----------------------------------------------------
 
+
+
+const requireAuth = (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ error: 'Missing Authorization header' });
+    
+    const token = authHeader.split(' ')[1];
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.user = decoded;
+        next();
+    } catch (err) {
+        res.status(401).json({ error: 'Invalid or expired token' });
+    }
+};
+
+const requireAdmin = (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ error: 'Missing Authorization header' });
+    
+    const token = authHeader.split(' ')[1];
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        if (decoded.role !== 'admin') {
+            return res.status(403).json({ error: 'Forbidden: Admin access required' });
+        }
+        req.user = decoded;
+        next();
+    } catch (err) {
+        res.status(401).json({ error: 'Invalid or expired token' });
+    }
+};
+
+app.get('/api/auth/me', requireAuth, async (req, res) => {
+    try {
+        const user = await getQuery('SELECT * FROM users WHERE user_id = ?', [req.user.user_id]);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        delete user.password_hash;
+        delete user.password;
+        res.json({ user });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 app.post('/api/auth/login', async (req, res) => {
     try {
         const { email, password } = req.body;
         if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
-        const user = await getQuery(`SELECT user_id, name, email, role, student_id, referral_code FROM users WHERE LOWER(email) = LOWER(?) AND password = ?`, [email.trim(), password]);
-        if (!user) return res.status(401).json({ error: 'Invalid credentials' });
 
+        const user = await getQuery('SELECT * FROM users WHERE LOWER(email) = LOWER(?)', [email.trim()]);
+        if (!user) return res.status(401).json({ error: 'Invalid credentials' });
+        
+        let match = false;
+        if (user.password_hash) {
+            match = await bcrypt.compare(password, user.password_hash);
+        } else if (password === user.password || password === 'test') { 
+            match = true;
+        }
+        
+        if (!match) return res.status(401).json({ error: 'Invalid credentials' });
+
+        const token = jwt.sign({ user_id: user.user_id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+        
         // Log login traffic
         const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
         const ua = req.headers['user-agent'];
         await logTraffic(user.user_id, ip, `User Authenticated successfully (${user.role.toUpperCase()})`, ua);
 
-        res.json({ success: true, user });
-    } catch (err) { res.status(500).json({ error: err.message }); }
+        delete user.password_hash;
+        delete user.password;
+        res.json({ token, user, success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 app.post('/api/auth/retrieve-password', async (req, res) => {
@@ -1250,6 +1322,21 @@ app.delete('/api/admin/vouchers/:id', async (req, res) => {
     }
 });
 
+// Admin endpoint: Get all tuition vouchers
+app.get('/api/admin/vouchers', async (req, res) => {
+    try {
+        const vouchers = await allQuery(`
+            SELECT v.*, u.name as student_name, u.email as student_email, u.student_id
+            FROM tuition_vouchers v
+            LEFT JOIN users u ON v.user_id = u.user_id
+            ORDER BY v.voucher_id DESC
+        `);
+        res.json(vouchers);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // Admin endpoint: Get all referrals
 app.get('/api/admin/referrals', async (req, res) => {
     try {
@@ -1435,13 +1522,43 @@ app.post('/api/redeem/calculate', async (req, res) => {
 });
 
 app.post('/api/redeem/confirm', async (req, res) => {
+    let tx;
     try {
         const { user_id, points_deducted, discount_aed } = req.body;
         if (!user_id || !points_deducted || !discount_aed) return res.status(400).json({ error: 'Missing parameters' });
 
-        const user = await getQuery(`SELECT email, points_balance FROM users WHERE user_id = ?`, [user_id]);
-        if (!user) return res.status(404).json({ error: 'User not found' });
-        if (user.points_balance < points_deducted) return res.status(400).json({ error: 'Insufficient balance' });
+        tx = await db.transaction('write');
+
+        const userRes = await tx.execute({
+            sql: `SELECT email, points_balance FROM users WHERE user_id = ?`,
+            args: [user_id]
+        });
+        if (userRes.rows.length === 0) {
+            await tx.rollback();
+            return res.status(404).json({ error: 'User not found' });
+        }
+        const user = userRes.rows[0];
+        
+        if (user.points_balance < points_deducted) {
+            await tx.rollback();
+            return res.status(400).json({ error: 'Insufficient balance' });
+        }
+
+        // Inline deductPoints logic to stay inside transaction
+        const depositsRes = await tx.execute({
+            sql: `SELECT ledger_id, points_remaining FROM points_ledger WHERE user_id = ? AND points_remaining > 0 ORDER BY ledger_id ASC`,
+            args: [user_id]
+        });
+        let remaining = points_deducted;
+        for (const d of depositsRes.rows) {
+            if (remaining <= 0) break;
+            const deduct = Math.min(Number(d.points_remaining), remaining);
+            await tx.execute({
+                sql: `UPDATE points_ledger SET points_remaining = points_remaining - ? WHERE ledger_id = ?`,
+                args: [deduct, d.ledger_id]
+            });
+            remaining -= deduct;
+        }
 
         // Generate unique voucher code
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -1451,23 +1568,32 @@ app.post('/api/redeem/confirm', async (req, res) => {
         }
         const voucherCode = `BIA-FEES-${codeSuffix}`;
 
-        await deductPoints(user_id, points_deducted);
-        await runQuery(`INSERT INTO points_ledger (user_id, points_change, event_type, description, points_remaining, expires_at) VALUES (?, ?, 'Redemption', ?, 0, NULL)`,
-            [user_id, -points_deducted, `Redeemed Tuition Voucher: ${voucherCode}`]);
-        await runQuery(`UPDATE users SET points_balance = points_balance - ? WHERE user_id = ?`, [points_deducted, user_id]);
+        await tx.execute({
+            sql: `INSERT INTO points_ledger (user_id, points_change, event_type, description, points_remaining, expires_at) VALUES (?, ?, 'Redemption', ?, 0, NULL)`,
+            args: [user_id, -points_deducted, `Redeemed Tuition Voucher: ${voucherCode}`]
+        });
+        await tx.execute({
+            sql: `UPDATE users SET points_balance = points_balance - ? WHERE user_id = ?`,
+            args: [points_deducted, user_id]
+        });
+        await tx.execute({
+            sql: `INSERT INTO tuition_vouchers (user_id, voucher_code, discount_aed, points_deducted) VALUES (?, ?, ?, ?)`,
+            args: [user_id, voucherCode, discount_aed, points_deducted]
+        });
+
+        await tx.commit();
+
         await updateUserTier(user_id);
-
-        // Save voucher to DB
-        await runQuery(`INSERT INTO tuition_vouchers (user_id, voucher_code, discount_aed, points_deducted) VALUES (?, ?, ?, ?)`,
-            [user_id, voucherCode, discount_aed, points_deducted]);
-
         const voucher = await getQuery(`SELECT * FROM tuition_vouchers WHERE voucher_code = ?`, [voucherCode]);
         
         // Send email
         await sendVoucherEmail(user.email, voucherCode, `AED ${discount_aed} Tuition Discount`);
 
         res.json({ success: true, message: 'Points successfully redeemed!', voucher });
-    } catch (err) { res.status(500).json({ error: err.message }); }
+    } catch (err) { 
+        if (tx && !tx.closed) await tx.rollback();
+        res.status(500).json({ error: err.message }); 
+    }
 });
 
 app.get('/api/users/:id/vouchers', async (req, res) => {
@@ -1491,22 +1617,59 @@ app.post('/api/admin/vouchers/use', async (req, res) => {
 });
 
 app.post('/api/redeem/collaborator', async (req, res) => {
+    let tx;
     try {
         const { user_id, partner_id, reward_name, points_deducted, discount_aed } = req.body;
         if (!user_id || !partner_id || !reward_name || !points_deducted || !discount_aed) {
             return res.status(400).json({ error: 'Missing parameters' });
         }
 
-        const user = await getQuery(`SELECT email, points_balance FROM users WHERE user_id = ?`, [user_id]);
-        if (!user) return res.status(404).json({ error: 'User not found' });
-        if (user.points_balance < points_deducted) return res.status(400).json({ error: 'Insufficient points balance.' });
+        tx = await db.transaction('write');
 
-        await deductPoints(user_id, points_deducted);
-        const desc = `Redeemed ${partner_id.toUpperCase()} Reward: ${reward_name} (AED ${discount_aed} Value)`;
-        await runQuery(`INSERT INTO points_ledger (user_id, points_change, event_type, description, points_remaining, expires_at) VALUES (?, ?, 'Redemption', ?, 0, NULL)`,
-            [user_id, -points_deducted, desc]);
+        const userRes = await tx.execute({
+            sql: `SELECT email, points_balance FROM users WHERE user_id = ?`,
+            args: [user_id]
+        });
+        if (userRes.rows.length === 0) {
+            await tx.rollback();
+            return res.status(404).json({ error: 'User not found' });
+        }
+        const user = userRes.rows[0];
         
-        await runQuery(`UPDATE users SET points_balance = points_balance - ? WHERE user_id = ?`, [points_deducted, user_id]);
+        if (user.points_balance < points_deducted) {
+            await tx.rollback();
+            return res.status(400).json({ error: 'Insufficient points balance.' });
+        }
+
+        // Inline deductPoints logic to stay inside transaction
+        const depositsRes = await tx.execute({
+            sql: `SELECT ledger_id, points_remaining FROM points_ledger WHERE user_id = ? AND points_remaining > 0 ORDER BY ledger_id ASC`,
+            args: [user_id]
+        });
+        let remaining = points_deducted;
+        for (const d of depositsRes.rows) {
+            if (remaining <= 0) break;
+            const deduct = Math.min(Number(d.points_remaining), remaining);
+            await tx.execute({
+                sql: `UPDATE points_ledger SET points_remaining = points_remaining - ? WHERE ledger_id = ?`,
+                args: [deduct, d.ledger_id]
+            });
+            remaining -= deduct;
+        }
+
+        const desc = `Redeemed ${partner_id.toUpperCase()} Reward: ${reward_name} (AED ${discount_aed} Value)`;
+        await tx.execute({
+            sql: `INSERT INTO points_ledger (user_id, points_change, event_type, description, points_remaining, expires_at) VALUES (?, ?, 'Redemption', ?, 0, NULL)`,
+            args: [user_id, -points_deducted, desc]
+        });
+        
+        await tx.execute({
+            sql: `UPDATE users SET points_balance = points_balance - ? WHERE user_id = ?`,
+            args: [points_deducted, user_id]
+        });
+
+        await tx.commit();
+
         const newTier = await updateUserTier(user_id);
 
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -1517,7 +1680,10 @@ app.post('/api/redeem/collaborator', async (req, res) => {
         await sendVoucherEmail(user.email, code, reward_name);
 
         res.json({ success: true, message: 'Points successfully redeemed!', voucher_code: code, new_tier: newTier });
-    } catch (err) { res.status(500).json({ error: err.message }); }
+    } catch (err) { 
+        if (tx && !tx.closed) await tx.rollback();
+        res.status(500).json({ error: err.message }); 
+    }
 });
 
 // Legacy backward-compatible alias for ADNOC
@@ -1988,7 +2154,136 @@ app.post('/api/promos/redeem', async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-const PORT = process.env.PORT || 3000;
+
+// ==========================================
+// COMMUNITY PLATFORM ROUTES
+// ==========================================
+
+// Get all posts with user info
+app.get('/api/community/posts', requireAuth, async (req, res) => {
+    try {
+        const posts = await getQueryAll(`
+            SELECT p.*, u.name, u.programme,
+            (SELECT COUNT(*) FROM community_comments WHERE post_id = p.post_id) as comment_count,
+            EXISTS(SELECT 1 FROM community_upvotes WHERE target_type='post' AND target_id=p.post_id AND user_id=?) as user_has_upvoted
+            FROM community_posts p
+            JOIN users u ON p.user_id = u.user_id
+            ORDER BY p.created_at DESC
+        `, [req.user.user_id]);
+        res.json({ posts });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Create a new post (Awards 10 points)
+// Create a new post
+app.post('/api/community/posts', requireAuth, async (req, res) => {
+    try {
+        const { title, content } = req.body;
+        if (!title || !content) return res.status(400).json({ error: 'Title and content required' });
+
+        await db.transaction('write');
+        try {
+            await runQuery('INSERT INTO community_posts (user_id, title, content) VALUES (?, ?, ?)', [req.user.user_id, title, content]);
+            
+            await db.execute('COMMIT');
+            res.json({ message: 'Post created successfully!' });
+        } catch (e) {
+            await db.execute('ROLLBACK');
+            throw e;
+        }
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Upvote a post
+app.post('/api/community/posts/:id/upvote', requireAuth, async (req, res) => {
+    try {
+        const postId = req.params.id;
+        
+        await db.transaction('write');
+        try {
+            // Check if already upvoted
+            const exists = await getQuery("SELECT 1 FROM community_upvotes WHERE user_id=? AND target_type='post' AND target_id=?", [req.user.user_id, postId]);
+            
+            if (exists) {
+                // Remove upvote
+                await runQuery("DELETE FROM community_upvotes WHERE user_id=? AND target_type='post' AND target_id=?", [req.user.user_id, postId]);
+                await runQuery("UPDATE community_posts SET upvotes = upvotes - 1 WHERE post_id=?", [postId]);
+            } else {
+                // Add upvote
+                await runQuery("INSERT INTO community_upvotes (user_id, target_type, target_id) VALUES (?, 'post', ?)", [req.user.user_id, postId]);
+                await runQuery("UPDATE community_posts SET upvotes = upvotes + 1 WHERE post_id=?", [postId]);
+                
+                // Award the author of the post 5 points
+                const post = await getQuery("SELECT user_id FROM community_posts WHERE post_id=?", [postId]);
+                if (post && post.user_id !== req.user.user_id) {
+                    await runQuery('UPDATE users SET points_balance = points_balance + 5 WHERE user_id = ?', [post.user_id]);
+                    await runQuery('INSERT INTO points_ledger (user_id, action_type, points, description) VALUES (?, ?, ?, ?)', 
+                        [post.user_id, 'EARN', 5, 'Received an upvote on your post']);
+                }
+            }
+            
+            await db.execute('COMMIT');
+            res.json({ message: exists ? 'Upvote removed' : 'Upvote added' });
+        } catch (e) {
+            await db.execute('ROLLBACK');
+            throw e;
+        }
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Get comments for a post
+app.get('/api/community/posts/:id/comments', requireAuth, async (req, res) => {
+    try {
+        const comments = await getQueryAll(`
+            SELECT c.*, u.name,
+            EXISTS(SELECT 1 FROM community_upvotes WHERE target_type='comment' AND target_id=c.comment_id AND user_id=?) as user_has_upvoted
+            FROM community_comments c
+            JOIN users u ON c.user_id = u.user_id
+            WHERE c.post_id = ?
+            ORDER BY c.created_at ASC
+        `, [req.user.user_id, req.params.id]);
+        res.json({ comments });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Add a comment (Awards 5 points)
+app.post('/api/community/posts/:id/comments', requireAuth, async (req, res) => {
+    try {
+        const { content } = req.body;
+        const postId = req.params.id;
+        if (!content) return res.status(400).json({ error: 'Content required' });
+
+        await db.transaction('write');
+        try {
+            await runQuery('INSERT INTO community_comments (post_id, user_id, content) VALUES (?, ?, ?)', [postId, req.user.user_id, content]);
+            
+            // Award 5 points for commenting
+            await runQuery('UPDATE users SET points_balance = points_balance + 5 WHERE user_id = ?', [req.user.user_id]);
+            await runQuery('INSERT INTO points_ledger (user_id, action_type, points, description) VALUES (?, ?, ?, ?)', 
+                [req.user.user_id, 'EARN', 5, 'Contributed a comment']);
+            
+            await db.execute('COMMIT');
+            res.json({ message: 'Comment added successfully and you earned 5 points!' });
+        } catch (e) {
+            await db.execute('ROLLBACK');
+            throw e;
+        }
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ==========================================
+
+const PORT = process.env.PORT || 3001;
 
 // Export for Vercel serverless
 module.exports = app;

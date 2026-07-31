@@ -14,6 +14,23 @@ function escapeHTML(str) {
 // BIA Loyalty Engine Frontend App with Role-based login and admin directory
 
 const API_BASE = '/api';
+// Intercept fetch to append JWT
+const originalFetch = window.fetch;
+window.fetch = async function() {
+    let [resource, config] = arguments;
+    if (typeof resource === 'string' && resource.startsWith(API_BASE)) {
+        const token = localStorage.getItem('token');
+        if (token) {
+            config = config || {};
+            config.headers = {
+                ...config.headers,
+                'Authorization': `Bearer ${token}`
+            };
+        }
+    }
+    return originalFetch(resource, config);
+};
+
 
 // App State Cache
 let appState = {
@@ -613,7 +630,36 @@ function setupLandingParticles() {
 // ----------------------------------------------------
 // SCREEN PRELOADER INTRO TIMER & REVEAL
 // ----------------------------------------------------
-function playIntroPreloader() {
+
+async function attemptAutoLogin() {
+    const token = localStorage.getItem('token');
+    if (!token) return false;
+    
+    try {
+        const response = await fetch(`${API_BASE}/auth/me`);
+        const data = await response.json();
+        
+        if (response.ok && data.user) {
+            appState.currentUser = data.user;
+            
+            // Update UI based on role
+            const adminNav = document.querySelector('a[data-tab="admin-vouchers-mgmt"]');
+            if (adminNav) {
+                adminNav.style.display = data.user.role === 'admin' ? 'flex' : 'none';
+            }
+            
+            return true;
+        } else {
+            localStorage.removeItem('token');
+            return false;
+        }
+    } catch (err) {
+        return false;
+    }
+}
+
+async function playIntroPreloader() {
+
     const loader = document.getElementById('loader-screen');
     const loginOverlay = document.getElementById('login-overlay');
     
@@ -838,6 +884,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
         if (!response.ok) throw new Error(data.error || 'Authentication failed');
 
         appState.currentUser = data.user;
+        localStorage.setItem('token', data.token);
         
         // Hide login modal & cover screen, trigger GSAP reveal
         closeLoginModal();
@@ -1112,6 +1159,7 @@ function showPortalDashboard() {
 
 function handleLogout() {
     appState.currentUser = null;
+    localStorage.removeItem('token');
     appState.userProfile = null;
     appState.adminUser = null;
     const banner = document.getElementById('impersonation-bar');
@@ -1606,8 +1654,14 @@ document.getElementById('btn-simulate-lms').addEventListener('click', async () =
 });
 
 document.getElementById('btn-calculate-discount').addEventListener('click', async () => {
-    const fee = parseFloat(document.getElementById('course-fee').value);
-    const points = parseInt(document.getElementById('points-to-redeem').value);
+    const feeStr = document.getElementById('course-fee').value;
+    const pointsStr = document.getElementById('points-to-redeem').value;
+    
+    // Don't calculate if inputs are empty
+    if (!feeStr || !pointsStr) return;
+
+    const fee = parseFloat(feeStr);
+    const points = parseInt(pointsStr);
 
     try {
         const response = await fetch(`${API_BASE}/redeem/calculate`, {
@@ -1635,6 +1689,20 @@ document.getElementById('btn-calculate-discount').addEventListener('click', asyn
         }
     } catch (err) {
         alert(`Error: ${err.message}`);
+    }
+});
+
+// Add auto-calculate on input change
+let calcTimeout;
+['course-fee', 'points-to-redeem'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+        el.addEventListener('input', () => {
+            clearTimeout(calcTimeout);
+            calcTimeout = setTimeout(() => {
+                document.getElementById('btn-calculate-discount').click();
+            }, 300); // 300ms debounce
+        });
     }
 });
 
@@ -2040,76 +2108,98 @@ window.loadStudentAnnouncements = loadStudentAnnouncements;
 // ══════════════════════════════════════════════════
 // VOUCHER MANAGEMENT (admin view of all vouchers)
 // ══════════════════════════════════════════════════
+window.cachedAdminVouchers = [];
+
+window.cachedAdminVouchers = [];
+
 async function loadAdminVoucherReport() {
     const tbody = document.getElementById('admin-vouchers-body');
     if (!tbody) return;
-    tbody.innerHTML = '<tr><td colspan="7" class="no-data"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" class="no-data"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</td></tr>';
     try {
-        // Use the existing admin ledger which has voucher info, or the students endpoint
-        const studentsRes = await fetch(`${API_BASE}/admin/students`);
-        const students = studentsRes.ok ? await studentsRes.json() : [];
-        const studentMap = {};
-        students.forEach(s => { studentMap[s.user_id] = s.name; });
-
-        // Fetch all vouchers via the system ledger
-        const res = await fetch(`${API_BASE}/admin/ledger`);
+        const res = await fetch(`${API_BASE}/admin/vouchers`);
         if (!res.ok) throw new Error('Failed to load voucher data.');
-        const ledger = await res.json();
-        const voucherEntries = ledger.filter(e => e.event_type && (e.event_type.toLowerCase().includes('voucher') || e.description?.toLowerCase().includes('voucher')));
+        const vouchers = await res.json();
+        window.cachedAdminVouchers = vouchers;
 
         const totalEl = document.getElementById('voucher-stat-total');
         const valueEl = document.getElementById('voucher-stat-value');
         const avgEl   = document.getElementById('voucher-stat-avg');
 
-        if (totalEl) totalEl.textContent = voucherEntries.length;
-
-        if (voucherEntries.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="no-data">No vouchers have been claimed yet.</td></tr>';
-            if (valueEl) valueEl.textContent = '0';
-            if (avgEl) avgEl.textContent = '0';
-            return;
-        }
-
-        // Also fetch the actual tuition vouchers
-        const allVouchersPromises = students.map(s =>
-            fetch(`${API_BASE}/users/${s.user_id}/vouchers`).then(r => r.ok ? r.json() : []).catch(() => [])
-        );
-        const allVouchersArrays = await Promise.all(allVouchersPromises);
-        const allVouchers = allVouchersArrays.flat().map((v, i) => ({
-            ...v,
-            studentName: studentMap[v.user_id] || 'Unknown'
-        }));
-
-        const totalValue = allVouchers.reduce((sum, v) => sum + (v.discount_aed || 0), 0);
-        const avgValue = allVouchers.length ? (totalValue / allVouchers.length).toFixed(1) : 0;
-        if (totalEl) totalEl.textContent = allVouchers.length;
+        const totalValue = vouchers.reduce((sum, v) => sum + (v.discount_aed || 0), 0);
+        const avgValue = vouchers.length ? (totalValue / vouchers.length).toFixed(1) : 0;
+        
+        if (totalEl) totalEl.textContent = vouchers.length;
         if (valueEl) valueEl.textContent = `${totalValue.toFixed(0)} AED`;
         if (avgEl) avgEl.textContent = `${avgValue} AED`;
 
-        if (allVouchers.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="no-data">No vouchers have been claimed yet.</td></tr>';
-            return;
-        }
-
-        tbody.innerHTML = allVouchers.map(v => `
-            <tr>
-                <td style="font-family:'Outfit'; font-size:0.8rem; color:#dfb15b; font-weight:700;">${v.voucher_code || '—'}</td>
-                <td><strong class="clickable-student-name" onclick="showStudentDetailModal(${v.user_id})" style="color: var(--text-main); cursor: pointer; text-decoration: underline;">${v.studentName}</strong></td>
-                <td style="color:#4ade80; font-weight:700;">${v.discount_aed || 0} AED</td>
-                <td style="font-family:'Outfit';">${formatNumber(v.points_deducted || 0)} pts</td>
-                <td><span style="font-size:0.7rem; padding:0.2rem 0.5rem; border-radius:4px; background:${v.status === 'Used' ? 'rgba(74,222,128,0.1)' : 'rgba(255,255,255,0.05)'}; border:1px solid ${v.status === 'Used' ? 'rgba(74,222,128,0.2)' : 'rgba(255,255,255,0.1)'}; color:${v.status === 'Used' ? '#4ade80' : 'rgba(255,255,255,0.5)'}; font-weight:700;">${v.status || 'Unused'}</span></td>
-                <td style="font-size:0.72rem; color:rgba(255,255,255,0.5);">${v.created_at ? cleanDate(v.created_at) : '—'}</td>
-                <td>
-                    <button onclick="adminDeleteVoucher(${v.voucher_id})" style="background:none; border:none; color:rgba(239,68,68,0.4); cursor:pointer; font-size:0.8rem; transition:color 0.15s;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='rgba(239,68,68,0.4)'" title="Delete voucher">
-                        <i class="fa-solid fa-trash-can"></i>
-                    </button>
-                </td>
-            </tr>`).join('');
+        filterAdminVouchers();
     } catch (err) {
-        if (tbody) tbody.innerHTML = `<tr><td colspan="7" class="no-data" style="color:#ef4444;">Error: ${err.message}</td></tr>`;
+        if (tbody) tbody.innerHTML = `<tr><td colspan="8" class="no-data" style="color:#ef4444;">Error: ${err.message}</td></tr>`;
     }
 }
 window.loadAdminVoucherReport = loadAdminVoucherReport;
+
+function filterAdminVouchers() {
+    const tbody = document.getElementById('admin-vouchers-body');
+    if (!tbody) return;
+    
+    const searchInput = document.getElementById('admin-voucher-search');
+    const filterInput = document.getElementById('admin-voucher-status-filter');
+    
+    const searchStr = searchInput ? searchInput.value.toLowerCase() : '';
+    const statusFilter = filterInput ? filterInput.value : 'ALL';
+    
+    const filtered = window.cachedAdminVouchers.filter(v => {
+        const code = (v.voucher_code || '').toLowerCase();
+        const sName = (v.student_name || '').toLowerCase();
+        const matchesSearch = code.includes(searchStr) || sName.includes(searchStr);
+        
+        const status = v.status ? v.status.toUpperCase() : 'UNUSED';
+        const matchesStatus = statusFilter === 'ALL' || status === statusFilter;
+        
+        return matchesSearch && matchesStatus;
+    });
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="no-data">No vouchers found matching criteria.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = filtered.map(v => `
+        <tr>
+            <td style="font-family:'Outfit'; font-size:0.8rem; color:#dfb15b; font-weight:700;">${v.voucher_code || '—'}</td>
+            <td><strong class="clickable-student-name" onclick="showStudentDetailModal(${v.user_id})" style="color: var(--text-main); cursor: pointer; text-decoration: underline;">${v.student_name || 'Unknown'}</strong></td>
+            <td style="color:#4ade80; font-weight:700;">${v.discount_aed || 0} AED</td>
+            <td style="font-family:'Outfit';">${formatNumber(v.points_deducted || 0)} pts</td>
+            <td><span style="font-size:0.7rem; padding:0.2rem 0.5rem; border-radius:4px; background:${v.status === 'Used' ? 'rgba(74,222,128,0.1)' : 'rgba(255,255,255,0.05)'}; border:1px solid ${v.status === 'Used' ? 'rgba(74,222,128,0.2)' : 'rgba(255,255,255,0.1)'}; color:${v.status === 'Used' ? '#4ade80' : 'rgba(255,255,255,0.5)'}; font-weight:700;">${v.status || 'Unused'}</span></td>
+            <td style="font-size:0.72rem; color:rgba(255,255,255,0.5);">${v.created_at ? cleanDate(v.created_at) : '—'}</td>
+            <td>
+                ${v.status !== 'Used' ? `<button onclick="adminUseVoucher('${v.voucher_code}')" style="background:rgba(74,222,128,0.1); border:1px solid rgba(74,222,128,0.3); color:#4ade80; padding:0.25rem 0.6rem; border-radius:6px; cursor:pointer; font-size:0.7rem; font-weight:bold; transition:all 0.2s;" onmouseover="this.style.background='rgba(74,222,128,0.2)'" onmouseout="this.style.background='rgba(74,222,128,0.1)'" title="Mark as Used"><i class="fa-solid fa-check"></i> Mark Used</button>` : `<span style="font-size:0.7rem; color:rgba(255,255,255,0.3);"><i class="fa-solid fa-check-double"></i> Claimed</span>`}
+            </td>
+            <td>
+                <button onclick="adminDeleteVoucher(${v.voucher_id})" style="background:none; border:none; color:rgba(239,68,68,0.4); cursor:pointer; font-size:0.8rem; transition:color 0.15s;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='rgba(239,68,68,0.4)'" title="Delete voucher">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+            </td>
+        </tr>`).join('');
+}
+window.filterAdminVouchers = filterAdminVouchers;
+
+async function adminUseVoucher(code) {
+    if (!confirm(`Mark voucher ${code} as Used? This cannot be undone easily.`)) return;
+    try {
+        const res = await fetch(`${API_BASE}/admin/vouchers/use`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ voucher_code: code })
+        });
+        if (!res.ok) throw new Error();
+        showToast('Voucher Used', `Voucher ${code} marked as used.`, 'success');
+        loadAdminVoucherReport();
+    } catch { showToast('Error', 'Could not update voucher.', 'error'); }
+}
+window.adminUseVoucher = adminUseVoucher;
 
 async function adminDeleteVoucher(id) {
     if (!confirm('Delete this voucher record?')) return;
@@ -8003,3 +8093,228 @@ async function loadPublicFAQs() {
         container.innerHTML = '<div style="text-align: center; color: rgba(255,255,255,0.4); padding: 2rem;">Failed to load FAQs. Please try again later.</div>';
     }
 }
+
+
+// ==========================================
+// COMMUNITY HUB
+// ==========================================
+
+async function loadCommunityPosts() {
+    const container = document.getElementById('community-feed');
+    if (!container) return;
+    
+    try {
+        container.innerHTML = `
+            <div class="card glassmorphic" style="padding: 1.25rem; border-radius: 8px; animation: pulse 1.5s infinite;">
+                <div style="height: 20px; background: rgba(255,255,255,0.1); border-radius: 4px; width: 60%; margin-bottom: 10px;"></div>
+                <div style="height: 12px; background: rgba(255,255,255,0.05); border-radius: 4px; width: 40%; margin-bottom: 20px;"></div>
+                <div style="height: 12px; background: rgba(255,255,255,0.1); border-radius: 4px; width: 100%; margin-bottom: 8px;"></div>
+                <div style="height: 12px; background: rgba(255,255,255,0.1); border-radius: 4px; width: 90%;"></div>
+            </div>
+            <div class="card glassmorphic" style="padding: 1.25rem; border-radius: 8px; animation: pulse 1.5s infinite; animation-delay: 0.2s;">
+                <div style="height: 20px; background: rgba(255,255,255,0.1); border-radius: 4px; width: 50%; margin-bottom: 10px;"></div>
+                <div style="height: 12px; background: rgba(255,255,255,0.05); border-radius: 4px; width: 30%; margin-bottom: 20px;"></div>
+                <div style="height: 12px; background: rgba(255,255,255,0.1); border-radius: 4px; width: 95%; margin-bottom: 8px;"></div>
+                <div style="height: 12px; background: rgba(255,255,255,0.1); border-radius: 4px; width: 85%;"></div>
+            </div>
+            <style>
+                @keyframes pulse {
+                    0% { opacity: 0.6; }
+                    50% { opacity: 1; }
+                    100% { opacity: 0.6; }
+                }
+            </style>
+        `;
+        
+        const response = await fetch(`${API_BASE}/community/posts`);
+        const data = await response.json();
+        
+        if (!response.ok) throw new Error(data.error);
+        
+        if (!data.posts || data.posts.length === 0) {
+            container.innerHTML = '<div style="text-align: center; color: rgba(255,255,255,0.4); padding: 2rem;">No posts yet. Be the first to start a discussion!</div>';
+            return;
+        }
+        
+        container.innerHTML = data.posts.map(post => `
+            <div class="card glassmorphic" style="padding: 1.25rem; border-radius: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <h4 style="margin: 0 0 0.5rem 0; color: #dfb15b; font-size: 1.1rem;">${escapeHTML(post.title)}</h4>
+                        <div style="font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-bottom: 1rem;">
+                            By <strong style="color: #fff;">${escapeHTML(post.name)}</strong> (${escapeHTML(post.programme)}) • ${new Date(post.created_at).toLocaleDateString()}
+                        </div>
+                    </div>
+                    <button onclick="upvotePost(${post.post_id})" style="background: none; border: 1px solid ${post.user_has_upvoted ? '#dfb15b' : 'rgba(255,255,255,0.2)'}; color: ${post.user_has_upvoted ? '#dfb15b' : '#fff'}; border-radius: 4px; padding: 0.3rem 0.6rem; cursor: pointer; transition: 0.2s;">
+                        <i class="fa-solid fa-arrow-up"></i> ${post.upvotes}
+                    </button>
+                </div>
+                <div style="color: rgba(255,255,255,0.85); line-height: 1.6; font-size: 0.95rem; margin-bottom: 1rem;">
+                    ${escapeHTML(post.content).replace(/\n/g, '<br>')}
+                </div>
+                <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 0.75rem;">
+                    <button onclick="toggleComments(${post.post_id})" style="background: none; border: none; color: rgba(255,255,255,0.6); cursor: pointer; font-family: inherit;">
+                        <i class="fa-regular fa-comment"></i> ${post.comment_count} Comments
+                    </button>
+                    <div id="comments-section-${post.post_id}" style="display: none; margin-top: 1rem; border-left: 2px solid rgba(223,177,91,0.3); padding-left: 1rem;">
+                        <div id="comments-list-${post.post_id}"></div>
+                        <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                            <input type="text" id="comment-input-${post.post_id}" class="input-field" placeholder="Add a comment..." style="flex: 1; padding: 0.5rem;">
+                            <button onclick="submitComment(${post.post_id})" class="btn btn-primary" style="padding: 0.5rem 1rem;">Reply</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+        
+    } catch (err) {
+        container.innerHTML = `<div style="color: #ef4444; padding: 1rem;">Failed to load posts: ${err.message}</div>`;
+    }
+}
+
+async function upvotePost(postId) {
+    try {
+        const response = await fetch(`${API_BASE}/community/posts/${postId}/upvote`, { method: 'POST' });
+        if (!response.ok) throw new Error('Failed to upvote');
+        loadCommunityPosts(); // Reload to update counts
+    } catch (err) {
+        showToast('Error', err.message, 'error');
+    }
+}
+
+async function toggleComments(postId) {
+    const section = document.getElementById(`comments-section-${postId}`);
+    if (section.style.display === 'none') {
+        section.style.display = 'block';
+        loadComments(postId);
+    } else {
+        section.style.display = 'none';
+    }
+}
+
+async function loadComments(postId) {
+    const container = document.getElementById(`comments-list-${postId}`);
+    try {
+        container.innerHTML = `
+            <div style="margin-bottom: 0.75rem; background: rgba(0,0,0,0.1); padding: 0.75rem; border-radius: 6px; animation: pulse 1.5s infinite;">
+                <div style="height: 12px; background: rgba(255,255,255,0.1); border-radius: 4px; width: 40%; margin-bottom: 8px;"></div>
+                <div style="height: 10px; background: rgba(255,255,255,0.05); border-radius: 4px; width: 80%;"></div>
+            </div>
+            <div style="margin-bottom: 0.75rem; background: rgba(0,0,0,0.1); padding: 0.75rem; border-radius: 6px; animation: pulse 1.5s infinite; animation-delay: 0.2s;">
+                <div style="height: 12px; background: rgba(255,255,255,0.1); border-radius: 4px; width: 30%; margin-bottom: 8px;"></div>
+                <div style="height: 10px; background: rgba(255,255,255,0.05); border-radius: 4px; width: 60%;"></div>
+            </div>
+        `;
+        const response = await fetch(`${API_BASE}/community/posts/${postId}/comments`);
+        const data = await response.json();
+        
+        if (!data.comments || data.comments.length === 0) {
+            container.innerHTML = '<span style="color:rgba(255,255,255,0.4); font-size: 0.85rem;">No comments yet.</span>';
+            return;
+        }
+        
+        container.innerHTML = data.comments.map(c => `
+            <div style="margin-bottom: 0.75rem; background: rgba(0,0,0,0.1); padding: 0.75rem; border-radius: 6px;">
+                <div style="display: flex; justify-content: space-between;">
+                    <strong style="color: #dfb15b; font-size: 0.85rem;">${escapeHTML(c.name)}</strong>
+                    <span style="font-size: 0.75rem; color: rgba(255,255,255,0.4);">${new Date(c.created_at).toLocaleDateString()}</span>
+                </div>
+                <div style="font-size: 0.9rem; margin-top: 0.25rem;">${escapeHTML(c.content)}</div>
+            </div>
+        `).join('');
+    } catch (err) {
+        container.innerHTML = 'Failed to load comments.';
+    }
+}
+
+async function submitComment(postId) {
+    const input = document.getElementById(`comment-input-${postId}`);
+    const content = input.value.trim();
+    if (!content) return;
+    
+    try {
+        const response = await fetch(`${API_BASE}/community/posts/${postId}/comments`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ content })
+        });
+        
+        if (!response.ok) throw new Error('Failed to comment');
+        
+        input.value = '';
+        loadComments(postId);
+        loadCommunityPosts(); // To update the comment count
+        showToast('Success', 'Comment added! +5 points', 'success');
+        fetchOverview(); // Update points balance in UI
+    } catch (err) {
+        showToast('Error', err.message, 'error');
+    }
+}
+
+// Attach event listeners for Community UI
+document.addEventListener('DOMContentLoaded', () => {
+    const btnNewPost = document.getElementById('btn-new-post');
+    const newPostContainer = document.getElementById('new-post-container');
+    const btnCancelPost = document.getElementById('btn-cancel-post');
+    const btnSubmitPost = document.getElementById('btn-submit-post');
+    
+    if (btnNewPost) {
+        btnNewPost.addEventListener('click', () => {
+            newPostContainer.style.display = 'block';
+            btnNewPost.style.display = 'none';
+        });
+    }
+    
+    if (btnCancelPost) {
+        btnCancelPost.addEventListener('click', () => {
+            newPostContainer.style.display = 'none';
+            btnNewPost.style.display = 'block';
+            document.getElementById('post-title').value = '';
+            document.getElementById('post-content').value = '';
+        });
+    }
+    
+    if (btnSubmitPost) {
+        btnSubmitPost.addEventListener('click', async () => {
+            const title = document.getElementById('post-title').value.trim();
+            const content = document.getElementById('post-content').value.trim();
+            
+            if (!title || !content) {
+                showToast('Error', 'Title and content are required', 'error');
+                return;
+            }
+            
+            try {
+                btnSubmitPost.disabled = true;
+                btnSubmitPost.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Publishing...';
+                
+                const response = await fetch(`${API_BASE}/community/posts`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, content })
+                });
+                
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error);
+                
+                showToast('Success', data.message, 'success');
+                btnCancelPost.click();
+                loadCommunityPosts();
+                fetchOverview(); // Update points balance
+            } catch (err) {
+                showToast('Error', err.message, 'error');
+            } finally {
+                btnSubmitPost.disabled = false;
+                btnSubmitPost.innerHTML = 'Publish Post';
+            }
+        });
+    }
+    
+    // Add interceptor to load community posts when tab is clicked
+    const communityTabBtn = document.querySelector('button[data-target="community-hub"]');
+    if (communityTabBtn) {
+        communityTabBtn.addEventListener('click', () => {
+            loadCommunityPosts();
+        });
+    }
+});

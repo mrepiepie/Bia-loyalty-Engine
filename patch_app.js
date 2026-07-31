@@ -1,120 +1,110 @@
 const fs = require('fs');
-let app = fs.readFileSync('public/app.js', 'utf8');
 
-// 1. Update loadUserProfile
-let target_profile = `        populateDashboardPartners();
-        await loadStudentVouchers(userId);
-    } catch (err) {`;
-let replace_profile = `        populateDashboardPartners();
-        await loadStudentVouchers(userId);
-        await loadStudentPromoHistory(userId);
-    } catch (err) {`;
-app = app.replace(target_profile, replace_profile);
+let content = fs.readFileSync('public/app.js', 'utf8');
 
-// 2. Update showStudentDetailModal
-let target_modal = `    // Open Modal
-    const modal = document.getElementById('student-detail-modal');`;
-let replace_modal = `    // Load student promo history
-    await loadStudentPromoHistory(userId, true);
+const anchorStart = 'async function loadAdminVoucherReport() {';
+const anchorEnd = 'window.loadAdminVoucherReport = loadAdminVoucherReport;';
 
-    // Open Modal
-    const modal = document.getElementById('student-detail-modal');`;
-app = app.replace(target_modal, replace_modal);
+const startIndex = content.indexOf(anchorStart);
+const endIndex = content.indexOf(anchorEnd) + anchorEnd.length;
 
-// 3. Update adminPromoForm submit
-let target_promo = `            const response = await fetch(\`\${API_BASE}/admin/promos\`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ code, points_reward, max_uses, occasion })
-            });
-            const data = await response.json();
-            if (!response.ok) throw new Error(data.error || 'Failed to generate promo code');
-            
-            showToast('Promo Generated! 🎉', \`Code \${code} is now active.\`, 'success');
-            adminPromoForm.reset();
-            loadAdminPromos();`;
+if (startIndex === -1 || endIndex === -1 || endIndex <= startIndex) {
+    console.error("Could not find the function to replace.");
+    process.exit(1);
+}
 
-let replace_promo = `            const response = await fetch(\`\${API_BASE}/admin/promos\`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ code, points_reward, max_uses, occasion })
-            });
-            const data = await response.json();
-            
-            if (!response.ok) {
-                if (data.promo_exists) {
-                    const confirmOverride = confirm(\`This promo code (\${code}) already exists.\\nDo you want to update it to use the new reward (+\${points_reward} pts) and limit (\${max_uses || 'unlimited'})?\`);
-                    if (confirmOverride) {
-                        const overrideRes = await fetch(\`\${API_BASE}/admin/promos/\${code}/override\`, {
-                            method: 'PUT',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ points_reward, max_uses, occasion })
-                        });
-                        const overrideData = await overrideRes.json();
-                        if (!overrideRes.ok) throw new Error(overrideData.error || 'Failed to update existing promo code');
-                        showToast('Promo Updated!', \`Code \${code} has been successfully updated and re-activated.\`, 'success');
-                        adminPromoForm.reset();
-                        loadAdminPromos();
-                        return;
-                    } else {
-                        return; // User cancelled
-                    }
-                }
-                throw new Error(data.error || 'Failed to generate promo code');
-            }
-            
-            showToast('Promo Generated! 🎉', \`Code \${code} is now active.\`, 'success');
-            adminPromoForm.reset();
-            loadAdminPromos();`;
+const replacement = `window.cachedAdminVouchers = [];
 
-let target_promo2 = `            const response = await fetch(\`\${API_BASE}/admin/promos\`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ code, points_reward, max_uses, occasion })
-            });
-            const data = await response.json();
-            if (!response.ok) throw new Error(data.error || 'Failed to generate promo code');
-            
-            showToast('Promo Generated! YZ?', \`Code \${code} is now active.\`, 'success');
-            adminPromoForm.reset();
-            loadAdminPromos();`;
-
-app = app.replace(target_promo, replace_promo).replace(target_promo2, replace_promo);
-
-// 4. Append loadStudentPromoHistory
-let append = `
-async function loadStudentPromoHistory(userId, isAdminModal = false) {
+async function loadAdminVoucherReport() {
+    const tbody = document.getElementById('admin-vouchers-body');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="8" class="no-data"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</td></tr>';
     try {
-        const response = await fetch(\`\${API_BASE}/users/\${userId}/promo-history\`);
-        if (!response.ok) return;
-        const data = await response.json();
+        const res = await fetch(\`\${API_BASE}/admin/vouchers\`);
+        if (!res.ok) throw new Error('Failed to load voucher data.');
+        const vouchers = await res.json();
+        window.cachedAdminVouchers = vouchers;
+
+        const totalEl = document.getElementById('voucher-stat-total');
+        const valueEl = document.getElementById('voucher-stat-value');
+        const avgEl   = document.getElementById('voucher-stat-avg');
+
+        const totalValue = vouchers.reduce((sum, v) => sum + (v.discount_aed || 0), 0);
+        const avgValue = vouchers.length ? (totalValue / vouchers.length).toFixed(1) : 0;
         
-        const targetList = isAdminModal ? document.getElementById('sd-promo-history-list') : document.getElementById('student-promo-history-list');
-        if (!targetList) return;
-        
-        if (!data.history || data.history.length === 0) {
-            targetList.innerHTML = '<tr><td colspan="3" style="text-align: center; color: rgba(255,255,255,0.4);">No promo codes redeemed yet.</td></tr>';
-            return;
-        }
-        
-        targetList.innerHTML = data.history.map(h => {
-            const dateStr = new Date(h.claimed_at + 'Z').toLocaleDateString();
-            return \`
-                <tr>
-                    <td><strong style="color: var(--bia-gold);">\${h.code}</strong></td>
-                    <td>+\${h.points_reward}</td>
-                    <td style="color: rgba(255,255,255,0.5);">\${dateStr}</td>
-                </tr>
-            \`;
-        }).join('');
+        if (totalEl) totalEl.textContent = vouchers.length;
+        if (valueEl) valueEl.textContent = \`\${totalValue.toFixed(0)} AED\`;
+        if (avgEl) avgEl.textContent = \`\${avgValue} AED\`;
+
+        filterAdminVouchers();
     } catch (err) {
-        console.error('Error loading promo history:', err);
+        if (tbody) tbody.innerHTML = \`<tr><td colspan="8" class="no-data" style="color:#ef4444;">Error: \${err.message}</td></tr>\`;
     }
 }
-`;
+window.loadAdminVoucherReport = loadAdminVoucherReport;
 
-if (!app.includes('async function loadStudentPromoHistory')) {
-    app += append;
+function filterAdminVouchers() {
+    const tbody = document.getElementById('admin-vouchers-body');
+    if (!tbody) return;
+    
+    const searchInput = document.getElementById('admin-voucher-search');
+    const filterInput = document.getElementById('admin-voucher-status-filter');
+    
+    const searchStr = searchInput ? searchInput.value.toLowerCase() : '';
+    const statusFilter = filterInput ? filterInput.value : 'ALL';
+    
+    const filtered = window.cachedAdminVouchers.filter(v => {
+        const code = (v.voucher_code || '').toLowerCase();
+        const sName = (v.student_name || '').toLowerCase();
+        const matchesSearch = code.includes(searchStr) || sName.includes(searchStr);
+        
+        const status = v.status ? v.status.toUpperCase() : 'UNUSED';
+        const matchesStatus = statusFilter === 'ALL' || status === statusFilter;
+        
+        return matchesSearch && matchesStatus;
+    });
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="no-data">No vouchers found matching criteria.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = filtered.map(v => \`
+        <tr>
+            <td style="font-family:'Outfit'; font-size:0.8rem; color:#dfb15b; font-weight:700;">\${v.voucher_code || '—'}</td>
+            <td><strong class="clickable-student-name" onclick="showStudentDetailModal(\${v.user_id})" style="color: var(--text-main); cursor: pointer; text-decoration: underline;">\${v.student_name || 'Unknown'}</strong></td>
+            <td style="color:#4ade80; font-weight:700;">\${v.discount_aed || 0} AED</td>
+            <td style="font-family:'Outfit';">\${formatNumber(v.points_deducted || 0)} pts</td>
+            <td><span style="font-size:0.7rem; padding:0.2rem 0.5rem; border-radius:4px; background:\${v.status === 'Used' ? 'rgba(74,222,128,0.1)' : 'rgba(255,255,255,0.05)'}; border:1px solid \${v.status === 'Used' ? 'rgba(74,222,128,0.2)' : 'rgba(255,255,255,0.1)'}; color:\${v.status === 'Used' ? '#4ade80' : 'rgba(255,255,255,0.5)'}; font-weight:700;">\${v.status || 'Unused'}</span></td>
+            <td style="font-size:0.72rem; color:rgba(255,255,255,0.5);">\${v.created_at ? cleanDate(v.created_at) : '—'}</td>
+            <td>
+                \${v.status !== 'Used' ? \`<button onclick="adminUseVoucher('\${v.voucher_code}')" style="background:rgba(74,222,128,0.1); border:1px solid rgba(74,222,128,0.3); color:#4ade80; padding:0.25rem 0.6rem; border-radius:6px; cursor:pointer; font-size:0.7rem; font-weight:bold; transition:all 0.2s;" onmouseover="this.style.background='rgba(74,222,128,0.2)'" onmouseout="this.style.background='rgba(74,222,128,0.1)'" title="Mark as Used"><i class="fa-solid fa-check"></i> Mark Used</button>\` : \`<span style="font-size:0.7rem; color:rgba(255,255,255,0.3);"><i class="fa-solid fa-check-double"></i> Claimed</span>\`}
+            </td>
+            <td>
+                <button onclick="adminDeleteVoucher(\${v.voucher_id})" style="background:none; border:none; color:rgba(239,68,68,0.4); cursor:pointer; font-size:0.8rem; transition:color 0.15s;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='rgba(239,68,68,0.4)'" title="Delete voucher">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+            </td>
+        </tr>\`).join('');
 }
+window.filterAdminVouchers = filterAdminVouchers;
 
-fs.writeFileSync('public/app.js', app, 'utf8');
+async function adminUseVoucher(code) {
+    if (!confirm(\`Mark voucher \${code} as Used? This cannot be undone easily.\`)) return;
+    try {
+        const res = await fetch(\`\${API_BASE}/admin/vouchers/use\`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ voucher_code: code })
+        });
+        if (!res.ok) throw new Error();
+        showToast('Voucher Used', \`Voucher \${code} marked as used.\`, 'success');
+        loadAdminVoucherReport();
+    } catch { showToast('Error', 'Could not update voucher.', 'error'); }
+}
+window.adminUseVoucher = adminUseVoucher;`;
+
+const newContent = content.substring(0, startIndex) + replacement + content.substring(endIndex);
+
+fs.writeFileSync('public/app.js', newContent);
+console.log("Successfully replaced loadAdminVoucherReport in app.js.");
