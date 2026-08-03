@@ -3476,7 +3476,7 @@ function setupLogoCarousel() {
     const allLogos = [
         {
             name: 'ADNOC', id: 1,
-            svg: `<img src="https://upload.wikimedia.org/wikipedia/commons/2/23/ADNOC_Logo.svg" alt="ADNOC" style="width: 80px; height: auto; object-fit: contain;" />`
+            svg: `<img src="https://upload.wikimedia.org/wikipedia/en/thumb/8/83/ADNOC_logo.svg/220px-ADNOC_logo.svg.png" alt="ADNOC" style="width: 80px; height: auto; object-fit: contain;" />`
         },
         {
             name: 'VISA', id: 2,
@@ -3496,7 +3496,7 @@ function setupLogoCarousel() {
         },
         {
             name: 'BOSE', id: 6,
-            svg: `<img src="https://upload.wikimedia.org/wikipedia/commons/8/87/Bose_logo.svg" alt="BOSE" style="width: 90px; height: auto; object-fit: contain;" />`
+            svg: `<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Bose_logo.svg/320px-Bose_logo.svg.png" alt="BOSE" style="width: 90px; height: auto; object-fit: contain;" />`
         },
         {
             name: 'H&M', id: 7,
@@ -3541,9 +3541,9 @@ function setupLogoCarousel() {
     function createItem(logo) {
         const item = document.createElement('div');
         item.className = 'logo-slot-item';
-        item.innerHTML = `<div class="logo-slot-svg">${logo.svg}</div><span class="logo-slot-name">${logo.name}</span>`;
+        item.innerHTML = `<div class="logo-slot-svg" style="display:flex; justify-content:center; align-items:center; height:100%; width:100%;">${logo.svg}</div>`;
         // Start state: y+10%, blur(8px), opacity:0    matches template initial
-        item.style.cssText = 'position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.5rem;opacity:0;transform:translateY(10%);filter:blur(8px);';
+        item.style.cssText = 'position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;transform:translateY(10%);filter:blur(8px);';
         return item;
     }
 
