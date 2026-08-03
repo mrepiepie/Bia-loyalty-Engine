@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BIA Community - Discuss, Ask, Learn</title>
+    <meta name="description" content="Join the BIA student community to discuss courses, find internships, and connect with peers.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css?v=2.0.0">
+    <style>
+        /* Specific Community Layout Styles */
+        body {
+            background-color: #0b0c10;
+            color: #c5c6c7;
+        }
+        
+        .community-layout {
+            display: grid;
+            grid-template-columns: 250px 1fr 300px;
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            padding-top: 100px; /* Space for navbar */
+        }
+        
+        @media (max-width: 1100px) {
+            .community-layout {
+                grid-template-columns: 1fr 300px;
+            }
+            .sidebar-left {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 800px) {
+            .community-layout {
+                grid-template-columns: 1fr;
+            }
+            .sidebar-right {
+                display: none;
+            }
+        }
+        
+        /* Navbar */
+        .community-nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 70px;
+            background: rgba(11, 12, 16, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            z-index: 1000;
+        }
+        
+        .nav-logo {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.5rem;
+            color: #66fcf1;
+            text-decoration: none;
+        }
+
+        /* Post Cards (Reddit Style) */
+        .post-card {
+            display: flex;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            transition: all 0.2s ease;
+            overflow: hidden;
+        }
+        
+        .post-card:hover {
+            border-color: rgba(102, 252, 241, 0.3);
+            background: rgba(255,255,255,0.05);
+        }
+        
+        .vote-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
+            background: rgba(0,0,0,0.2);
+            border-right: 1px solid rgba(255,255,255,0.05);
+            min-width: 60px;
+        }
+        
+        .vote-btn {
+            background: none;
+            border: none;
+            color: #888;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.2s ease;
+            padding: 0.25rem;
+        }
+        
+        .vote-btn:hover { color: #fff; }
+        .vote-btn.upvoted { color: #66fcf1; }
+        .vote-btn.downvoted { color: #ff4b4b; }
+        
+        .post-content-area {
+            padding: 1.5rem;
+            flex: 1;
+        }
+        
+        .post-meta {
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .tag-pill {
+            background: rgba(102, 252, 241, 0.1);
+            color: #66fcf1;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .post-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.25rem;
+            color: #fff;
+            margin: 0 0 0.75rem 0;
+            font-weight: 600;
+        }
+        
+        .post-body {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            color: #c5c6c7;
+        }
+        
+        .post-actions {
+            display: flex;
+            gap: 1.5rem;
+        }
+        
+        .action-btn {
+            background: none;
+            border: none;
+            color: #888;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.2s ease;
+        }
+        
+        .action-btn:hover { color: #66fcf1; }
+
+        /* Sort Bar */
+        .sort-bar {
+            display: flex;
+            gap: 1rem;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .sort-btn {
+            background: none;
+            border: none;
+            color: #888;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            transition: all 0.2s ease;
+        }
+        
+        .sort-btn.active {
+            background: rgba(102, 252, 241, 0.15);
+            color: #66fcf1;
+        }
+        .sort-btn:hover:not(.active) {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+
+        /* Lead Capture Modal */
+        .lead-modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+            display: none; justify-content: center; align-items: center; z-index: 9999;
+        }
+        .lead-modal {
+            background: #1f2833; padding: 3rem; border-radius: 16px; border: 1px solid rgba(102, 252, 241, 0.3);
+            text-align: center; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="community-nav">
+        <a href="/" class="nav-logo">BIA <span style="color:#fff;">Community</span></a>
+        
+        <div id="nav-auth-state">
+            <!-- Injected by JS: Either Login button or User Profile info -->
+            <a href="/" class="btn btn-primary btn-sm">Sign In / Register</a>
+        </div>
+    </nav>
+
+    <div class="community-layout">
+        
+        <!-- Left Sidebar: Topics/Nav -->
+        <aside class="sidebar-left">
+            <div class="card glassmorphic">
+                <h4 style="margin-top:0; color: #fff;"><i class="fa-solid fa-compass"></i> Discover</h4>
+                <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.5rem;">
+                    <li><a href="#" style="color: #66fcf1; text-decoration: none; display: block; padding: 0.5rem; background: rgba(102,252,241,0.1); border-radius: 8px;">🏠 Home</a></li>
+                    <li><a href="#" style="color: #c5c6c7; text-decoration: none; display: block; padding: 0.5rem;">📚 Academics</a></li>
+                    <li><a href="#" style="color: #c5c6c7; text-decoration: none; display: block; padding: 0.5rem;">💼 Internships</a></li>
+                    <li><a href="#" style="color: #c5c6c7; text-decoration: none; display: block; padding: 0.5rem;">🏢 Housing</a></li>
+                </ul>
+                
+                <hr style="border-color: rgba(255,255,255,0.05); margin: 1.5rem 0;">
+                
+                <button id="btn-create-post-sidebar" class="btn btn-primary" style="width: 100%;"><i class="fa-solid fa-plus"></i> Create Post</button>
+            </div>
+        </aside>
+
+        <!-- Main Feed -->
+        <main class="feed-main">
+            <!-- Create Post Box (For logged in users) -->
+            <div id="create-post-box" class="card glassmorphic" style="display: none; margin-bottom: 1.5rem;">
+                <input type="text" id="post-title" class="input-field" placeholder="Title of your post" style="margin-bottom: 1rem; font-size: 1.1rem; font-weight: 600;">
+                <textarea id="post-content" class="input-field" placeholder="What are your thoughts? (Markdown supported)" rows="4" style="margin-bottom: 1rem; resize: vertical;"></textarea>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <input type="text" id="post-tags" class="input-field" placeholder="Tags (comma separated)" style="width: 200px;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; color: #888; cursor: pointer;">
+                            <input type="checkbox" id="post-anonymous"> Post Anonymously
+                        </label>
+                    </div>
+                    <button id="btn-submit-post" class="btn btn-primary">Post (Earn 10 pts)</button>
+                </div>
+            </div>
+
+            <div class="sort-bar">
+                <button class="sort-btn active" data-sort="hot"><i class="fa-solid fa-fire"></i> Hot</button>
+                <button class="sort-btn" data-sort="new"><i class="fa-solid fa-certificate"></i> New</button>
+                <button class="sort-btn" data-sort="top"><i class="fa-solid fa-arrow-trend-up"></i> Top</button>
+            </div>
+
+            <div id="feed-container">
+                <!-- Posts injected here via JS -->
+                <div style="text-align: center; padding: 3rem; color: #888;">
+                    <i class="fa-solid fa-circle-notch fa-spin fa-2x"></i>
+                    <p>Loading posts...</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Right Sidebar: Leaderboard & Guidelines -->
+        <aside class="sidebar-right">
+            <div class="card glassmorphic" style="margin-bottom: 1.5rem;">
+                <h4 style="margin-top:0; color: #fff;"><i class="fa-solid fa-shield-halved"></i> Community Guidelines</h4>
+                <p style="font-size: 0.85rem; color: #888; margin-bottom: 0;">Be respectful, helpful, and earn BIA loyalty points for contributing high-quality answers.</p>
+                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.05);">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.5rem;">
+                        <span>New Post</span> <span style="color:#66fcf1; font-weight: 700;">+10 pts</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.5rem;">
+                        <span>New Comment</span> <span style="color:#66fcf1; font-weight: 700;">+5 pts</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.5rem;">
+                        <span>Receive Upvote</span> <span style="color:#66fcf1; font-weight: 700;">+5 pts</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+                        <span>Accepted Answer</span> <span style="color:#dfb15b; font-weight: 700;">+50 pts</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+    </div>
+
+    <!-- Lead Capture Modal (For unauthenticated visitors) -->
+    <div id="lead-modal" class="lead-modal-overlay">
+        <div class="lead-modal">
+            <i class="fa-solid fa-lock" style="font-size: 3rem; color: #66fcf1; margin-bottom: 1rem;"></i>
+            <h2 style="color: #fff; margin-bottom: 1rem;">Join the Discussion!</h2>
+            <p style="color: #c5c6c7; margin-bottom: 2rem;">Sign up or log in to upvote, comment, and earn rewards on the BIA Student Portal.</p>
+            <a href="/" class="btn btn-primary" style="display: inline-block; width: 100%;">Create Account / Login</a>
+            <button onclick="document.getElementById('lead-modal').style.display='none'" style="background:none; border:none; color:#888; margin-top:1rem; cursor:pointer; font-size:0.9rem;">Maybe later</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js"></script>
+    <script src="community.js"></script>
+
+</body>
+</html>
