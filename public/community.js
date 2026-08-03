@@ -13,7 +13,7 @@ function requireAuth(callback) {
 }
 
 async function checkAuth() {
-    const token = localStorage.getItem('bia_token');
+    const token = localStorage.getItem('token');
     if (!token) return null;
     try {
         const res = await fetch('/api/auth/me', {
@@ -53,7 +53,7 @@ async function fetchPosts() {
     feed.innerHTML = '<div style="text-align: center; padding: 3rem; color: #888;"><i class="fa-solid fa-circle-notch fa-spin fa-2x"></i></div>';
     
     const headers = {};
-    const token = localStorage.getItem('bia_token');
+    const token = localStorage.getItem('token');
     if (token) headers['Authorization'] = `Bearer ${token}`;
     
     try {
@@ -133,7 +133,7 @@ function createPostElement(post) {
 
 window.handleVote = function(type, id, value) {
     requireAuth(async () => {
-        const token = localStorage.getItem('bia_token');
+        const token = localStorage.getItem('token');
         try {
             await fetch(`/api/community/\${type}s/\${id}/vote`, {
                 method: 'POST',
@@ -166,7 +166,7 @@ async function loadComments(postId) {
     list.innerHTML = 'Loading comments...';
     
     const headers = {};
-    const token = localStorage.getItem('bia_token');
+    const token = localStorage.getItem('token');
     if (token) headers['Authorization'] = `Bearer \${token}`;
     
     try {
@@ -214,7 +214,7 @@ window.submitComment = function(postId) {
         const content = input.value.trim();
         if (!content) return;
         
-        const token = localStorage.getItem('bia_token');
+        const token = localStorage.getItem('token');
         try {
             const res = await fetch(`/api/community/posts/\${postId}/comments`, {
                 method: 'POST',
@@ -242,7 +242,7 @@ window.submitComment = function(postId) {
 window.acceptAnswer = async function(postId, commentId) {
     if (!confirm("Are you sure you want to accept this answer? This will award the author 50 points and cannot be undone.")) return;
     
-    const token = localStorage.getItem('bia_token');
+    const token = localStorage.getItem('token');
     try {
         const res = await fetch(`/api/community/posts/\${postId}/accept/\${commentId}`, {
             method: 'POST',
@@ -277,7 +277,7 @@ document.getElementById('btn-submit-post').addEventListener('click', async () =>
         tags = tagsStr.split(',').map(t => t.trim()).filter(t => t.length > 0);
     }
     
-    const token = localStorage.getItem('bia_token');
+    const token = localStorage.getItem('token');
     try {
         const res = await fetch('/api/community/posts', {
             method: 'POST',

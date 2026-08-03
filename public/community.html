@@ -210,11 +210,14 @@
         @keyframes popIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
     </style>
 </head>
-<body>
+<body class="dark-theme">
 
     <!-- Navbar -->
     <nav class="community-nav">
-        <a href="/" class="nav-logo">BIA <span style="color:#fff;">Community</span></a>
+        <div style="display: flex; align-items: center; gap: 1.5rem;">
+            <a href="/" class="nav-logo">BIA <span style="color:#fff;">Community</span></a>
+            <a href="/" class="btn btn-sm" style="background: rgba(255, 255, 255, 0.1); color: #fff; text-decoration: none; border: 1px solid rgba(255, 255, 255, 0.2);"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</a>
+        </div>
         
         <div id="nav-auth-state">
             <!-- Injected by JS: Either Login button or User Profile info -->
