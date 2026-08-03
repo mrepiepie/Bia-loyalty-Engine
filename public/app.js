@@ -3655,6 +3655,11 @@ async function loadDynamicPartners() {
                         position: relative;
                         height: 260px; /* Small preview size */
                         width: 100%;
+                        z-index: 1;
+                    }
+                    /* THIS FIXES THE OVERLAP GLITCH! Brings parent wrapper to front on hover */
+                    .partner-grid-item:hover {
+                        z-index: 1000;
                     }
                     .partner-popout-card {
                         position: absolute;
