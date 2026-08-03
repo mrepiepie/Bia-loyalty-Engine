@@ -3646,59 +3646,52 @@ async function loadDynamicPartners() {
                 return;
             }
             
-            // Inject custom CSS for the offset reveal effect
+            // Clean, professional, stable CSS
             if (!document.getElementById('partner-offset-styles')) {
                 const style = document.createElement('style');
                 style.id = 'partner-offset-styles';
                 style.textContent = `
                     .partner-offset-card {
                         position: relative;
-                        background: var(--bg-card);
-                        border: 2px solid transparent;
-                        transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-                        overflow: hidden;
+                        background: rgba(20, 20, 22, 0.95);
+                        border-radius: 12px;
+                        transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.3s cubic-bezier(0.25, 1, 0.5, 1);
                         display: flex;
                         flex-direction: column;
+                        box-shadow: 
+                            6px 6px 0 0 var(--partner-color),
+                            inset 0 0 0 1px rgba(255,255,255,0.1);
+                        text-decoration: none;
+                        color: inherit;
+                        height: 100%;
                     }
-                    .partner-offset-card::before {
+                    .partner-offset-card:hover {
+                        transform: translate(-4px, -4px);
+                        box-shadow: 
+                            10px 10px 0 0 var(--partner-color),
+                            inset 0 0 0 1px rgba(255,255,255,0.2);
+                    }
+                    /* Optional subtle tint on hover */
+                    .partner-offset-card::after {
                         content: '';
                         position: absolute;
                         top: 0; left: 0; right: 0; bottom: 0;
-                        box-shadow: 
-                            8px 8px 0 0 var(--partner-color),
-                            inset 8px 8px 0 0 var(--partner-color);
-                        transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-                        pointer-events: none;
-                        z-index: 10;
-                    }
-                    .partner-offset-card:hover {
-                        transform: translateY(-5px);
-                        z-index: 50;
-                    }
-                    .partner-offset-card:hover::before {
-                        box-shadow: 
-                            0 0 0 0 var(--partner-hover),
-                            inset 100vw 100vh 0 0 var(--partner-hover);
-                    }
-                    .partner-info-reveal {
-                        max-height: 0;
+                        background: var(--partner-color);
                         opacity: 0;
-                        transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-                        overflow: hidden;
+                        transition: opacity 0.3s ease;
+                        pointer-events: none;
+                        border-radius: 12px;
+                        z-index: 1;
                     }
-                    .partner-offset-card:hover .partner-info-reveal {
-                        max-height: 500px;
-                        opacity: 1;
-                        padding-top: 1.5rem;
-                    }
-                    .partner-offset-card:hover .partner-image-banner {
-                        height: 120px;
+                    .partner-offset-card:hover::after {
+                        opacity: 0.05;
                     }
                     .partner-image-banner {
                         width: 100%;
-                        height: 250px;
-                        transition: height 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+                        height: 200px;
                         object-fit: cover;
+                        border-radius: 12px 12px 0 0;
+                        border-bottom: 2px solid var(--partner-color);
                     }
                 `;
                 document.head.appendChild(style);
@@ -3706,38 +3699,35 @@ async function loadDynamicPartners() {
 
             grid.innerHTML = data.map((partner, i) => {
                 const pColor = partner.logoColor || '#ffb829';
-                // Create a slightly darker/transparent version for the hover fill
-                const pHover = pColor + '1A'; // 10% opacity hex
                 
                 return `
-                <div class="card glassmorphic partner-offset-card" id="partner-card-${i}" style="--partner-color: ${pColor}; --partner-hover: ${pHover}; padding:0; gap:0; cursor: pointer;">
+                <div class="partner-offset-card" id="partner-card-${i}" style="--partner-color: ${pColor};">
                     
                     <!-- Top Banner Image -->
-                    <div style="width:100%; position:relative; background:${pColor};">
-                        <img src="${partner.image}" alt="${partner.name}" class="partner-image-banner" style="mix-blend-mode: normal;">
-                        <span class="section-badge" style="position:absolute; top:1.5rem; right:1.5rem; font-size:0.75rem; background:rgba(0,0,0,0.8); backdrop-filter:blur(4px); border:1px solid ${pColor}; color:${pColor}; z-index: 20;">${partner.badge || 'PARTNER'}</span>
+                    <div style="width:100%; position:relative;">
+                        <img src="${partner.image}" alt="${partner.name}" class="partner-image-banner">
+                        <span class="section-badge" style="position:absolute; top:1rem; right:1rem; font-size:0.75rem; background:rgba(0,0,0,0.85); backdrop-filter:blur(4px); border:1px solid ${pColor}; color:${pColor}; z-index: 20; padding: 4px 10px; border-radius: 20px; font-weight: 600; letter-spacing: 0.5px;">${partner.badge || 'PARTNER'}</span>
                     </div>
                     
-                    <!-- Content Area -->
+                    <!-- Content Area (Always visible, stable height) -->
                     <div style="padding:1.5rem; display:flex; flex-direction:column; flex:1; position:relative; z-index: 20;">
-                        <div>
-                            <h4 style="margin-bottom:0.5rem; font-size:1.4rem;">${partner.title}</h4>
-                            <p style="font-size:0.95rem; color:var(--text-muted); line-height: 1.5;">${partner.name} Collaborator</p>
+                        <div style="margin-bottom: 1.5rem;">
+                            <h4 style="margin-bottom:0.5rem; font-size:1.4rem; color: #fff;">${partner.title}</h4>
+                            <p style="font-size:0.95rem; color:var(--text-muted); line-height: 1.5; margin-bottom: 1rem;">${partner.name} Collaborator</p>
+                            <p style="font-size:0.95rem; color:#e0e0e0; line-height: 1.6;">${partner.subtitle}</p>
                         </div>
                         
-                        <!-- Hidden info that reveals on hover -->
-                        <div class="partner-info-reveal">
-                            <p style="font-size:0.95rem; color:var(--text-main); line-height: 1.5; margin-bottom:1.5rem;">${partner.subtitle}</p>
-                            
-                            <strong style="font-size:0.9rem; color:${pColor};">Available Rewards</strong>
-                            <div style="display:flex; flex-direction:column; gap:0.5rem; margin-top:0.75rem;">
+                        <!-- Rewards -->
+                        <div style="margin-top:auto; display:flex; flex-direction:column;">
+                            <strong style="font-size:0.85rem; color:${pColor}; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.75rem;">Available Rewards</strong>
+                            <div style="display:flex; flex-direction:column; gap:0.5rem;">
                             ${(partner.rewards || []).map(r => {
                                 const name = r.tier || r.name || 'Reward';
                                 const pts = r.points || r.cost || 0;
                                 return `
-                                <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.6); padding:0.75rem; border-radius:6px; border:1px solid rgba(255,255,255,0.05);">
-                                    <span style="font-size:0.9rem; font-weight: 500;">${name}</span>
-                                    <span style="font-size:0.9rem; color:var(--text-emerald); font-weight: 600;">${pts} pts</span>
+                                <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); padding:0.85rem 1rem; border-radius:8px; border:1px solid rgba(255,255,255,0.05); transition: background 0.2s;">
+                                    <span style="font-size:0.9rem; font-weight: 500; color: #fff;">${name}</span>
+                                    <span style="font-size:0.95rem; color:${pColor}; font-weight: 700;">${pts} pts</span>
                                 </div>
                                 `;
                             }).join('')}
