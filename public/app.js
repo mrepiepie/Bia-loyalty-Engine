@@ -3646,7 +3646,7 @@ async function loadDynamicPartners() {
                 return;
             }
             
-            // Clean, theme-aware, elegant CSS
+            // Clean, theme-aware, elegant CSS with banner image expansion on hover
             if (!document.getElementById('partner-clean-styles')) {
                 const style = document.createElement('style');
                 style.id = 'partner-clean-styles';
@@ -3659,7 +3659,6 @@ async function loadDynamicPartners() {
                         transition: transform 0.3s ease, box-shadow 0.3s ease;
                         display: flex;
                         flex-direction: column;
-                        overflow: hidden;
                         height: 100%;
                         text-decoration: none;
                         color: var(--text-main, #333);
@@ -3675,12 +3674,27 @@ async function loadDynamicPartners() {
                     .dark-theme .partner-clean-card:hover {
                         box-shadow: 0 16px 32px rgba(0, 0, 0, 0.4);
                     }
-                    .partner-image-banner {
+                    
+                    /* Image container setup to allow zoom without spilling out */
+                    .partner-image-wrapper {
                         width: 100%;
                         height: 200px;
-                        object-fit: cover;
+                        position: relative;
+                        overflow: hidden;
+                        border-radius: 16px 16px 0 0;
                         border-bottom: 1px solid rgba(150, 150, 150, 0.1);
                     }
+                    .partner-image-banner {
+                        width: 100%;
+                        height: 100%;
+                        object-fit: cover;
+                        transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+                    }
+                    /* The elegant "preview" zoom effect on the image when hovering the card */
+                    .partner-clean-card:hover .partner-image-banner {
+                        transform: scale(1.08);
+                    }
+                    
                     .partner-content-area {
                         padding: 1.5rem;
                         display: flex;
@@ -3710,10 +3724,10 @@ async function loadDynamicPartners() {
                 return `
                 <div class="partner-clean-card" id="partner-card-${i}">
                     
-                    <!-- Top Banner Image -->
-                    <div style="width:100%; position:relative;">
+                    <!-- Top Banner Image Wrapper -->
+                    <div class="partner-image-wrapper">
                         <img src="${partner.image}" alt="${partner.name}" class="partner-image-banner">
-                        <span style="position:absolute; top:1rem; right:1rem; font-size:0.75rem; background:${pColor}; color:#fff; padding: 4px 12px; border-radius: 20px; font-weight: 600; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">${partner.badge || 'PARTNER'}</span>
+                        <span style="position:absolute; top:1rem; right:1rem; font-size:0.75rem; background:${pColor}; color:#fff; padding: 4px 12px; border-radius: 20px; font-weight: 600; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 10;">${partner.badge || 'PARTNER'}</span>
                     </div>
                     
                     <!-- Content Area -->
