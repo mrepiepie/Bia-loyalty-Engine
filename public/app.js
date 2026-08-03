@@ -3476,63 +3476,36 @@ function setupLogoCarousel() {
     const allLogos = [
         {
             name: 'ADNOC', id: 1,
-            svg: `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" width="80" height="80">
-                <circle cx="60" cy="60" r="56" fill="#005B9A"/>
-                <path d="M60 14 C80 34 80 86 60 106 C40 86 40 34 60 14Z" fill="#DC2626"/>
-                <circle cx="60" cy="60" r="24" fill="#005B9A" stroke="#fff" stroke-width="3"/>
-                <text x="60" y="66" text-anchor="middle" font-family="Arial Black" font-weight="900" font-size="16" fill="#FFFFFF">A</text>
-            </svg>`
+            svg: `<img src="https://upload.wikimedia.org/wikipedia/commons/2/23/ADNOC_Logo.svg" alt="ADNOC" style="width: 80px; height: auto; object-fit: contain;" />`
         },
         {
             name: 'VISA', id: 2,
-            svg: `<svg viewBox="0 0 160 52" xmlns="http://www.w3.org/2000/svg" width="110" height="36">
-                <text x="0" y="44" font-family="Arial Black,sans-serif" font-weight="900" font-size="48" fill="#1A1F71" letter-spacing="-2">VISA</text>
-            </svg>`
+            svg: `<img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="VISA" style="width: 90px; height: auto; object-fit: contain;" />`
         },
         {
             name: 'TOYOTA', id: 3,
-            svg: `<svg viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg" width="90" height="60">
-                <ellipse cx="60" cy="40" rx="56" ry="24" stroke="#EB0A1E" stroke-width="5" fill="none"/>
-                <ellipse cx="60" cy="40" rx="32" ry="16" stroke="#EB0A1E" stroke-width="5" fill="none"/>
-                <ellipse cx="60" cy="40" rx="11" ry="24" stroke="#EB0A1E" stroke-width="5" fill="none"/>
-            </svg>`
+            svg: `<img src="https://upload.wikimedia.org/wikipedia/commons/9/9d/Toyota_carlogo.svg" alt="TOYOTA" style="width: 80px; height: auto; object-fit: contain;" />`
         },
         {
             name: 'IKEA', id: 4,
-            svg: `<svg viewBox="0 0 140 56" xmlns="http://www.w3.org/2000/svg" width="110" height="44">
-                <rect width="140" height="56" rx="6" fill="#003399"/>
-                <text x="70" y="40" text-anchor="middle" font-family="Arial Black,sans-serif" font-weight="900" font-size="32" fill="#FFCC00">IKEA</text>
-            </svg>`
+            svg: `<img src="https://upload.wikimedia.org/wikipedia/commons/c/c5/Ikea_logo.svg" alt="IKEA" style="width: 90px; height: auto; object-fit: contain;" />`
         },
         {
             name: 'EBAY', id: 5,
-            svg: `<svg viewBox="0 0 148 60" xmlns="http://www.w3.org/2000/svg" width="110" height="44">
-                <text x="0" y="50" font-family="Arial Black,sans-serif" font-weight="900" font-size="56">
-                    <tspan fill="#E53238">e</tspan><tspan fill="#0064D2">b</tspan><tspan fill="#F5AF02">a</tspan><tspan fill="#86B817">y</tspan>
-                </text>
-            </svg>`
+            svg: `<img src="https://upload.wikimedia.org/wikipedia/commons/1/1b/EBay_logo.svg" alt="EBAY" style="width: 90px; height: auto; object-fit: contain;" />`
         },
         {
             name: 'BOSE', id: 6,
-            svg: `<svg viewBox="0 0 130 40" xmlns="http://www.w3.org/2000/svg" width="110" height="34">
-                <text x="0" y="34" font-family="Arial Black,sans-serif" font-weight="900" font-size="38" fill="#dfb15b" letter-spacing="3">BOSE</text>
-            </svg>`
+            svg: `<img src="https://upload.wikimedia.org/wikipedia/commons/8/87/Bose_logo.svg" alt="BOSE" style="width: 90px; height: auto; object-fit: contain;" />`
         },
         {
             name: 'H&M', id: 7,
-            svg: `<svg viewBox="0 0 120 56" xmlns="http://www.w3.org/2000/svg" width="100" height="46">
-                <rect width="120" height="56" rx="6" fill="#E50010"/>
-                <text x="60" y="40" text-anchor="middle" font-family="Arial Black,sans-serif" font-weight="900" font-size="28" fill="#FFFFFF">H&amp;M</text>
-            </svg>`
+            svg: `<img src="https://upload.wikimedia.org/wikipedia/commons/5/53/H%26M-Logo.svg" alt="H&M" style="width: 70px; height: auto; object-fit: contain;" />`
         },
         {
             name: 'SHUKRAN', id: 8,
-            svg: `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" width="76" height="76">
-                <circle cx="60" cy="60" r="56" fill="#C8102E"/>
-                <polygon points="60,18 68,46 98,46 74,64 82,92 60,74 38,92 46,64 22,46 52,46" fill="#FFD700"/>
-                <text x="60" y="108" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="9" fill="#FFFFFF" letter-spacing="0.8">SHUKRAN</text>
-            </svg>`
-        },
+            svg: `<img src="https://landmarkgroup.com/themes/custom/landmark/logo.svg" alt="Landmark Shukran" style="width: 90px; height: auto; object-fit: contain; filter: brightness(0) invert(1);" />`
+        }
     ];
 
     //  Replicate React template logic exactly 
