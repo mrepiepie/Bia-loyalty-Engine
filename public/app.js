@@ -3646,16 +3646,18 @@ async function loadDynamicPartners() {
                 return;
             }
             
-            // Netflix-style popup CSS: solid backgrounds to prevent transparency shine-through
+            // Netflix-style popup CSS: solid backgrounds and bigger grid gaps
             if (!document.getElementById('partner-netflix-styles')) {
                 const style = document.createElement('style');
                 style.id = 'partner-netflix-styles';
                 style.textContent = `
+                    #landing-partners-grid {
+                        gap: 2.5rem !important; /* MUCH more breathing room between cards */
+                    }
                     .partner-grid-item {
                         position: relative;
-                        height: 260px; /* Small preview size */
+                        height: 270px; /* Small preview size */
                         width: 100%;
-                        /* DO NOT set z-index here! It traps the stacking context */
                     }
                     .partner-popout-card {
                         position: absolute;
@@ -3692,7 +3694,7 @@ async function loadDynamicPartners() {
                     }
                     
                     .partner-preview-header {
-                        padding: 1rem 1.5rem;
+                        padding: 1.25rem 1.5rem; /* slightly more vertical breathing room */
                         background: inherit;
                     }
                     
