@@ -3646,7 +3646,7 @@ async function loadDynamicPartners() {
                 return;
             }
             
-            // Netflix-style popup CSS: completely fixed z-index overlap
+            // Netflix-style popup CSS: solid backgrounds to prevent transparency shine-through
             if (!document.getElementById('partner-netflix-styles')) {
                 const style = document.createElement('style');
                 style.id = 'partner-netflix-styles';
@@ -3660,7 +3660,7 @@ async function loadDynamicPartners() {
                     .partner-popout-card {
                         position: absolute;
                         top: 0; left: 0; right: 0;
-                        background: var(--bg-card, #ffffff);
+                        background: #ffffff; /* SOLID background, no transparency */
                         border-radius: 16px;
                         border: 1px solid rgba(150, 150, 150, 0.2);
                         transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
@@ -3673,14 +3673,14 @@ async function loadDynamicPartners() {
                     }
                     .dark-theme .partner-popout-card {
                         border-color: rgba(255, 255, 255, 0.08);
-                        background: var(--bg-card, #1c1c1e);
+                        background: #0d0d0d; /* SOLID dark background, no transparency */
                     }
                     
                     /* Hover effect: Scale up and pull to absolute front */
                     .partner-popout-card:hover {
                         z-index: 9999;
                         transform: scale(1.1);
-                        box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6);
+                        box-shadow: 0 40px 80px rgba(0, 0, 0, 0.9);
                         border-color: var(--partner-color);
                     }
                     
@@ -3693,10 +3693,7 @@ async function loadDynamicPartners() {
                     
                     .partner-preview-header {
                         padding: 1rem 1.5rem;
-                        background: var(--bg-card, #ffffff);
-                    }
-                    .dark-theme .partner-preview-header {
-                        background: var(--bg-card, #1c1c1e);
+                        background: inherit;
                     }
                     
                     /* The hidden text that reveals on hover */
@@ -3705,6 +3702,7 @@ async function loadDynamicPartners() {
                         opacity: 0;
                         padding: 0 1.5rem;
                         transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+                        background: inherit;
                     }
                     
                     .partner-popout-card:hover .partner-content-reveal {
@@ -3717,14 +3715,14 @@ async function loadDynamicPartners() {
                         display: flex;
                         justify-content: space-between;
                         align-items: center;
-                        background: rgba(150, 150, 150, 0.05);
+                        background: rgba(150, 150, 150, 0.08);
                         padding: 0.85rem 1rem;
                         border-radius: 8px;
                         border: 1px solid rgba(150, 150, 150, 0.1);
                     }
                     .dark-theme .partner-reward-item {
-                        background: rgba(255, 255, 255, 0.03);
-                        border-color: rgba(255, 255, 255, 0.05);
+                        background: rgba(255, 255, 255, 0.05);
+                        border-color: rgba(255, 255, 255, 0.08);
                     }
                 `;
                 document.head.appendChild(style);
@@ -3740,9 +3738,9 @@ async function loadDynamicPartners() {
                     <div class="partner-popout-card" id="partner-card-${i}" style="--partner-color: ${pColor};">
                         
                         <!-- Top Banner Image -->
-                        <div style="width:100%; position:relative;">
+                        <div style="width:100%; position:relative; background: #000;">
                             <img src="${partner.image}" alt="${partner.name}" class="partner-image-banner">
-                            <span style="position:absolute; top:1rem; right:1rem; font-size:0.75rem; background:${pColor}; color:#fff; padding: 4px 12px; border-radius: 20px; font-weight: 600; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 10;">${partner.badge || 'PARTNER'}</span>
+                            <span style="position:absolute; top:1rem; right:1rem; font-size:0.75rem; background:${pColor}; color:#fff; padding: 4px 12px; border-radius: 20px; font-weight: 600; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(0,0,0,0.4); z-index: 10;">${partner.badge || 'PARTNER'}</span>
                         </div>
                         
                         <!-- Preview Header (Always visible) -->
