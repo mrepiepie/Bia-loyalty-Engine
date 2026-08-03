@@ -668,6 +668,14 @@ async function playIntroPreloader() {
     }
     
     if (loginOverlay) {
+        const loggedIn = await attemptAutoLogin();
+        if (loggedIn) {
+            loginOverlay.style.display = 'none';
+            document.body.classList.remove('landing-active');
+            showPortalDashboard();
+            return;
+        }
+
         loginOverlay.style.display = 'block';
         loginOverlay.style.opacity = '1';
         document.body.classList.add('landing-active');
@@ -679,7 +687,6 @@ async function playIntroPreloader() {
         }
     }
 }
-
 
 // ----------------------------------------------------
 // REAL-TIME LOYALTY ENGINE LIVE FEED SIMULATOR
@@ -1221,7 +1228,7 @@ if (btnCheckin) {
             if (!response.ok) throw new Error(data.error || 'Check-in failed');
 
             msg.style.color = '#14b8a6';
-            msg.textContent = `🎉 Attendance reward claimed successfully! (+15 pts)`;
+            msg.textContent = ` Attendance reward claimed successfully! (+15 pts)`;
 
             // Update user balance and refresh dashboard elements
             await loadUserProfile(appState.currentUser.user_id);
@@ -1812,7 +1819,7 @@ document.getElementById('create-student-form').addEventListener('submit', async 
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'Failed to register student');
 
-        showToast('Enrolled successfully! 🎉', `${name} enrolled in ${programme}. Welcome bonus: ${data.welcome_points} pts. Referral Code: ${data.referral_code}`, 'success');
+        showToast('Enrolled successfully! ', `${name} enrolled in ${programme}. Welcome bonus: ${data.welcome_points} pts. Referral Code: ${data.referral_code}`, 'success');
         document.getElementById('reg-name').value = '';
         document.getElementById('reg-email').value = '';
         document.getElementById('reg-student-id').value = '';
@@ -1826,9 +1833,9 @@ document.getElementById('create-student-form').addEventListener('submit', async 
     }
 });
 
-// ══════════════════════════════════════════════════
+// 
 // ENGAGEMENT REPORT
-// ══════════════════════════════════════════════════
+// 
 async function loadEngagementReport() {
     const tbody = document.getElementById('engagement-table-body');
     if (!tbody) return;
@@ -1860,7 +1867,7 @@ async function loadEngagementReport() {
             return `
                 <tr>
                     <td><strong style="color:#fff;">${s.name}</strong><br><span style="font-size:0.68rem;color:rgba(255,255,255,0.4);">${s.email}</span></td>
-                    <td style="font-size:0.78rem;">${s.programme || '—'}</td>
+                    <td style="font-size:0.78rem;">${s.programme || ''}</td>
                     <td><span class="tier-badge ${(s.current_tier||'Bronze').toLowerCase()}">${s.current_tier || 'Bronze'}</span></td>
                     <td style="font-family:'Outfit'; font-weight:700; color:#dfb15b;">${formatNumber(s.points_balance || 0)}</td>
                     <td style="text-align:center;">${s.referral_count || 0}</td>
@@ -1874,9 +1881,9 @@ async function loadEngagementReport() {
 }
 window.loadEngagementReport = loadEngagementReport;
 
-// ══════════════════════════════════════════════════
+// 
 // PROGRAMME OVERVIEW CARD
-// ══════════════════════════════════════════════════
+// 
 async function loadProgrammeOverview() {
     const container = document.getElementById('programme-overview-body');
     if (!container) return;
@@ -1936,9 +1943,9 @@ async function loadProgrammeOverview() {
 }
 window.loadProgrammeOverview = loadProgrammeOverview;
 
-// ══════════════════════════════════════════════════
+// 
 // BULK POINTS AWARD
-// ══════════════════════════════════════════════════
+// 
 (function setupBulkPointsForm() {
     const form = document.getElementById('bulk-points-form');
     if (!form) return;
@@ -1958,7 +1965,7 @@ window.loadProgrammeOverview = loadProgrammeOverview;
             });
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || 'Failed to award points.');
-            showToast('Bulk Award Complete ⚡', `${points} pts awarded to ${data.students_updated} students in ${programme}.`, 'success');
+            showToast('Bulk Award Complete ', `${points} pts awarded to ${data.students_updated} students in ${programme}.`, 'success');
             document.getElementById('bulk-points-amount').value = '';
             document.getElementById('bulk-points-reason').value = '';
             loadAdminStudents();
@@ -1972,9 +1979,9 @@ window.loadProgrammeOverview = loadProgrammeOverview;
     });
 })();
 
-// ══════════════════════════════════════════════════
+// 
 // ANNOUNCEMENTS
-// ══════════════════════════════════════════════════
+// 
 async function loadAnnouncements() {
     const list = document.getElementById('announcements-list');
     if (!list) return;
@@ -1986,7 +1993,7 @@ async function loadAnnouncements() {
             list.innerHTML = '<p style="color:rgba(255,255,255,0.35);font-size:0.82rem;">No active announcements. Post one using the form.</p>';
             return;
         }
-        const typeIcon = { info: '💬', success: '✅', warning: '⚠️' };
+        const typeIcon = { info: '', success: '', warning: '' };
         const typeColor = { info: 'rgba(96,165,250,0.15)', success: 'rgba(74,222,128,0.1)', warning: 'rgba(251,191,36,0.1)' };
         const typeBorder = { info: 'rgba(96,165,250,0.25)', success: 'rgba(74,222,128,0.2)', warning: 'rgba(251,191,36,0.2)' };
         list.innerHTML = items.map(item => `
@@ -1997,7 +2004,7 @@ async function loadAnnouncements() {
                         <strong style="color:#fff; font-size:0.88rem;">${item.title}</strong>
                     </div>
                     <p style="color:rgba(255,255,255,0.6); font-size:0.78rem; margin:0; line-height:1.4;">${item.body}</p>
-                    <span style="font-size:0.64rem; color:rgba(255,255,255,0.3); margin-top:0.3rem; display:block;">Posted ${cleanDate(item.created_at)}${item.expires_at ? ` · Expires ${cleanDate(item.expires_at)}` : ''}</span>
+                    <span style="font-size:0.64rem; color:rgba(255,255,255,0.3); margin-top:0.3rem; display:block;">Posted ${cleanDate(item.created_at)}${item.expires_at ? `  Expires ${cleanDate(item.expires_at)}` : ''}</span>
                 </div>
                 <button onclick="deleteAnnouncement(${item.announcement_id})" style="background:none; border:none; color:rgba(239,68,68,0.5); cursor:pointer; font-size:0.9rem; flex-shrink:0; transition:color 0.15s;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='rgba(239,68,68,0.5)'" title="Delete">
                     <i class="fa-solid fa-trash-can"></i>
@@ -2038,7 +2045,7 @@ window.deleteAnnouncement = deleteAnnouncement;
                 body: JSON.stringify({ title, body, type, expires_at })
             });
             if (!res.ok) throw new Error((await res.json()).error || 'Failed.');
-            showToast('Published! 📢', `"${title}" is now live on all student dashboards.`, 'success');
+            showToast('Published! ', `"${title}" is now live on all student dashboards.`, 'success');
             form.reset();
             loadAnnouncements();
             loadStudentAnnouncements();
@@ -2061,9 +2068,9 @@ async function loadStudentAnnouncements() {
         if (items.length === 0) {
             banner.innerHTML = `
                 <div class="card glassmorphic spotlight-card" style="padding: 1rem 1.25rem; border-radius: 12px; border: 1px dashed rgba(255,255,255,0.06); background: rgba(255,255,255,0.01); display: flex; align-items: center; justify-content: center; gap: 0.85rem; width: 100%; box-sizing: border-box; margin-bottom: 1.25rem;">
-                    <span class="sleepy-coffee-icon" style="font-size: 1.4rem;">☕</span>
+                    <span class="sleepy-coffee-icon" style="font-size: 1.4rem;"></span>
                     <span style="font-size: 0.8rem; color: rgba(255,255,255,0.45); font-weight: 300; text-align: left;">
-                        <strong>All quiet!</strong> No active announcements today. BIA deans are searching for reading glasses 👓, and professors are busy drinking espresso. Carry on! ✨
+                        <strong>All quiet!</strong> No active announcements today. BIA deans are searching for reading glasses , and professors are busy drinking espresso. Carry on! 
                     </span>
                 </div>
             `;
@@ -2105,9 +2112,9 @@ async function loadStudentAnnouncements() {
 }
 window.loadStudentAnnouncements = loadStudentAnnouncements;
 
-// ══════════════════════════════════════════════════
+// 
 // VOUCHER MANAGEMENT (admin view of all vouchers)
-// ══════════════════════════════════════════════════
+// 
 window.cachedAdminVouchers = [];
 
 window.cachedAdminVouchers = [];
@@ -2168,12 +2175,12 @@ function filterAdminVouchers() {
 
     tbody.innerHTML = filtered.map(v => `
         <tr>
-            <td style="font-family:'Outfit'; font-size:0.8rem; color:#dfb15b; font-weight:700;">${v.voucher_code || '—'}</td>
+            <td style="font-family:'Outfit'; font-size:0.8rem; color:#dfb15b; font-weight:700;">${v.voucher_code || ''}</td>
             <td><strong class="clickable-student-name" onclick="showStudentDetailModal(${v.user_id})" style="color: var(--text-main); cursor: pointer; text-decoration: underline;">${v.student_name || 'Unknown'}</strong></td>
             <td style="color:#4ade80; font-weight:700;">${v.discount_aed || 0} AED</td>
             <td style="font-family:'Outfit';">${formatNumber(v.points_deducted || 0)} pts</td>
             <td><span style="font-size:0.7rem; padding:0.2rem 0.5rem; border-radius:4px; background:${v.status === 'Used' ? 'rgba(74,222,128,0.1)' : 'rgba(255,255,255,0.05)'}; border:1px solid ${v.status === 'Used' ? 'rgba(74,222,128,0.2)' : 'rgba(255,255,255,0.1)'}; color:${v.status === 'Used' ? '#4ade80' : 'rgba(255,255,255,0.5)'}; font-weight:700;">${v.status || 'Unused'}</span></td>
-            <td style="font-size:0.72rem; color:rgba(255,255,255,0.5);">${v.created_at ? cleanDate(v.created_at) : '—'}</td>
+            <td style="font-size:0.72rem; color:rgba(255,255,255,0.5);">${v.created_at ? cleanDate(v.created_at) : ''}</td>
             <td>
                 ${v.status !== 'Used' ? `<button onclick="adminUseVoucher('${v.voucher_code}')" style="background:rgba(74,222,128,0.1); border:1px solid rgba(74,222,128,0.3); color:#4ade80; padding:0.25rem 0.6rem; border-radius:6px; cursor:pointer; font-size:0.7rem; font-weight:bold; transition:all 0.2s;" onmouseover="this.style.background='rgba(74,222,128,0.2)'" onmouseout="this.style.background='rgba(74,222,128,0.1)'" title="Mark as Used"><i class="fa-solid fa-check"></i> Mark Used</button>` : `<span style="font-size:0.7rem; color:rgba(255,255,255,0.3);"><i class="fa-solid fa-check-double"></i> Claimed</span>`}
             </td>
@@ -2212,9 +2219,9 @@ async function adminDeleteVoucher(id) {
 }
 window.adminDeleteVoucher = adminDeleteVoucher;
 
-// ══════════════════════════════════════════════════
+// 
 // CSV EXPORT UTILITIES
-// ══════════════════════════════════════════════════
+// 
 async function exportStudentsCSV() {
     try {
         const res = await fetch(`${API_BASE}/admin/students`);
@@ -2227,7 +2234,7 @@ async function exportStudentsCSV() {
             s.points_balance || 0, s.referral_count || 0, `"${s.referral_code || ''}"`
         ]);
         downloadCSV([headers, ...rows], `BIA_Students_${new Date().toISOString().slice(0,10)}.csv`);
-        showToast('Exported! 📥', `${students.length} student records downloaded as CSV.`, 'success');
+        showToast('Exported! ', `${students.length} student records downloaded as CSV.`, 'success');
     } catch { showToast('Error', 'Could not export student data.', 'error'); }
 }
 window.exportStudentsCSV = exportStudentsCSV;
@@ -2250,7 +2257,7 @@ async function exportVouchersCSV() {
             `"${v.status || 'Unused'}"`, `"${v.created_at ? cleanDate(v.created_at) : ''}"`
         ]);
         downloadCSV([headers, ...rows], `BIA_Vouchers_${new Date().toISOString().slice(0,10)}.csv`);
-        showToast('Exported! 📥', `${allVouchers.length} voucher records downloaded.`, 'success');
+        showToast('Exported! ', `${allVouchers.length} voucher records downloaded.`, 'success');
     } catch { showToast('Error', 'Could not export voucher data.', 'error'); }
 }
 window.exportVouchersCSV = exportVouchersCSV;
@@ -2264,9 +2271,9 @@ function downloadCSV(rows, filename) {
     URL.revokeObjectURL(url);
 }
 
-// ══════════════════════════════════════════════════
-// TAB LOAD HOOKS — trigger data loads on tab switch
-// ══════════════════════════════════════════════════
+// 
+// TAB LOAD HOOKS  trigger data loads on tab switch
+// 
 const _origNavHandler = document.querySelectorAll('.nav-tab');
 document.querySelectorAll('.nav-tab').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -2336,7 +2343,7 @@ document.getElementById('adjust-points-form').addEventListener('submit', async (
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'Adjustment failed');
 
-        showToast('Points Adjusted! ⚡', `Successfully adjusted balance by ${points_change > 0 ? '+' : ''}${formatNumber(points_change)} pts.`, 'success');
+        showToast('Points Adjusted! ', `Successfully adjusted balance by ${points_change > 0 ? '+' : ''}${formatNumber(points_change)} pts.`, 'success');
         
         closeAdjustmentModal();
         await loadAdminStudents();
@@ -2656,7 +2663,7 @@ function setupCustomSelects() {
 
         const label = document.createElement('span');
         label.className = 'select-label';
-        label.textContent = nativeSelect.options[nativeSelect.selectedIndex]?.text || 'Select…';
+        label.textContent = nativeSelect.options[nativeSelect.selectedIndex]?.text || 'Select';
 
         const arrowSVG = `<svg class="select-arrow" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>`;
         trigger.appendChild(label);
@@ -2698,11 +2705,11 @@ function setupCustomSelects() {
         // Sync custom dropdown when native select is updated dynamically (mutation observer)
         const observer = new MutationObserver(() => {
             updateOptionsList();
-            label.textContent = nativeSelect.options[nativeSelect.selectedIndex]?.text || 'Select…';
+            label.textContent = nativeSelect.options[nativeSelect.selectedIndex]?.text || 'Select';
         });
         observer.observe(nativeSelect, { childList: true });
 
-        // Inject into DOM — insert wrapper before the native select
+        // Inject into DOM  insert wrapper before the native select
         nativeSelect.parentNode.insertBefore(wrapper, nativeSelect);
         wrapper.appendChild(trigger);
         document.body.appendChild(dropdown);
@@ -2721,7 +2728,7 @@ function setupCustomSelects() {
             dropdown.style.zIndex = '99999';
         }
 
-        // ── GSAP open/close animations ──
+        //  GSAP open/close animations 
         function openDropdown() {
             // Close any other open custom selects
             document.querySelectorAll('.custom-select-trigger.open').forEach(openTrig => {
@@ -2986,7 +2993,7 @@ function setupBenefitsCarousel() {
         }, duration);
     }
 
-    // Initial kickoff — set first slide visible immediately
+    // Initial kickoff  set first slide visible immediately
     gsap.set(slides[0], { opacity: 1 });
     resetTimer();
 }
@@ -3463,7 +3470,7 @@ function setupLogoCarousel() {
     const container = document.getElementById('logo-carousel-root');
     if (!container) return;
 
-    // ── Partner Brand SVGs (BIA ecosystem) ──────────────────────────────────
+    //  Partner Brand SVGs (BIA ecosystem) 
     const allLogos = [
         {
             name: 'ADNOC', id: 1,
@@ -3526,7 +3533,7 @@ function setupLogoCarousel() {
         },
     ];
 
-    // ── Replicate React template logic exactly ───────────────────────────────
+    //  Replicate React template logic exactly 
     // shuffleArray
     const shuffled = [...allLogos].sort(() => Math.random() - 0.5);
 
@@ -3555,12 +3562,12 @@ function setupLogoCarousel() {
         return { slot, logos, prevIndex: -1, currentItem: null };
     });
 
-    // Create a logo DOM item (hidden by default — JS animates it in)
+    // Create a logo DOM item (hidden by default  JS animates it in)
     function createItem(logo) {
         const item = document.createElement('div');
         item.className = 'logo-slot-item';
         item.innerHTML = `<div class="logo-slot-svg">${logo.svg}</div><span class="logo-slot-name">${logo.name}</span>`;
-        // Start state: y+10%, blur(8px), opacity:0  →  matches template initial
+        // Start state: y+10%, blur(8px), opacity:0    matches template initial
         item.style.cssText = 'position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.5rem;opacity:0;transform:translateY(10%);filter:blur(8px);';
         return item;
     }
@@ -3569,7 +3576,7 @@ function setupLogoCarousel() {
     colStates.forEach(({ slot, logos }) => {
         const item = createItem(logos[0]);
         slot.appendChild(item);
-        // Instantly show first logo — matches React's initial mount
+        // Instantly show first logo  matches React's initial mount
         item.style.opacity = '1';
         item.style.transform = 'translateY(0)';
         item.style.filter = 'blur(0px)';
@@ -3579,8 +3586,8 @@ function setupLogoCarousel() {
         s.prevIndex = 0;
     });
 
-    // ── Shared ticker: exactly matches React's setInterval(updateTime, 100) ──
-    const cycleInterval = 2000; // ms per logo — same as template
+    //  Shared ticker: exactly matches React's setInterval(updateTime, 100) 
+    const cycleInterval = 2000; // ms per logo  same as template
     let currentTime = 0;
 
     setInterval(() => {
@@ -3594,7 +3601,7 @@ function setupLogoCarousel() {
             if (newIndex === state.prevIndex) return;
             state.prevIndex = newIndex;
 
-            // ── EXIT: y → -20%, opacity → 0, blur(6px) [tween ease-in 0.3s] ──
+            //  EXIT: y  -20%, opacity  0, blur(6px) [tween ease-in 0.3s] 
             const exiting = state.currentItem;
             if (exiting) {
                 exiting.style.transition = 'opacity 0.3s ease-in, transform 0.3s ease-in, filter 0.3s ease-in';
@@ -3604,7 +3611,7 @@ function setupLogoCarousel() {
                 setTimeout(() => exiting.remove(), 340);
             }
 
-            // ── ENTER: spring cubic-bezier simulates stiffness:300, damping:20, bounce:0.2 ──
+            //  ENTER: spring cubic-bezier simulates stiffness:300, damping:20, bounce:0.2 
             const entering = createItem(state.logos[newIndex]);
             state.slot.appendChild(entering);
             state.currentItem = entering;
@@ -3791,9 +3798,9 @@ function populateDashboardPartners() {
     }
 }
 
-// ──────────────────────────────────────────────────────────
+// 
 // BEAUTIFUL CUSTOM REDEMPTION MODAL LOGIC
-// ──────────────────────────────────────────────────────────
+// 
 function openRedemptionModal(partner, reward) {
     selectedRedemption = { partner, reward };
 
@@ -3883,7 +3890,7 @@ function initRedemptionModalEvents() {
                     gsap.fromTo(successBox, { opacity: 0, scale: 0.9, y: 5 }, { opacity: 1, scale: 1, y: 0, duration: 0.35, ease: 'power2.out' });
                 }
 
-                showToast('Redemption Successful! 🛍️', `Deducted ${formatNumber(pointsNeeded)} pts for ${reward.name}.`, 'success');
+                showToast('Redemption Successful! ', `Deducted ${formatNumber(pointsNeeded)} pts for ${reward.name}.`, 'success');
 
                 // Refresh state
                 await loadUserProfile(appState.currentUser.user_id);
@@ -3900,7 +3907,7 @@ function initRedemptionModalEvents() {
         copyBtn.addEventListener('click', () => {
             const code = document.getElementById('generated-voucher-code').textContent;
             navigator.clipboard.writeText(code).then(() => {
-                showToast('Code Copied! 📋', 'Voucher code copied to clipboard.', 'info');
+                showToast('Code Copied! ', 'Voucher code copied to clipboard.', 'info');
                 copyBtn.innerHTML = '<i class="fa-solid fa-check" style="color: #10b981;"></i>';
                 setTimeout(() => {
                     copyBtn.innerHTML = '<i class="fa-solid fa-copy"></i>';
@@ -4018,9 +4025,9 @@ if (scrollDownBtn) {
     });
 }
 
-// ──────────────────────────────────────────────────────────
+// 
 // GLOBAL TOAST NOTIFICATION SYSTEM
-// ──────────────────────────────────────────────────────────
+// 
 const TOAST_ICONS = {
     success: '<i class="fa-solid fa-circle-check"></i>',
     error:   '<i class="fa-solid fa-circle-xmark"></i>',
@@ -4089,7 +4096,7 @@ function showToast(title, message, type = 'success', duration = 4000, action = n
 }
 
 function showPointsUndoToast(message, ledgerId, userId) {
-    showToast('Points Adjusted! ⚡', message, 'points', 2000, {
+    showToast('Points Adjusted! ', message, 'points', 2000, {
         label: 'Undo',
         onClick: async () => {
             const response = await fetch(`${API_BASE}/admin/adjust-points/${ledgerId}/undo`, { method: 'POST' });
@@ -4106,9 +4113,9 @@ function showPointsUndoToast(message, ledgerId, userId) {
     });
 }
 
-// ──────────────────────────────────────────────────────────
+// 
 // HERO STAT COUNTERS ANIMATION (fires when landing page loads)
-// ──────────────────────────────────────────────────────────
+// 
 function animateHeroStats() {
     const statNums = document.querySelectorAll('.hero-stat-num[data-target]');
     if (!statNums.length) return;
@@ -4151,9 +4158,9 @@ loginOverlayObserver.observe(document.getElementById('login-overlay'), {
     attributes: true, attributeFilter: ['style']
 });
 
-// ──────────────────────────────────────────────────────────
-// QUICK STAT PILLS — sync with live profile data
-// ──────────────────────────────────────────────────────────
+// 
+// QUICK STAT PILLS  sync with live profile data
+// 
 function syncQuickStats() {
     if (!appState.userProfile) return;
     const u = appState.userProfile;
@@ -4165,18 +4172,18 @@ function syncQuickStats() {
     if (streak) streak.textContent = u.checkin_streak || 0;
     if (tier)   tier.textContent   = u.current_tier || 'Bronze';
     if (pts)    pts.textContent    = formatNumber(u.points_balance || 0);
-    // Vouchers count is static for now — driven by partner count
+    // Vouchers count is static for now  driven by partner count
 }
 
 
 
-// ──────────────────────────────────────────────────────────
-// QUEST COMPLETION — award real points via LMS webhook
-// ──────────────────────────────────────────────────────────
+// 
+// QUEST COMPLETION  award real points via LMS webhook
+// 
 async function completeQuest(btn, points, description) {
     if (!appState.currentUser) return;
     btn.disabled = true;
-    btn.textContent = '✓ Done';
+    btn.textContent = ' Done';
 
     const questItem = btn.closest('.quest-item');
 
@@ -4193,7 +4200,7 @@ async function completeQuest(btn, points, description) {
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'Quest completion failed');
 
-        showToast('Quest Completed! 🎉', `+${formatNumber(data.points_awarded)} loyalty points credited to your wallet.`, 'points');
+        showToast('Quest Completed! ', `+${formatNumber(data.points_awarded)} loyalty points credited to your wallet.`, 'points');
 
         if (questItem) {
             if (window.gsap) {
@@ -4214,9 +4221,9 @@ async function completeQuest(btn, points, description) {
     }
 }
 
-// ──────────────────────────────────────────────────────────
+// 
 // REPLACE alert() ON REDEMPTION CONFIRM WITH TOAST
-// ──────────────────────────────────────────────────────────
+// 
 // Patch btn-confirm-redemption to use toast
 const _confirmBtn = document.getElementById('btn-confirm-redemption');
 if (_confirmBtn) {
@@ -4238,7 +4245,7 @@ if (_confirmBtn) {
             const data = await response.json();
             if (!response.ok) throw new Error(data.error || 'Redemption failed');
 
-            showToast('Redemption Confirmed 🎟️', `AED ${formatNumber(appState.currentCalculation.discount_aed)} discount voucher generated successfully!`, 'success');
+            showToast('Redemption Confirmed ', `AED ${formatNumber(appState.currentCalculation.discount_aed)} discount voucher generated successfully!`, 'success');
             document.getElementById('redemption-results').style.display = 'none';
             
             // Pop open the gorgeous BIA certificate voucher modal
@@ -4429,7 +4436,7 @@ async function loadAdminEvents() {
                 try {
                     const delRes = await fetch(`${API_BASE}/events/${event.event_id}`, { method: 'DELETE' });
                     if (!delRes.ok) throw new Error('Deletion failed');
-                    showToast('Event Deleted 🗑️', `Event "${event.title}" successfully removed.`, 'info');
+                    showToast('Event Deleted ', `Event "${event.title}" successfully removed.`, 'info');
                     loadAdminEvents();
                     loadPublicEvents();
                 } catch (err) {
@@ -4475,7 +4482,7 @@ function setupAdminEventsManagement() {
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error || 'Failed to add event');
 
-                showToast('Event Published! 📢', `Successfully published "${title}".`, 'success');
+                showToast('Event Published! ', `Successfully published "${title}".`, 'success');
                 form.reset();
                 loadAdminEvents();
                 loadPublicEvents();
@@ -4496,9 +4503,9 @@ function convertFileToBase64(file) {
     });
 }
 
-// ──────────────────────────────────────────────────────────
+// 
 // BIA TUITION DISCOUNT VOUCHER CONTROLLERS & RENDERERS
-// ──────────────────────────────────────────────────────────
+// 
 
 async function loadStudentVouchers(userId) {
     const container = document.getElementById('student-vouchers-list');
@@ -4598,7 +4605,7 @@ window.claimExecutivePerk = async function(btn, type, details) {
             throw new Error(data.error || 'Failed to submit lead request.');
         }
 
-        showToast('Request Logged! 🚀', `Successfully registered for: ${details}. BIA Advisors will follow up shortly.`, 'success');
+        showToast('Request Logged! ', `Successfully registered for: ${details}. BIA Advisors will follow up shortly.`, 'success');
         
         btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Unlocked';
         btn.style.background = 'rgba(74, 222, 128, 0.1)';
@@ -4722,7 +4729,7 @@ window.markLeadContacted = async function(btn, leadId) {
         });
         if (!response.ok) throw new Error('Failed to update lead');
 
-        showToast('Lead Status Updated! ✅', 'Marked student inquiry as contacted.', 'success');
+        showToast('Lead Status Updated! ', 'Marked student inquiry as contacted.', 'success');
         await window.loadAdminLeads();
     } catch (err) {
         showToast('Error', err.message, 'error');
@@ -4743,7 +4750,7 @@ window.convertLeadAdmin = async function(btn, leadId) {
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'Conversion failed');
 
-        showToast('Converted! 🏆', `Lead converted successfully. Student awarded +${data.points_awarded} points!`, 'success');
+        showToast('Converted! ', `Lead converted successfully. Student awarded +${data.points_awarded} points!`, 'success');
         await window.loadAdminLeads();
     } catch (err) {
         showToast('Error', err.message, 'error');
@@ -4790,7 +4797,7 @@ const setupTuitionVoucherModalListeners = () => {
         copyBtn.addEventListener('click', () => {
             const code = document.getElementById('voucher-cert-code').textContent;
             navigator.clipboard.writeText(code).then(() => {
-                showToast('Copied! 📋', 'Voucher code copied to clipboard.', 'success');
+                showToast('Copied! ', 'Voucher code copied to clipboard.', 'success');
             });
         });
     }
@@ -4803,7 +4810,7 @@ const setupFooterListeners = () => {
         smsForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const phone = document.getElementById('sms-phone-input').value.trim();
-            showToast('Link Sent! 📱', `A download link has been dispatched to +971 ${phone}.`, 'success');
+            showToast('Link Sent! ', `A download link has been dispatched to +971 ${phone}.`, 'success');
             smsForm.reset();
         });
     }
@@ -4813,15 +4820,15 @@ const setupFooterListeners = () => {
         newsletterForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const email = document.getElementById('newsletter-email-input').value.trim();
-            showToast('Subscribed! ✉️', `You have successfully joined the BIA Loyalty mailing list.`, 'success');
+            showToast('Subscribed! ', `You have successfully joined the BIA Loyalty mailing list.`, 'success');
             newsletterForm.reset();
         });
     }
 };
 
-// ──────────────────────────────────────────────────────────
+// 
 // STUDENT SPOTLIGHT DETAIL SYSTEM & ADMIN CONTROLS
-// ──────────────────────────────────────────────────────────
+// 
 
 // Keep a local cache of frozen students to persist status between opens
 if (!window.frozenStudentsList) {
@@ -4890,9 +4897,9 @@ window.showStudentDetailModal = async function(userId) {
         const currentlyFrozen = window.frozenStudentsList[userId] || false;
         window.frozenStudentsList[userId] = !currentlyFrozen;
         if (!currentlyFrozen) {
-            showToast('Account Suspended ❄️', `Sarah Al-Mansoori's loyalty wallet has been suspended.`, 'success');
+            showToast('Account Suspended ', `Sarah Al-Mansoori's loyalty wallet has been suspended.`, 'success');
         } else {
-            showToast('Account Activated ⚡', `Sarah Al-Mansoori's loyalty wallet is active.`, 'success');
+            showToast('Account Activated ', `Sarah Al-Mansoori's loyalty wallet is active.`, 'success');
         }
         showStudentDetailModal(userId);
     };
@@ -5046,7 +5053,7 @@ window.showStudentDetailModal = async function(userId) {
             const data = await response.json();
             if (!response.ok) throw new Error(data.error || 'Failed to update student profile.');
 
-            showToast('Profile Updated! 👤', 'Student details have been successfully modified.', 'success');
+            showToast('Profile Updated! ', 'Student details have been successfully modified.', 'success');
             
             // Update cache
             student.name = newName;
@@ -5077,7 +5084,7 @@ window.showStudentDetailModal = async function(userId) {
             const data = await response.json();
             if (!response.ok) throw new Error(data.error || 'Failed to delete student.');
 
-            showToast('Account Deleted 🗑️', `Student profile "${student.name}" has been deleted from BIA.`, 'success');
+            showToast('Account Deleted ', `Student profile "${student.name}" has been deleted from BIA.`, 'success');
             
             window.closeStudentDetailModal();
             await loadAdminStudents();
@@ -5104,7 +5111,7 @@ window.showStudentDetailModal = async function(userId) {
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error || 'Failed to override tier');
 
-                showToast('Tier Overridden! 🏆', `Manually changed ${student.name}'s tier to ${newTier}.`, 'success');
+                showToast('Tier Overridden! ', `Manually changed ${student.name}'s tier to ${newTier}.`, 'success');
                 
                 // Refresh list and modal
                 await loadAdminStudents();
@@ -5136,7 +5143,7 @@ window.closeStudentDetailModal = function() {
     }
 };
 
-// ── Undo toast helper ────────────────────────────────────────────────────────
+//  Undo toast helper 
 function showUndoToast(ledgerId, change, description, userId) {
     const UNDO_MS = 3000;
 
@@ -5149,7 +5156,7 @@ function showUndoToast(ledgerId, change, description, userId) {
     toast.id = 'bia-undo-toast';
     toast.innerHTML = `
         <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.55rem;">
-            <span style="font-size:1.1rem;">⚡</span>
+            <span style="font-size:1.1rem;"></span>
             <div style="flex:1;min-width:0;">
                 <div style="font-weight:700;font-size:0.82rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
                     ${sign}${change} pts applied
@@ -5253,7 +5260,7 @@ function showUndoToast(ledgerId, change, description, userId) {
             toast.style.animation = 'bia-undo-slide-out 0.2s ease forwards';
             setTimeout(() => toast.remove(), 220);
 
-            showToast('Undone ↩️', `Reversed: ${sign}${change} pts removed from record.`, 'success');
+            showToast('Undone ', `Reversed: ${sign}${change} pts removed from record.`, 'success');
 
             // Refresh modal and list
             await loadAdminStudents();
@@ -5311,7 +5318,7 @@ window.markVoucherUsedAdmin = async function(voucherCode, userId) {
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'Failed to redeem voucher');
 
-        showToast('Voucher Redeemed 🎟️', `Tuition discount voucher ${voucherCode} marked as Used.`, 'success');
+        showToast('Voucher Redeemed ', `Tuition discount voucher ${voucherCode} marked as Used.`, 'success');
         
         // Refresh detail view modal
         await showStudentDetailModal(userId);
@@ -5337,7 +5344,7 @@ window.deleteLedgerEntryAdmin = async function(btn, ledgerId) {
             throw new Error(data.error || 'Failed to delete transaction.');
         }
 
-        showToast('Entry Deleted 🗑️', 'Ledger transaction entry deleted successfully.', 'success');
+        showToast('Entry Deleted ', 'Ledger transaction entry deleted successfully.', 'success');
         await loadAdminLedger();
     } catch (err) {
         showToast('Error', err.message, 'error');
@@ -5359,7 +5366,7 @@ window.deleteLeadAdmin = async function(btn, leadId) {
         });
         if (!response.ok) throw new Error('Failed to delete lead.');
 
-        showToast('Lead Deleted 🗑️', 'Seminar interest lead entry deleted successfully.', 'success');
+        showToast('Lead Deleted ', 'Seminar interest lead entry deleted successfully.', 'success');
         await window.loadAdminLeads();
     } catch (err) {
         showToast('Error', err.message, 'error');
@@ -5381,7 +5388,7 @@ window.deleteReferralAdmin = async function(btn, referralId) {
         });
         if (!response.ok) throw new Error('Failed to delete referral.');
 
-        showToast('Referral Deleted 🗑️', 'Referral entry deleted successfully.', 'success');
+        showToast('Referral Deleted ', 'Referral entry deleted successfully.', 'success');
         
         // Refresh profile & active queue list
         if (appState.currentUser) {
@@ -5408,7 +5415,7 @@ window.deleteVoucherAdmin = async function(btn, voucherId, userId) {
         });
         if (!response.ok) throw new Error('Failed to delete voucher.');
 
-        showToast('Voucher Revoked 🗑️', 'Discount voucher code deleted successfully.', 'success');
+        showToast('Voucher Revoked ', 'Discount voucher code deleted successfully.', 'success');
         await showStudentDetailModal(userId);
     } catch (err) {
         showToast('Error', err.message, 'error');
@@ -5473,18 +5480,18 @@ const setupP2PTransferListeners = () => {
         lookupTimeout = setTimeout(async () => {
             try {
                 if (appState.currentUser && studentId === appState.currentUser.student_id) {
-                    verifyMsg.textContent = '⚠️ You cannot transfer points to yourself';
+                    verifyMsg.textContent = ' You cannot transfer points to yourself';
                     verifyMsg.style.color = '#ef4444';
                     return;
                 }
 
                 const response = await fetch(`${API_BASE}/users/by-student-id/${studentId}`);
                 if (!response.ok) {
-                    verifyMsg.textContent = '❌ Student ID not found';
+                    verifyMsg.textContent = ' Student ID not found';
                     verifyMsg.style.color = '#ef4444';
                 } else {
                     const data = await response.json();
-                    verifyMsg.textContent = `✅ Recipient: ${data.name}`;
+                    verifyMsg.textContent = ` Recipient: ${data.name}`;
                     verifyMsg.style.color = '#4ade80';
                 }
             } catch (err) {
@@ -5549,7 +5556,7 @@ const setupP2PTransferListeners = () => {
             const data = await response.json();
             if (!response.ok) throw new Error(data.error || 'Transfer failed');
 
-            showToast('Points Gifted! 🎁', `Sent ${amount} pts to ${recipientId} successfully.`, 'success');
+            showToast('Points Gifted! ', `Sent ${amount} pts to ${recipientId} successfully.`, 'success');
 
             // Reset form & calculations
             form.reset();
@@ -5595,7 +5602,7 @@ const setupP2PTransferListeners = () => {
                     text: text,
                     url: url
                 });
-                showToast('Shared! 🎉', 'Referral link shared successfully.', 'success');
+                showToast('Shared! ', 'Referral link shared successfully.', 'success');
             } catch (err) {
                 // AbortError is normal when user cancels the native popup
                 if (err.name !== 'AbortError') {
@@ -5618,7 +5625,7 @@ const setupP2PTransferListeners = () => {
                 copyBtn.innerHTML = '<i class="fa-solid fa-check" style="color: #4ade80;"></i> Copied message!';
                 copyBtn.style.borderColor = 'rgba(74, 222, 128, 0.2)';
                 
-                showToast('Copied! 📋', 'Referral invitation message copied to clipboard.', 'success');
+                showToast('Copied! ', 'Referral invitation message copied to clipboard.', 'success');
                 
                 setTimeout(() => {
                     copyBtn.innerHTML = origHtml;
@@ -5646,8 +5653,8 @@ const setupLinkedInIntegrationListeners = () => {
     // Post template maps
     const templates = {
         enrollment: "I am thrilled to announce my enrollment at Bradford International Alliance! Eager to build new skills and advance my career with BIA's international business modules. Learn more: https://bradfordia.com/programs",
-        gpa: "Academic Honors unlocked! 🌟 Just achieved GPA Excellence this term at Bradford International Alliance. Grateful for the support of professors and classmates. Learn more: https://bradfordia.com/programs",
-        seminar: "Exciting day attending the BIA Industry Tech Summit! 💻 Connecting with peers and learning about emerging digital transformation models. Proud to be a student at Bradford International Alliance!"
+        gpa: "Academic Honors unlocked!  Just achieved GPA Excellence this term at Bradford International Alliance. Grateful for the support of professors and classmates. Learn more: https://bradfordia.com/programs",
+        seminar: "Exciting day attending the BIA Industry Tech Summit!  Connecting with peers and learning about emerging digital transformation models. Proud to be a student at Bradford International Alliance!"
     };
 
     const updatePreview = () => {
@@ -5678,7 +5685,7 @@ const setupLinkedInIntegrationListeners = () => {
             connectBtn.style.borderColor = 'rgba(74, 222, 128, 0.2)';
             connectBtn.style.background = 'rgba(74, 222, 128, 0.05)';
 
-            statusTitle.textContent = 'LinkedIn Account Connected ✅';
+            statusTitle.textContent = 'LinkedIn Account Connected ';
             statusTitle.style.color = '#4ade80';
             
             const handle = appState.currentUser.name.toLowerCase().replace(/ /g, '_');
@@ -5688,7 +5695,7 @@ const setupLinkedInIntegrationListeners = () => {
             shareConsole.style.display = 'block';
             updatePreview();
             
-            showToast('LinkedIn Linked! 🔗', 'BIA Loyalty has authorized your LinkedIn profile successfully.', 'success');
+            showToast('LinkedIn Linked! ', 'BIA Loyalty has authorized your LinkedIn profile successfully.', 'success');
         }, 1000);
     });
 
@@ -5715,7 +5722,7 @@ const setupLinkedInIntegrationListeners = () => {
             const data = await response.json();
             if (!response.ok) throw new Error(data.error || 'Sharing failed');
 
-            showToast('Posted Successfully! 🚀', 'Your milestone post has been published to LinkedIn (+50 pts credited).', 'success');
+            showToast('Posted Successfully! ', 'Your milestone post has been published to LinkedIn (+50 pts credited).', 'success');
             
             // Sync user data
             await loadUserProfile(appState.currentUser.user_id);
@@ -5948,7 +5955,7 @@ function showLogDetail(idx) {
     const threatColor = threatScore === 0 ? '#4ade80' : threatScore < 30 ? '#4ade80' : threatScore < 60 ? '#dfb15b' : '#ef4444';
     const isAdmin = log.role === 'admin';
     const name = log.user_name || 'Anonymous Guest';
-    const email = log.user_email || '—';
+    const email = log.user_email || '';
     const role = (log.role || 'guest').toUpperCase();
 
     content.innerHTML = `
@@ -5963,7 +5970,7 @@ function showLogDetail(idx) {
                     <span style="font-size:0.62rem; background:${isAdmin ? 'rgba(223,177,91,0.12)' : 'rgba(255,255,255,0.06)'}; color:${isAdmin ? '#dfb15b' : 'rgba(255,255,255,0.5)'}; border:1px solid ${isAdmin ? 'rgba(223,177,91,0.2)' : 'rgba(255,255,255,0.1)'}; border-radius:4px; padding:0.1rem 0.4rem; font-weight:700;">${role}</span>
                 </div>
                 <p style="margin:0.2rem 0 0 0; color:rgba(255,255,255,0.4); font-size:0.75rem;">${email}</p>
-                <p style="margin:0.35rem 0 0 0; font-size:0.7rem; color:rgba(255,255,255,0.35);">Log ID #${log.log_id || '—'} &nbsp;·&nbsp; ${cleanDate(log.created_at)}</p>
+                <p style="margin:0.35rem 0 0 0; font-size:0.7rem; color:rgba(255,255,255,0.35);">Log ID #${log.log_id || ''} &nbsp;&nbsp; ${cleanDate(log.created_at)}</p>
             </div>
             <button onclick="event.stopPropagation(); closeLogDetail()" style="background:none; border:none; color:rgba(255,255,255,0.35); cursor:pointer; font-size:1.1rem; flex-shrink:0; padding:0; transition:color 0.15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.35)'">
                 <i class="fa-solid fa-xmark"></i>
@@ -5974,7 +5981,7 @@ function showLogDetail(idx) {
         <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:0.75rem; margin-bottom:1.25rem;">
             <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:8px; padding:0.75rem; text-align:center;">
                 <span style="font-size:0.6rem; color:rgba(255,255,255,0.35); text-transform:uppercase; display:block;">IP Address</span>
-                <span style="font-family:'Outfit'; font-size:0.88rem; font-weight:700; color:#dfb15b;">${log.ip_address || '—'}</span>
+                <span style="font-family:'Outfit'; font-size:0.88rem; font-weight:700; color:#dfb15b;">${log.ip_address || ''}</span>
             </div>
             <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:8px; padding:0.75rem; text-align:center;">
                 <span style="font-size:0.6rem; color:rgba(255,255,255,0.35); text-transform:uppercase; display:block;">Device</span>
@@ -5982,7 +5989,7 @@ function showLogDetail(idx) {
             </div>
             <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:8px; padding:0.75rem; text-align:center;">
                 <span style="font-size:0.6rem; color:rgba(255,255,255,0.35); text-transform:uppercase; display:block;">Threat Score</span>
-                <span style="font-family:'Outfit'; font-size:0.88rem; font-weight:700; color:${threatColor};">${threatScore}/100 · ${threatLabel}</span>
+                <span style="font-family:'Outfit'; font-size:0.88rem; font-weight:700; color:${threatColor};">${threatScore}/100  ${threatLabel}</span>
             </div>
         </div>
 
@@ -6111,7 +6118,7 @@ async function blockIp(ip, reason = 'Suspicious Activity') {
                 body: JSON.stringify({ ip_address: ip, reason })
             });
             if (!res.ok) throw new Error('Failed to blacklist IP.');
-            showToast('IP Blocked 🚫', `${ip} has been added to firewall blacklist.`, 'success');
+            showToast('IP Blocked ', `${ip} has been added to firewall blacklist.`, 'success');
             loadBlacklist();
             loadTrafficDashboard(); // Refresh stats/logs
         } catch (err) {
@@ -6130,7 +6137,7 @@ async function unblockIp(ip) {
             body: JSON.stringify({ ip_address: ip })
         });
         if (!res.ok) throw new Error('Failed to unblock IP.');
-        showToast('IP Unblocked ✅', `${ip} is now allowed to access.`, 'success');
+        showToast('IP Unblocked ', `${ip} is now allowed to access.`, 'success');
         loadBlacklist();
         loadTrafficDashboard(); // Refresh stats/logs
     } catch (err) {
@@ -6185,7 +6192,7 @@ const setupTrafficListeners = () => {
                     appState.settings.maintenance_end_time = '';
                 }
 
-                showToast('Security Update ✅', 'Traffic control override rules saved to database.', 'success');
+                showToast('Security Update ', 'Traffic control override rules saved to database.', 'success');
                 
                 const secStatus = document.getElementById('traffic-security-status');
                 if (secStatus) {
@@ -6240,7 +6247,7 @@ const setupTrafficListeners = () => {
                 });
                 if (!res.ok) throw new Error('Failed to block IP.');
                 
-                showToast('IP Blacklisted 🚫', `${ip} has been blocked from portal access.`, 'success');
+                showToast('IP Blacklisted ', `${ip} has been blocked from portal access.`, 'success');
                 ipInput.value = '';
                 reasonInput.value = '';
                 loadBlacklist();
@@ -6409,19 +6416,19 @@ async function showFeatureInsights(type) {
                         <tbody>
                             <tr>
                                 <td style="font-family:'Outfit';">194.26.29.81</td>
-                                <td>United States 🇺🇸</td>
+                                <td>United States </td>
                                 <td style="color:#ef4444; font-weight:700;">BLOCKED</td>
                                 <td>Just Now</td>
                             </tr>
                             <tr>
                                 <td style="font-family:'Outfit';">81.2.199.12</td>
-                                <td>United Kingdom 🇬🇧</td>
+                                <td>United Kingdom </td>
                                 <td style="color:#ef4444; font-weight:700;">BLOCKED</td>
                                 <td>5 mins ago</td>
                             </tr>
                             <tr>
                                 <td style="font-family:'Outfit';">220.181.38.14</td>
-                                <td>China 🇨🇳</td>
+                                <td>China </td>
                                 <td style="color:#ef4444; font-weight:700;">BLOCKED</td>
                                 <td>14 mins ago</td>
                             </tr>
@@ -6688,9 +6695,9 @@ setupAdminStudentSearchListener();
 setupP2PTransferListeners();
 setupLinkedInIntegrationListeners();
 
-// ──────────────────────────────────────────────────────────
+// 
 // PUBLIC ANNOUNCEMENTS & SLEEPY EMPTY-STATE ANIMATION
-// ──────────────────────────────────────────────────────────
+// 
 let isDrawerListenersSetup = false;
 function setupDrawerListeners() {
     if (isDrawerListenersSetup) return;
@@ -6744,11 +6751,11 @@ async function loadPublicAnnouncements() {
             container.innerHTML = `
                 <div class="card glassmorphic spotlight-card" style="padding: 1.75rem; border-radius: 16px; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.85rem; text-align: center; margin-top: 1rem; width: 100%; box-sizing: border-box;">
                     <div style="margin-bottom: 0.25rem;">
-                        <span class="sleepy-coffee-icon">☕</span>
+                        <span class="sleepy-coffee-icon"></span>
                     </div>
                     <h4 style="margin: 0; color: #dfb15b; font-family: 'Outfit'; font-size: 0.95rem; letter-spacing: 0.05em; text-transform: uppercase;">All Quiet</h4>
                     <p style="margin: 0; font-size: 0.8rem; color: rgba(255,255,255,0.5); line-height: 1.45; font-weight: 300;">
-                        No active announcements today. The BIA servers are purring, and the student portal is completely peaceful. 🎓✨
+                        No active announcements today. The BIA servers are purring, and the student portal is completely peaceful. 
                     </p>
                 </div>
             `;
@@ -6801,9 +6808,9 @@ async function loadPublicAnnouncements() {
 }
 window.loadPublicAnnouncements = loadPublicAnnouncements;
 
-// ──────────────────────────────────────────────────────────
+// 
 // DYNAMIC PROGRAMME PATHWAYS & UPSELL/CROSS-SELL
-// ──────────────────────────────────────────────────────────
+// 
 function renderCareerUpgrades() {
     const container = document.getElementById('upsell-cross-sell-content');
     if (!container) return;
@@ -7110,7 +7117,7 @@ window.resetDatabaseState = async function(btn) {
         });
         if (!response.ok) throw new Error('Database reset operation failed.');
 
-        showToast('Database Reset 🔄', 'All tables recreated and default demo profiles seeded successfully.', 'success');
+        showToast('Database Reset ', 'All tables recreated and default demo profiles seeded successfully.', 'success');
         
         // Log out admin or refresh portal
         setTimeout(() => {
@@ -7250,7 +7257,7 @@ async function claimEventPoints(eventId, btnElement) {
 
         if (!response.ok) throw new Error(data.error || 'Invalid code');
 
-        showToast('Points Claimed! 🎉', data.message, 'success');
+        showToast('Points Claimed! ', data.message, 'success');
         btnElement.innerText = 'Claimed!';
         btnElement.style.background = 'rgba(255,255,255,0.2)';
         input.disabled = true;
@@ -7385,7 +7392,7 @@ if (adminPromoForm) {
             const data = await response.json();
             if (!response.ok) throw new Error(data.error || 'Failed to generate promo code');
             
-            showToast('Promo Generated! 🎁', `Code ${code} is now active.`, 'success');
+            showToast('Promo Generated! ', `Code ${code} is now active.`, 'success');
             adminPromoForm.reset();
             loadAdminPromos();
         } catch (err) {
@@ -7423,7 +7430,7 @@ if (studentPromoForm) {
             const data = await response.json();
             if (!response.ok) throw new Error(data.error || 'Failed to redeem code');
             
-            showToast('Promo Redeemed! 🎉', data.message, 'success');
+            showToast('Promo Redeemed! ', data.message, 'success');
             studentPromoForm.reset();
             loadUserProfile(appState.currentUser.user_id); // Refresh points
             
@@ -7572,8 +7579,8 @@ function updateLangUI() {
         document.documentElement.lang = 'en';
         document.body.classList.remove('rtl-mode');
     } else {
-        if (textFooter) textFooter.innerText = 'عربي';
-        if (textDash) textDash.innerText = 'عربي';
+        if (textFooter) textFooter.innerText = '';
+        if (textDash) textDash.innerText = '';
         document.documentElement.lang = 'ar';
         document.body.classList.add('rtl-mode');
     }
@@ -8142,7 +8149,7 @@ async function loadCommunityPosts() {
                     <div>
                         <h4 style="margin: 0 0 0.5rem 0; color: #dfb15b; font-size: 1.1rem;">${escapeHTML(post.title)}</h4>
                         <div style="font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-bottom: 1rem;">
-                            By <strong style="color: #fff;">${escapeHTML(post.name)}</strong> (${escapeHTML(post.programme)}) • ${new Date(post.created_at).toLocaleDateString()}
+                            By <strong style="color: #fff;">${escapeHTML(post.name)}</strong> (${escapeHTML(post.programme)})  ${new Date(post.created_at).toLocaleDateString()}
                         </div>
                     </div>
                     <button onclick="upvotePost(${post.post_id})" style="background: none; border: 1px solid ${post.user_has_upvoted ? '#dfb15b' : 'rgba(255,255,255,0.2)'}; color: ${post.user_has_upvoted ? '#dfb15b' : '#fff'}; border-radius: 4px; padding: 0.3rem 0.6rem; cursor: pointer; transition: 0.2s;">
