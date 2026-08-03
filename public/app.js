@@ -7976,7 +7976,71 @@ window.deletePartner = deletePartner;
 document.addEventListener('DOMContentLoaded', () => {
     const addPartnerForm = document.getElementById('admin-add-partner-form');
     if (addPartnerForm) {
-        addPartnerForm.addEventListener('submit', async (e) => {
+        
+    const partnerImageFile = document.getElementById('partner-image-file');
+    const partnerImageHidden = document.getElementById('partner-image');
+    if (partnerImageFile) {
+        partnerImageFile.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    partnerImageHidden.value = ev.target.result;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                partnerImageHidden.value = '';
+            }
+        });
+    }
+
+    const btnAddTier = document.getElementById('btn-add-reward-tier');
+    const rewardsHidden = document.getElementById('partner-rewards');
+    const tiersContainer = document.getElementById('reward-tiers-container');
+    if (btnAddTier) {
+        btnAddTier.addEventListener('click', () => {
+            const tierInput = document.getElementById('reward-tier-input');
+            const pointsInput = document.getElementById('reward-points-input');
+            const valueInput = document.getElementById('reward-value-input');
+            
+            if (!tierInput.value || !pointsInput.value || !valueInput.value) {
+                alert('Please fill out all tier fields');
+                return;
+            }
+            
+            const newTier = {
+                tier: tierInput.value.trim(),
+                points: parseInt(pointsInput.value, 10),
+                value: valueInput.value.trim()
+            };
+            
+            let rewards = [];
+            try {
+                rewards = JSON.parse(rewardsHidden.value);
+            } catch(e) { rewards = []; }
+            
+            rewards.push(newTier);
+            rewardsHidden.value = JSON.stringify(rewards);
+            
+            // visually add
+            const row = document.createElement('div');
+            row.style.display = 'flex';
+            row.style.justifyContent = 'space-between';
+            row.style.background = 'rgba(255,255,255,0.05)';
+            row.style.padding = '0.5rem';
+            row.style.borderRadius = '6px';
+            row.innerHTML = '<span><b>' + newTier.tier + '</b> - ' + newTier.points + ' pts</span><span>' + newTier.value + '</span>';
+            tiersContainer.appendChild(row);
+            
+            // clear inputs
+            tierInput.value = '';
+            pointsInput.value = '';
+            valueInput.value = '';
+        });
+    }
+
+    addPartnerForm.addEventListener('submit', async (e) => {
+
             e.preventDefault();
             const submitBtn = addPartnerForm.querySelector('button[type="submit"]');
             submitBtn.disabled = true;
@@ -8003,7 +8067,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!res.ok) throw new Error(data.error || 'Failed to add partner');
                 
                 showToast('Success', 'Partner added successfully!', 'success');
+                
                 addPartnerForm.reset();
+                if (tiersContainer) tiersContainer.innerHTML = '';
+                if (rewardsHidden) rewardsHidden.value = '[]';
+
                 loadAdminPartners();
             } catch (err) {
                 showToast('Error', err.message, 'error');

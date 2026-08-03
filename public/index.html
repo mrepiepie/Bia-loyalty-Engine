@@ -2346,20 +2346,36 @@
                             </div>
                             <div style="display:flex; gap:1rem; flex-wrap:wrap;">
                                 <div style="flex:1; min-width:200px;">
-                                    <label>Base64 Image URL</label>
-                                    <input type="text" id="partner-image" placeholder="data:image/png;base64,...">
+                                    <label>Brand Image (Upload File)</label>
+                                    <input type="file" id="partner-image-file" accept="image/*" style="width:100%; padding:0.5rem; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:6px; color:white;">
+                                    <input type="hidden" id="partner-image" value="">
                                 </div>
                                 <div style="flex:1; min-width:100px;">
                                     <label>Brand Color</label>
                                     <input type="color" id="partner-color" value="#00E676" style="width:100%; height:40px; border:none; background:transparent; cursor:pointer;">
                                 </div>
                             </div>
-                            <div style="display:flex; flex-direction:column; width:100%;">
-                                <label style="margin-bottom:0.5rem;">Rewards (JSON format: [{"tier":"Bronze", "points":100, "value":"AED 20"}, ...])</label>
-                                <textarea id="partner-rewards" rows="4" required style="width:100%; resize:vertical; padding:0.75rem; border-radius:6px; border:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.2); color:white; font-family:monospace;" placeholder='[
-  {"tier": "Bronze", "points": 100, "value": "AED 20 Value"},
-  {"tier": "Silver", "points": 250, "value": "AED 50 Value"}
-]'></textarea>
+                            <div style="display:flex; flex-direction:column; width:100%; border:1px solid rgba(255,255,255,0.1); padding:1rem; border-radius:8px; background:rgba(0,0,0,0.2);">
+                                <label style="margin-bottom:0.75rem; font-weight:600;">Reward Tiers</label>
+                                <div id="reward-tiers-container" style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1rem;">
+                                    <!-- Dynamic rows will appear here -->
+                                </div>
+                                <div style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:flex-end;">
+                                    <div style="flex:1; min-width:120px;">
+                                        <label style="font-size:0.8rem; opacity:0.7;">Tier Name</label>
+                                        <input type="text" id="reward-tier-input" placeholder="e.g. Bronze" style="padding:0.5rem; font-size:0.9rem;">
+                                    </div>
+                                    <div style="flex:1; min-width:100px;">
+                                        <label style="font-size:0.8rem; opacity:0.7;">Points</label>
+                                        <input type="number" id="reward-points-input" placeholder="100" style="padding:0.5rem; font-size:0.9rem;">
+                                    </div>
+                                    <div style="flex:1; min-width:120px;">
+                                        <label style="font-size:0.8rem; opacity:0.7;">Value Text</label>
+                                        <input type="text" id="reward-value-input" placeholder="AED 20" style="padding:0.5rem; font-size:0.9rem;">
+                                    </div>
+                                    <button type="button" id="btn-add-reward-tier" class="btn btn-secondary" style="padding:0.5rem 1rem;"><i class="fa-solid fa-plus"></i> Add Tier</button>
+                                </div>
+                                <input type="hidden" id="partner-rewards" value="[]">
                             </div>
                             <button type="submit" class="btn" style="align-self:flex-start;"><i class="fa-solid fa-plus"></i> Add Partner</button>
                         </form>
