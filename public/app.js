@@ -3474,39 +3474,39 @@ function setupLogoCarousel() {
 
     //  Partner Brand SVGs (BIA ecosystem) 
     const allLogos = [
-        {
-            name: 'ADNOC', id: 1,
-            svg: `<img src="https://www.google.com/s2/favicons?domain=adnoc.ae&sz=128" alt="ADNOC" style="width: 70px; height: 70px; object-fit: contain;" onerror="this.src='https://ui-avatars.com/api/?name=ADNOC&background=0D8ABC&color=fff&rounded=true&bold=true'"/>`
-        },
-        {
-            name: 'VISA', id: 2,
-            svg: `<img src="https://www.google.com/s2/favicons?domain=visa.com&sz=128" alt="VISA" style="width: 70px; height: 70px; object-fit: contain;" onerror="this.src='https://ui-avatars.com/api/?name=VISA&background=1A1F71&color=fff&rounded=true&bold=true'"/>`
-        },
-        {
-            name: 'TOYOTA', id: 3,
-            svg: `<img src="https://www.google.com/s2/favicons?domain=toyota.com&sz=128" alt="TOYOTA" style="width: 70px; height: 70px; object-fit: contain;" onerror="this.src='https://ui-avatars.com/api/?name=TOYOTA&background=EB0A1E&color=fff&rounded=true&bold=true'"/>`
-        },
-        {
-            name: 'IKEA', id: 4,
-            svg: `<img src="https://www.google.com/s2/favicons?domain=ikea.com&sz=128" alt="IKEA" style="width: 70px; height: 70px; object-fit: contain;" onerror="this.src='https://ui-avatars.com/api/?name=IKEA&background=003399&color=FFCC00&rounded=true&bold=true'"/>`
-        },
-        {
-            name: 'EBAY', id: 5,
-            svg: `<img src="https://www.google.com/s2/favicons?domain=ebay.com&sz=128" alt="EBAY" style="width: 70px; height: 70px; object-fit: contain;" onerror="this.src='https://ui-avatars.com/api/?name=EBAY&background=fff&color=E53238&rounded=true&bold=true'"/>`
-        },
-        {
-            name: 'BOSE', id: 6,
-            svg: `<img src="https://www.google.com/s2/favicons?domain=bose.com&sz=128" alt="BOSE" style="width: 70px; height: 70px; object-fit: contain;" onerror="this.src='https://ui-avatars.com/api/?name=BOSE&background=000&color=fff&rounded=true&bold=true'"/>`
-        },
-        {
-            name: 'H&M', id: 7,
-            svg: `<img src="https://www.google.com/s2/favicons?domain=hm.com&sz=128" alt="H&M" style="width: 70px; height: 70px; object-fit: contain;" onerror="this.src='https://ui-avatars.com/api/?name=HM&background=E50010&color=fff&rounded=true&bold=true'"/>`
-        },
-        {
-            name: 'SHUKRAN', id: 8,
-            svg: `<img src="https://www.google.com/s2/favicons?domain=landmarkgroup.com&sz=128" alt="Landmark Shukran" style="width: 70px; height: 70px; object-fit: contain;" onerror="this.src='https://ui-avatars.com/api/?name=SHUKRAN&background=C8102E&color=FFD700&rounded=true&bold=true'"/>`
-        }
-    ];
+    {
+        name: 'ADNOC', id: 1,
+        svg: "<img src=\"https://www.google.com/s2/favicons?domain=adnoc.ae&sz=128\" alt=\"ADNOC\" style=\"width: 60px; height: 60px; object-fit: contain; border-radius: 50%;\" />"
+    },
+    {
+        name: 'VISA', id: 2,
+        svg: "<svg fill=\"#1A1F71\" width=\"70\" height=\"70\" role=\"img\" viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\"><title>Visa</title><path d=\"M9.112 8.262L5.97 15.758H3.92L2.374 9.775c-.094-.368-.175-.503-.461-.658C1.447 8.864.677 8.627 0 8.479l.046-.217h3.3a.904.904 0 01.894.764l.817 4.338 2.018-5.102zm8.033 5.049c.008-1.979-2.736-2.088-2.717-2.972.006-.269.262-.555.822-.628a3.66 3.66 0 011.913.336l.34-1.59a5.207 5.207 0 00-1.814-.333c-1.917 0-3.266 1.02-3.278 2.479-.012 1.079.963 1.68 1.698 2.04.756.367 1.01.603 1.006.931-.005.504-.602.725-1.16.734-.975.015-1.54-.263-1.992-.473l-.351 1.642c.453.208 1.289.39 2.156.398 2.037 0 3.37-1.006 3.377-2.564m5.061 2.447H24l-1.565-7.496h-1.656a.883.883 0 00-.826.55l-2.909 6.946h2.036l.405-1.12h2.488zm-2.163-2.656l1.02-2.815.588 2.815zm-8.16-4.84l-1.603 7.496H8.34l1.605-7.496z\"/></svg>"
+    },
+    {
+        name: 'TOYOTA', id: 3,
+        svg: "<svg fill=\"#EB0A1E\" width=\"70\" height=\"70\" role=\"img\" viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\"><title>Toyota</title><path d=\"M12 3.848C5.223 3.848 0 7.298 0 12c0 4.702 5.224 8.152 12 8.152S24 16.702 24 12c0-4.702-5.223-8.152-12-8.152zm7.334 3.839c0 1.08-1.725 1.913-4.488 2.246-.26-2.58-1.005-4.279-1.963-4.913 2.948.184 6.45 1.227 6.45 2.667zM12 16.401c-.96 0-1.746-1.5-1.808-4.389.577.047 1.18.072 1.808.072.628 0 1.23-.025 1.807-.072-.061 2.89-.847 4.389-1.807 4.389zm0-6.308c-.59 0-1.155-.019-1.69-.054.261-1.728.92-3.15 1.69-3.15.77 0 1.428 1.422 1.689 3.15-.535.034-1.099.054-1.689.054zm-.882-5.075c-.956.633-1.706 2.333-1.964 4.915C6.391 9.6 4.665 8.767 4.665 7.687c0-1.44 3.504-2.49 6.453-2.669zM2.037 11.68a5.265 5.265 0 011.048-3.164c.27 1.547 2.522 2.881 5.972 3.37V12c0 3.772.879 6.203 2.087 6.97-5.107-.321-9.107-3.48-9.107-7.29zm10.823 7.29c1.207-.767 2.087-3.198 2.087-6.97v-.115c3.447-.488 5.704-1.826 5.972-3.37a5.26 5.26 0 011.049 3.165c-.004 3.81-4.008 6.969-9.109 7.29z\"/></svg>"
+    },
+    {
+        name: 'IKEA', id: 4,
+        svg: "<svg fill=\"#0051BA\" width=\"70\" height=\"70\" role=\"img\" viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\"><title>IKEA</title><path d=\"M0 7.2v9.6h24V7.2H0zm12.002 9.12C5.308 16.32.48 14.36.48 12s4.831-4.32 11.522-4.32c6.69 0 11.518 1.96 11.518 4.32s-4.824 4.32-11.518 4.32zm-.225-6.062h4.176v.964c-.103-.047-.203-.047-.306-.047h-1.758v.46h1.689v.732h-1.689v.457h1.758c.103 0 .203 0 .306-.05v.967h-4.176c.052-.101.052-.198.052-.299V10.56c0-.101 0-.198-.052-.302zm-7.076.302v2.881c0 .101 0 .198.052.299H2.4c.052-.101.052-.198.052-.299V10.56c0-.101 0-.198-.052-.299h2.353c-.052.101-.052.198-.052.299zm6.447 2.881c.076.107.158.208.255.299H8.805c0-.101-.1-.306-.21-.467-.11-.161-.705-1.044-.705-1.044v1.212c0 .101 0 .198.052.299H5.778c.052-.101.052-.198.052-.299V10.56c0-.101 0-.198-.052-.299h2.164c-.052.101-.052.198-.052.299v1.259s.691-.88.85-1.085c.12-.154.268-.373.268-.473h2.257c-.155.101-.327.282-.468.45l-.826.984s1.039 1.548 1.177 1.746zm10.546-3.005a.178.178 0 0 0-.175-.178h-.21v.551h.083v-.195h.12l.11.195h.093l-.12-.212a.184.184 0 0 0 .099-.161zm-.189.101h-.114v-.191h.124c.055 0 .093.047.093.101 0 .053-.048.093-.103.09zm-.021-.457h-.031a.444.444 0 0 0-.437.457c0 .007 0 .017-.003.023a.466.466 0 0 0 .482.447.464.464 0 0 0 .458-.47v-.017a.454.454 0 0 0-.469-.44zm0 .823a.372.372 0 0 1-.375-.366v-.027a.357.357 0 0 1 .375-.339c.206 0 .375.165.375.366s-.168.366-.375.366zm-.877-.339c-.038-.101-.093-.198-.065-.299h-3.017c.014.101-.024.198-.062.299l-1.07 2.881a.852.852 0 0 1-.162.299h1.785c-.014-.101.024-.198.058-.299.034-.101.072-.198.072-.198l.021-.054h1.304l.021.05c.048.118.083.198.083.198.041.101.079.198.069.299h2.263a.837.837 0 0 1-.169-.299 690.277 690.277 0 0 0-1.131-2.877zm-2.167 1.893c.155-.42.289-.772.299-.806.028-.074.048-.151.062-.228.017.077.041.154.069.228l.316.806h-.746z\"/></svg>"
+    },
+    {
+        name: 'EBAY', id: 5,
+        svg: "<svg fill=\"#E53238\" width=\"70\" height=\"70\" role=\"img\" viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\"><title>eBay</title><path d=\"M6.056 12.132v-4.92h1.2v3.026c.59-.703 1.402-.906 2.202-.906 1.34 0 2.828.904 2.828 2.855 0 .233-.015.457-.06.668.24-.953 1.274-1.305 2.896-1.344.51-.018 1.095-.018 1.56-.018v-.135c0-.885-.556-1.244-1.53-1.244-.72 0-1.245.3-1.305.81h-1.275c.136-1.29 1.5-1.62 2.686-1.62 1.064 0 1.995.27 2.415 1.02l-.436-.84h1.41l2.055 4.125 2.055-4.126H24l-3.72 7.305h-1.346l1.07-2.04-2.33-4.38c.13.255.2.555.2.93v2.46c0 .346.01.69.04 1.005H16.8a6.543 6.543 0 01-.046-.765c-.603.734-1.32.96-2.32.96-1.48 0-2.272-.78-2.272-1.695 0-.15.015-.284.037-.405-.3 1.246-1.36 2.086-2.767 2.086-.87 0-1.694-.315-2.2-.93 0 .24-.015.494-.04.734h-1.18c.02-.39.04-.855.04-1.245v-1.05h-4.83c.065 1.095.818 1.74 1.853 1.74.718 0 1.355-.3 1.568-.93h1.24c-.24 1.29-1.61 1.725-2.79 1.725C.95 15.009 0 13.822 0 12.232c0-1.754.982-2.91 3.116-2.91 1.688 0 2.93.886 2.94 2.806v.005zm9.137.183c-1.095.034-1.77.233-1.77.95 0 .465.36.97 1.305.97 1.26 0 1.935-.69 1.935-1.814v-.13c-.45 0-.99.006-1.484.022h.012zm-6.06 1.875c1.11 0 1.876-.806 1.876-2.02s-.768-2.02-1.893-2.02c-1.11 0-1.89.806-1.89 2.02s.765 2.02 1.875 2.02h.03zm-4.35-2.514c-.044-1.125-.854-1.546-1.725-1.546-.944 0-1.694.474-1.815 1.546z\"/></svg>"
+    },
+    {
+        name: 'BOSE', id: 6,
+        svg: "<svg fill=\"#FFFFFF\" width=\"70\" height=\"70\" role=\"img\" viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\"><title>Bose</title><path d=\"M14.052 10.589a.69.69 0 0 0-.588.332l-.54.915c-.114.19.036.399.235.399h1.873l-.336.568a.274.274 0 0 1-.24.139h-.29a.113.113 0 0 1-.102-.164c.035-.062.112-.19.112-.19h-1.699l-.246.418c-.115.194.038.405.232.405h3.174a.692.692 0 0 0 .598-.34c.12-.206.405-.69.527-.896.123-.205-.032-.41-.228-.41h-1.873l.347-.586a.276.276 0 0 1 .231-.123h.292c.095 0 .135.102.105.155-.03.053-.117.199-.117.199h1.696l.254-.43c.094-.16-.023-.392-.24-.392h-3.18.003zm-1.344 0H9.537c-.23 0-.47.12-.592.329-.124.207-1.13 1.911-1.24 2.096-.109.185.042.397.236.397h3.177c.255 0 .48-.141.592-.33.111-.188 1.13-1.915 1.237-2.094.106-.18-.03-.4-.24-.4v.002zm-1.598.636c-.045.076-.89 1.505-.936 1.585a.276.276 0 0 1-.236.134h-.295c-.094 0-.138-.102-.102-.163l.94-1.592a.274.274 0 0 1 .235-.13h.296c.085 0 .143.091.097.167l.001-.001zm-2.919-.636H4.61l-1.39 2.354H0v.47h6.598a.69.69 0 0 0 .596-.336l.41-.697c.085-.145-.004-.331-.164-.379a.703.703 0 0 0 .583-.329c.115-.193.298-.506.402-.682a.266.266 0 0 0-.234-.4v-.001zM6.29 12.402l-.243.411a.267.267 0 0 1-.233.132h-.9l.419-.708h.857a.11.11 0 0 1 .099.166zm.694-1.178-.242.41a.266.266 0 0 1-.233.131h-.9l.418-.708h.858c.09 0 .14.093.098.167h.001zm11.194-.635-1.667 2.823h4.042l.276-.469h-2.345l.418-.707h2.345l.278-.47H19.18l.418-.709H24v-.468h-5.822z\"/></svg>"
+    },
+    {
+        name: 'H&M', id: 7,
+        svg: "<svg width=\"70\" height=\"70\" viewBox=\"0 0 100 100\"><circle cx=\"50\" cy=\"50\" r=\"50\" fill=\"#E50010\"/><text x=\"50\" y=\"65\" fill=\"#fff\" font-family=\"Arial\" font-size=\"30\" font-weight=\"bold\" text-anchor=\"middle\">H&amp;M</text></svg>"
+    },
+    {
+        name: 'SHUKRAN', id: 8,
+        svg: "<img src=\"https://www.google.com/s2/favicons?domain=landmarkgroup.com&sz=128\" alt=\"Landmark Shukran\" style=\"width: 60px; height: 60px; object-fit: contain; border-radius: 8px;\" />"
+    }
+];
 
     //  Replicate React template logic exactly 
     // shuffleArray
