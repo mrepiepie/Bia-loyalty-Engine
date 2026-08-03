@@ -3646,7 +3646,7 @@ async function loadDynamicPartners() {
                 return;
             }
             
-            // Netflix-style popup CSS: small preview, size increases and reveals text on hover
+            // Netflix-style popup CSS: completely fixed z-index overlap
             if (!document.getElementById('partner-netflix-styles')) {
                 const style = document.createElement('style');
                 style.id = 'partner-netflix-styles';
@@ -3655,11 +3655,7 @@ async function loadDynamicPartners() {
                         position: relative;
                         height: 260px; /* Small preview size */
                         width: 100%;
-                        z-index: 1;
-                    }
-                    /* THIS FIXES THE OVERLAP GLITCH! Brings parent wrapper to front on hover */
-                    .partner-grid-item:hover {
-                        z-index: 1000;
+                        /* DO NOT set z-index here! It traps the stacking context */
                     }
                     .partner-popout-card {
                         position: absolute;
@@ -3670,7 +3666,7 @@ async function loadDynamicPartners() {
                         transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
                         overflow: hidden;
                         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-                        z-index: 1;
+                        z-index: 10;
                         display: flex;
                         flex-direction: column;
                         color: var(--text-main, #333);
@@ -3680,11 +3676,11 @@ async function loadDynamicPartners() {
                         background: var(--bg-card, #1c1c1e);
                     }
                     
-                    /* Hover effect: Scale up and pull to front */
+                    /* Hover effect: Scale up and pull to absolute front */
                     .partner-popout-card:hover {
-                        z-index: 100;
-                        transform: scale(1.1); /* Size increases! */
-                        box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);
+                        z-index: 9999;
+                        transform: scale(1.1);
+                        box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6);
                         border-color: var(--partner-color);
                     }
                     
@@ -3739,7 +3735,7 @@ async function loadDynamicPartners() {
                 
                 return `
                 <!-- Grid Placeholder to prevent layout shift -->
-                <div class="partner-grid-item">
+                <div class="partner-grid-item" onmouseenter="this.style.zIndex='9999'" onmouseleave="this.style.zIndex=''">
                     <!-- Absolute Card that can scale and expand without glitching grid -->
                     <div class="partner-popout-card" id="partner-card-${i}" style="--partner-color: ${pColor};">
                         
