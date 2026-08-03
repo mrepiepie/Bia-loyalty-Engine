@@ -356,6 +356,23 @@
             </div>
         </section>
 
+        <!-- Partner Network Section -->
+        <section class="landing-section reveal-on-scroll" id="partners-network">
+            <div style="max-width: 1000px; margin: 0 auto; width: 100%;">
+                <div style="text-align: center; margin-bottom: 3rem;">
+                    <span class="section-badge badge-blue">COLLABORATORS</span>
+                    <h2 style="font-family: 'DM Serif Display', serif; color: #EFECE3; margin-top: 1rem; font-size: 2.5rem;">Partner Network</h2>
+                    <p style="color: var(--text-muted); margin-top: 0.5rem; max-width: 600px; margin-inline: auto;">Exclusive benefits and vouchers from our industry collaborators, available immediately upon logging into your student portal.</p>
+                </div>
+                
+                <!-- Dynamic partner cards will be injected here -->
+                <div id="landing-partners-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+                    <!-- Loading state -->
+                    <div style="text-align: center; color: var(--text-muted); grid-column: 1 / -1; padding: 2rem;">Loading partners...</div>
+                </div>
+            </div>
+        </section>
+
         <!-- Automated Programs & Benefits Slideshow Section -->
         <section class="landing-section reveal-on-scroll" id="tiers">
             <div class="carousel-container spotlight-card">
@@ -2363,7 +2380,14 @@
                                 <div style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:flex-end;">
                                     <div style="flex:1; min-width:120px;">
                                         <label style="font-size:0.8rem; opacity:0.7;">Tier Name</label>
-                                        <input type="text" id="reward-tier-input" placeholder="e.g. Bronze" style="padding:0.5rem; font-size:0.9rem;">
+                                        <select id="reward-tier-input" style="padding:0.5rem; font-size:0.9rem; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); border-radius:4px; color:white; width:100%;">
+                                            <option value="">Select Tier</option>
+                                            <option value="Bronze">Bronze</option>
+                                            <option value="Silver">Silver</option>
+                                            <option value="Gold">Gold</option>
+                                            <option value="Platinum">Platinum</option>
+                                            <option value="VIP">VIP</option>
+                                        </select>
                                     </div>
                                     <div style="flex:1; min-width:100px;">
                                         <label style="font-size:0.8rem; opacity:0.7;">Points</label>

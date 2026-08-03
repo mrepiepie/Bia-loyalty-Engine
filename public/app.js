@@ -3635,94 +3635,50 @@ function setupLogoCarousel() {
 
 async function loadDynamicPartners() {
     try {
-        const response = await fetch(`${API_BASE}/partners`);
+        const response = await fetch('/api/partners');
         const data = await response.json();
         appPartners = data;
 
-        const container = document.getElementById('dynamic-partnerships-container');
-        if (container) {
-            container.innerHTML = data.map((partner, index) => {
-                const isAdnoc = partner.id === 'adnoc';
-                const logoHtml = isAdnoc ? `
-                    <svg class="adnoc-svg-logo" viewBox="0 0 100 100" width="38" height="38">
-                        <circle cx="50" cy="50" r="46" fill="#005A9C" />
-                        <path d="M50,15 C68,35 68,65 50,85 C32,65 32,35 50,15 Z" fill="#E30613" />
-                        <polygon points="50,28 58,48 78,48 62,60 68,80 50,68 32,80 38,60 22,48 42,48" fill="#FFFFFF" />
-                    </svg>
-                ` : `
-                    <div class="partner-circle-logo" style="background-color: ${partner.logoColor};">
-                        <i class="fa-solid fa-handshake"></i>
+        // Populate new simple grid
+        const grid = document.getElementById('landing-partners-grid');
+        if (grid) {
+            if (!data || data.length === 0) {
+                grid.innerHTML = '<div style="text-align: center; color: var(--text-muted); grid-column: 1 / -1; padding: 2rem;">No partners available at the moment.</div>';
+                return;
+            }
+            grid.innerHTML = data.map(partner => `
+                <div class="card spotlight-card glassmorphic" style="display:flex; flex-direction:column; padding:1.5rem; gap:1rem;">
+                    <div style="display:flex; align-items:center; justify-content:space-between;">
+                        <img src="${partner.image}" alt="${partner.name}" style="height:40px; border-radius:8px; object-fit:contain; background:${partner.logoColor || 'rgba(255,255,255,0.1)'};">
+                        <span class="section-badge badge-blue" style="font-size:0.7rem;">${partner.badge || 'PARTNER'}</span>
                     </div>
-                `;
-
-                return `
-                    <section class="landing-section reveal-on-scroll partnerships-section" id="partnerships-${partner.id}">
-                        <!-- Blueprint lines and nodes (Cipher Digital style) -->
-                        <div class="section-blueprint-grid">
-                            <div class="blueprint-line line-top"></div>
-                            <div class="blueprint-line line-bottom"></div>
-                            <div class="blueprint-line line-center-ver"></div>
-                            <div class="grid-node bnode-tl"></div>
-                            <div class="grid-node bnode-tr"></div>
-                            <div class="grid-node bnode-bl"></div>
-                            <div class="grid-node bnode-br"></div>
-                        </div>
-                        
-                        <div class="partnerships-layout-container">
-                            <!-- Image Column -->
-                            <div class="partnerships-image-col">
-                                <img src="${partner.image}" alt="${partner.name}" class="partnerships-promo-img">
-                                <div class="image-overlay-glow"></div>
+                    <div>
+                        <h4 style="margin-bottom:0.25rem;">${partner.title}</h4>
+                        <p style="font-size:0.85rem; color:var(--text-muted);">${partner.subtitle}</p>
+                    </div>
+                    <div style="margin-top:auto; display:flex; flex-direction:column; gap:0.5rem; border-top:1px solid rgba(255,255,255,0.1); padding-top:1rem;">
+                        <strong style="font-size:0.8rem; color:#dfb15b;">Available Rewards</strong>
+                        ${(partner.rewards || []).map(r => `
+                            <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); padding:0.5rem; border-radius:4px;">
+                                <span style="font-size:0.8rem;">${r.tier}</span>
+                                <span style="font-size:0.8rem; color:var(--text-emerald);">${r.points} pts</span>
                             </div>
-
-                            <!-- Text & Rewards Column -->
-                            <div class="partnerships-text-col">
-                                <div class="adnoc-header-branding">
-                                    <div class="adnoc-brand-logo">
-                                        ${logoHtml}
-                                        <span class="adnoc-logo-text">${partner.name}</span>
-                                    </div>
-                                    <span class="section-badge badge-blue">${partner.badge}</span>
-                                </div>
-
-                                <h2 class="partnerships-title">${partner.title}</h2>
-                                <p class="partnerships-subtitle">${partner.subtitle}</p>
-                                
-                                <div class="partnership-disclosure">
-                                    <i class="fa-solid fa-circle-info"></i>
-                                    <span>${partner.disclosure}</span>
-                                </div>
-
-                                <!-- Rewards Cards Row -->
-                                <div class="partnerships-rewards-row">
-                                    ${partner.rewards.map(r => `
-                                        <div class="partnership-reward-card">
-                                            <div class="reward-icon-badge"><i class="fa-solid ${r.icon || 'fa-gift'}"></i></div>
-                                            <h4>${r.name}</h4>
-                                            <span class="reward-cost notranslate">${r.cost} Points <span class="reward-cash">(${r.cash})</span></span>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-                `;
-            }).join('');
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
         }
 
-        // Populate dashboard components if active
-        populateDashboardPartners();
+        // Keep old container for backward compatibility if needed
+        const container = document.getElementById('dynamic-partnerships-container');
+        if (container) {
+            container.innerHTML = '';
+        }
 
-        // Run ScrollTrigger setup now that DOM components exist
-        setupLandingScrollAnimations();
-        setupScrollReveals();
-    } catch (err) {
-        console.error('Error loading dynamic partners:', err);
+    } catch (error) {
+        console.error('Failed to load dynamic partners:', error);
     }
 }
-
-let selectedRedemption = null;
-
 function populateDashboardPartners() {
     const catalog = document.getElementById('dashboard-rewards-catalog');
     if (!catalog) return;
