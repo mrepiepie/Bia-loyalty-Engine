@@ -61,6 +61,11 @@ body.dark-theme {
     --blue: #8052ff; /* Electric Iris */
 }
 
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
 body {
     font-family: 'Outfit', 'Inter', sans-serif;
     background-color: var(--bg-dark);
