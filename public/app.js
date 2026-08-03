@@ -3646,17 +3646,17 @@ async function loadDynamicPartners() {
                 return;
             }
             
-            // Netflix-style popup CSS: solid backgrounds and bigger grid gaps
+            // Netflix-style popup CSS: fixed height overlap to fix cramped rows
             if (!document.getElementById('partner-netflix-styles')) {
                 const style = document.createElement('style');
                 style.id = 'partner-netflix-styles';
                 style.textContent = `
                     #landing-partners-grid {
-                        gap: 2.5rem !important; /* MUCH more breathing room between cards */
+                        gap: 3rem !important; /* Huge breathing room between columns/rows */
                     }
                     .partner-grid-item {
                         position: relative;
-                        height: 270px; /* Small preview size */
+                        height: 330px; /* Big height to ensure the card NEVER visually bleeds into the gap */
                         width: 100%;
                     }
                     .partner-popout-card {
@@ -3681,20 +3681,20 @@ async function loadDynamicPartners() {
                     /* Hover effect: Scale up and pull to absolute front */
                     .partner-popout-card:hover {
                         z-index: 9999;
-                        transform: scale(1.1);
+                        transform: scale(1.08);
                         box-shadow: 0 40px 80px rgba(0, 0, 0, 0.9);
                         border-color: var(--partner-color);
                     }
                     
                     .partner-image-banner {
                         width: 100%;
-                        height: 200px;
+                        height: 220px; /* Slightly taller image for better proportions */
                         object-fit: cover;
                         border-bottom: 1px solid rgba(150, 150, 150, 0.1);
                     }
                     
                     .partner-preview-header {
-                        padding: 1.25rem 1.5rem; /* slightly more vertical breathing room */
+                        padding: 1.25rem 1.5rem; 
                         background: inherit;
                     }
                     
