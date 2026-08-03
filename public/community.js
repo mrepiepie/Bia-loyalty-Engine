@@ -3,12 +3,12 @@
 let currentUser = null;
 let currentSort = 'hot';
 
-// Helper for Lead Capture
+// Helper for Auth
 function requireAuth(callback) {
     if (currentUser) {
         callback();
     } else {
-        document.getElementById('lead-modal').style.display = 'flex';
+        window.location.href = '/';
     }
 }
 
@@ -323,6 +323,10 @@ document.getElementById('btn-create-post-sidebar').addEventListener('click', () 
 // Init
 (async function init() {
     await checkAuth();
+    if (!currentUser) {
+        window.location.href = '/';
+        return;
+    }
     updateNav();
     fetchPosts();
 })();
