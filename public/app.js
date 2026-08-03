@@ -1638,7 +1638,8 @@ async function verifyReferralPayment(referralId) {
     }
 }
 
-document.getElementById('btn-simulate-lms').addEventListener('click', async () => {
+const btnSim = document.getElementById('btn-simulate-lms');
+if (btnSim) btnSim.addEventListener('click', async () => {
     const courseSelect = document.getElementById('lms-course');
     const option = courseSelect.options[courseSelect.selectedIndex];
     const points = parseInt(option.getAttribute('data-points'));
@@ -1742,7 +1743,8 @@ document.getElementById('btn-confirm-redemption').addEventListener('click', asyn
 // Obsolete btn-redeem-adnoc listener removed to prevent null selector errors.
 // Functionality is now handled dynamically by btn-redeem-collaborator-voucher.
 
-document.getElementById('btn-trigger-cron').addEventListener('click', async () => {
+const btnCron = document.getElementById('btn-trigger-cron');
+if (btnCron) btnCron.addEventListener('click', async () => {
     try {
         const response = await fetch(`${API_BASE}/cron/process-expiry`, { method: 'POST' });
         const data = await response.json();
