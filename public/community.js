@@ -63,7 +63,7 @@ async function fetchPosts() {
     if (token) headers['Authorization'] = `Bearer ${token}`;
     
     try {
-        const res = await fetch(`/api/community/posts?sort=${currentSort}`, { headers });
+        const res = await fetch(`/api/community/posts?sort=${currentSort}&_t=${Date.now()}`, { headers });
         const data = await res.json();
         
         feed.innerHTML = '';

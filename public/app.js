@@ -45,7 +45,7 @@ let appState = {
 
 // Formatting helpers
 function formatNumber(num) {
-    return `AED ${num.toFixed(2)}`;
+    return num.toLocaleString();
 }
 
 // Recent Community Posts Widget
