@@ -2222,7 +2222,7 @@ app.get('/api/community/posts', requireAuth, async (req, res) => {
         const userId = req.user ? req.user.user_id : -1;
         const sortBy = req.query.sort || 'new';
         let orderBy = 'p.created_at DESC';
-        if (sortBy === 'hot') orderBy = '(p.upvotes - p.downvotes) + p.comment_count DESC, p.created_at DESC';
+        if (sortBy === 'hot') orderBy = '(p.upvotes - p.downvotes) + comment_count DESC, p.created_at DESC';
         if (sortBy === 'top') orderBy = '(p.upvotes - p.downvotes) DESC, p.created_at DESC';
 
         const posts = await allQuery(`
