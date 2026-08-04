@@ -54,9 +54,14 @@ function updateNav() {
     }
 }
 
-async function fetchPosts() {
+async function fetchPosts(isSilent = false) {
     const feed = document.getElementById('feed-container');
-    feed.innerHTML = '<div style="text-align: center; padding: 3rem; color: #888;"><i class="fa-solid fa-circle-notch fa-spin fa-2x"></i></div>';
+    if (!isSilent) {
+        feed.innerHTML = '<div style="text-align: center; padding: 3rem; color: #888;"><i class="fa-solid fa-circle-notch fa-spin fa-2x"></i></div>';
+    } else {
+        feed.style.opacity = '0.5';
+        feed.style.pointerEvents = 'none';
+    }
     
     const headers = {};
     const token = localStorage.getItem('token');
@@ -88,8 +93,12 @@ async function fetchPosts() {
         } else {
             feed.innerHTML = '<div style="text-align:center; color:#888; padding: 2rem;">No posts found. Be the first to start a discussion!</div>';
         }
+        feed.style.opacity = '1';
+        feed.style.pointerEvents = 'auto';
     } catch (err) {
         feed.innerHTML = `<div style="color:#ff4b4b; text-align:center;">Failed to load posts: ${err.message}</div>`;
+        feed.style.opacity = '1';
+        feed.style.pointerEvents = 'auto';
     }
 }
 
@@ -119,9 +128,9 @@ function createPostElement(post) {
 
     div.innerHTML = `
         <div class="post-votes">
-            <button class="btn-vote ${post.user_has_upvoted ? 'active' : ''}" onclick="vote('post', ${post.post_id}, 1)"><i class="fa-solid fa-arrow-up"></i></button>
+            <button class="btn-vote ${post.user_has_upvoted ? 'active' : ''}" onclick="handleVote('post', ${post.post_id}, 1, this)"><i class="fa-solid fa-arrow-up"></i></button>
             <span class="vote-count">${post.upvotes - post.downvotes}</span>
-            <button class="btn-vote ${post.user_has_downvoted ? 'active' : ''}" onclick="vote('post', ${post.post_id}, -1)"><i class="fa-solid fa-arrow-down"></i></button>
+            <button class="btn-vote ${post.user_has_downvoted ? 'active' : ''}" onclick="handleVote('post', ${post.post_id}, -1, this)"><i class="fa-solid fa-arrow-down"></i></button>
         </div>
         <div class="post-content-area">
             ${acceptedHtml}
@@ -157,9 +166,50 @@ function createPostElement(post) {
     return div;
 }
 
-window.handleVote = function(type, id, value) {
+window.handleVote = function(type, id, value, btnElement) {
     requireAuth(async () => {
         const token = localStorage.getItem('token');
+        
+        // Optimistic UI Update
+        if (btnElement) {
+            const container = btnElement.parentElement;
+            const scoreSpan = container.querySelector('.vote-count') || container.querySelector('span');
+            const upBtn = container.querySelectorAll('button')[0];
+            const downBtn = container.querySelectorAll('button')[1];
+            
+            if (scoreSpan && upBtn && downBtn) {
+                let oldScore = parseInt(scoreSpan.textContent) || 0;
+                let diff = 0;
+                
+                if (value === 1) {
+                    if (upBtn.classList.contains('active')) {
+                        diff = -1;
+                        upBtn.classList.remove('active');
+                    } else {
+                        diff = downBtn.classList.contains('active') ? 2 : 1;
+                        upBtn.classList.add('active');
+                        downBtn.classList.remove('active');
+                    }
+                } else if (value === -1) {
+                    if (downBtn.classList.contains('active')) {
+                        diff = 1;
+                        downBtn.classList.remove('active');
+                    } else {
+                        diff = upBtn.classList.contains('active') ? -2 : -1;
+                        downBtn.classList.add('active');
+                        upBtn.classList.remove('active');
+                    }
+                }
+                
+                let newScore = oldScore + diff;
+                scoreSpan.textContent = newScore;
+                
+                if (type === 'comment') {
+                    scoreSpan.style.color = newScore > 0 ? '#66fcf1' : (newScore < 0 ? '#ff4b4b' : '#fff');
+                }
+            }
+        }
+        
         try {
             await fetch(`/api/community/${type}s/${id}/vote`, {
                 method: 'POST',
@@ -169,8 +219,7 @@ window.handleVote = function(type, id, value) {
                 },
                 body: JSON.stringify({ value })
             });
-            // Re-fetch to update state
-            fetchPosts();
+            // We removed fetchPosts() here so the UI doesn't refresh disruptively!
         } catch (e) {
             console.error('Vote failed', e);
         }
@@ -219,9 +268,9 @@ async function loadComments(postId) {
                     </div>
                     <div style="font-size: 0.95rem; margin-bottom: 0.5rem;">${c.content}</div>
                     <div style="display: flex; gap: 0.5rem; align-items: center;">
-                        <button class="vote-btn ${upvoted}" style="font-size: 0.9rem;" onclick="handleVote('comment', ${c.comment_id}, 1)"><i class="fa-solid fa-arrow-up"></i></button>
+                        <button class="vote-btn ${upvoted}" style="font-size: 0.9rem;" onclick="handleVote('comment', ${c.comment_id}, 1, this)"><i class="fa-solid fa-arrow-up"></i></button>
                         <span style="font-size: 0.9rem; font-weight: bold; color: ${score > 0 ? '#66fcf1' : (score < 0 ? '#ff4b4b' : '#fff')}">${score}</span>
-                        <button class="vote-btn ${downvoted}" style="font-size: 0.9rem;" onclick="handleVote('comment', ${c.comment_id}, -1)"><i class="fa-solid fa-arrow-down"></i></button>
+                        <button class="vote-btn ${downvoted}" style="font-size: 0.9rem;" onclick="handleVote('comment', ${c.comment_id}, -1, this)"><i class="fa-solid fa-arrow-down"></i></button>
                     </div>
                 `;
                 list.appendChild(div);
@@ -253,8 +302,8 @@ window.submitComment = function(postId) {
             if (res.ok) {
                 input.value = '';
                 loadComments(postId);
-                // Also update the UI manually or re-fetch posts
-                fetchPosts();
+                // Silently update post feed so we don't blink the whole page
+                fetchPosts(true);
             } else {
                 const data = await res.json();
                 alert(data.error || 'Failed to comment');
@@ -276,7 +325,7 @@ window.acceptAnswer = async function(postId, commentId) {
         });
         if (res.ok) {
             alert('Answer accepted! 50 points awarded.');
-            fetchPosts();
+            fetchPosts(true);
         } else {
             const data = await res.json();
             alert(data.error);
@@ -338,7 +387,7 @@ document.getElementById('btn-submit-post').addEventListener('click', async () =>
             document.getElementById('post-anonymous').checked = false;
             document.getElementById('post-image').value = '';
             document.getElementById('post-image-label').textContent = 'Attach Image';
-            fetchPosts();
+            fetchPosts(true);
         } else {
             const data = await res.json();
             alert(data.error);
