@@ -20,7 +20,8 @@ async function checkAuth() {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) {
-            currentUser = await res.json();
+            const data = await res.json();
+            currentUser = data.user;
             return currentUser;
         }
     } catch (e) {

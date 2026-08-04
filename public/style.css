@@ -7150,3 +7150,20 @@ body:not(.dark-theme) .logo-carousel-col {
 body:not(.dark-theme) .logo-slot-name {
   color: rgba(0, 0, 0, 0.45) !important;
 }
+
+/* Community Specific Inputs */
+.input-field {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #fff;
+    padding: 0.75rem;
+    border-radius: 8px;
+    font-family: inherit;
+    width: 100%;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.2s;
+}
+.input-field:focus {
+    border-color: rgba(102, 252, 241, 0.5);
+}
