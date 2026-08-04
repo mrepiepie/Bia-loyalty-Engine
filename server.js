@@ -1581,7 +1581,7 @@ app.post('/api/redeem/confirm', async (req, res) => {
         const { user_id, points_deducted, discount_aed } = req.body;
         if (!user_id || !points_deducted || !discount_aed) return res.status(400).json({ error: 'Missing parameters' });
 
-        tx = 
+        tx = await db.transaction('write');
 
         const userRes = await tx.execute({
             sql: `SELECT email, points_balance FROM users WHERE user_id = ?`,
@@ -1678,7 +1678,7 @@ app.post('/api/redeem/collaborator', async (req, res) => {
             return res.status(400).json({ error: 'Missing parameters' });
         }
 
-        tx = 
+        tx = await db.transaction('write');
 
         const userRes = await tx.execute({
             sql: `SELECT email, points_balance FROM users WHERE user_id = ?`,
