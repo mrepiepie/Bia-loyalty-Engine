@@ -123,7 +123,7 @@ function createPostElement(post) {
                 <span style="color: #fff; font-weight: 600;">${post.name}</span>
                 ${post.programme ? `<span style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; font-size: 0.7rem;">${post.programme}</span>` : ''}
                 <span>•</span>
-                <span>${new Date(post.created_at).toLocaleDateString()}</span>
+                <span>${new Date(post.created_at).toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                 ${tagsHtml ? `<span>•</span> ${tagsHtml}` : ''}
             </div>
             <h3 class="post-title">${post.title}</h3>
@@ -208,7 +208,7 @@ async function loadComments(postId) {
 
                 div.innerHTML = `
                     <div style="font-size: 0.8rem; color: #888; margin-bottom: 0.25rem;">
-                        <strong style="color: #fff;">${c.name}</strong> • ${new Date(c.created_at).toLocaleDateString()}
+                        <strong style="color: #fff;">${c.name}</strong> • ${new Date(c.created_at).toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                         ${acceptBtn}
                     </div>
                     <div style="font-size: 0.95rem; margin-bottom: 0.5rem;">${c.content}</div>
@@ -374,7 +374,7 @@ async function loadAdminCommunityStats() {
                     <td style="padding: 0.5rem 0;">
                         <div style="color: #66fcf1; font-weight: 600;">${item.type.toUpperCase()} by #${item.user_id}</div>
                         <div style="color: #ccc; margin-top: 0.25rem;">${item.snippet.length > 40 ? item.snippet.substring(0, 40) + '...' : item.snippet}</div>
-                        <div style="color: #888; font-size: 0.7rem; margin-top: 0.25rem;">${new Date(item.created_at).toLocaleDateString()}</div>
+                        <div style="color: #888; font-size: 0.7rem; margin-top: 0.25rem;">${new Date(item.created_at).toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
                     </td>
                     <td style="padding: 0.5rem 0; text-align: right;">
                         <button class='btn btn-sm' style='background: rgba(255, 75, 75, 0.1); color: #ff4b4b; padding: 2px 8px; font-size: 0.7rem;' onclick='deleteCommunityItem("${item.type}", "${item.id}", this)'><i class="fa-solid fa-trash"></i></button>
