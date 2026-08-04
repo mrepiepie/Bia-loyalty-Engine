@@ -312,12 +312,14 @@ async function initializeDatabase() {
             content TEXT NOT NULL,
             is_anonymous INTEGER DEFAULT 0,
             tags TEXT DEFAULT '[]',
+            image_url TEXT,
             upvotes INTEGER DEFAULT 0,
             downvotes INTEGER DEFAULT 0,
             accepted_answer_id INTEGER,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users(user_id)
         )`);
+        try { await runQuery('ALTER TABLE community_posts ADD COLUMN image_url TEXT'); } catch(e) {}
 
         await runQuery(`CREATE TABLE IF NOT EXISTS community_comments (
             comment_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -2249,13 +2251,13 @@ app.get('/api/community/posts', requireAuth, async (req, res) => {
 // Create a new post
 app.post('/api/community/posts', requireAuth, async (req, res) => {
     try {
-        const { title, content, is_anonymous, tags } = req.body;
+        const { title, content, is_anonymous, tags, image_base64 } = req.body;
         if (!title || !content) return res.status(400).json({ error: 'Title and content required' });
 
         
         try {
-            await runQuery('INSERT INTO community_posts (user_id, title, content, is_anonymous, tags) VALUES (?, ?, ?, ?, ?)', 
-                [req.user.user_id, title, content, is_anonymous ? 1 : 0, tags || '[]']);
+            await runQuery('INSERT INTO community_posts (user_id, title, content, is_anonymous, tags, image_url) VALUES (?, ?, ?, ?, ?, ?)', 
+                [req.user.user_id, title, content, is_anonymous ? 1 : 0, tags || '[]', image_base64 || null]);
             
             
             res.json({ message: 'Post created successfully!' });

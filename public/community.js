@@ -109,13 +109,19 @@ function createPostElement(post) {
         acceptedHtml = `<div style="background: rgba(223, 177, 91, 0.1); color: #dfb15b; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;"><i class="fa-solid fa-check-circle"></i> Answered</div>`;
     }
 
-    const safeHtml = DOMPurify.sanitize(marked.parse(post.content));
+    let commentsHtml = `
+            <div class="comments-section" id="comments-${post.post_id}" style="display: none; margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+                <!-- Comments injected here -->
+            </div>
+        `;
+        
+    const imageHtml = post.image_url ? `<img src="${post.image_url}" style="max-width: 100%; max-height: 400px; border-radius: 8px; margin-top: 1rem; margin-bottom: 0.5rem; display: block; object-fit: cover;" alt="Post Attachment">` : '';
 
     div.innerHTML = `
-        <div class="vote-col">
-            <button class="vote-btn ${upvoted}" onclick="handleVote('post', ${post.post_id}, 1)"><i class="fa-solid fa-arrow-up"></i></button>
-            <span style="font-weight: 700; margin: 0.5rem 0; color: ${score > 0 ? '#66fcf1' : (score < 0 ? '#ff4b4b' : '#fff')}">${score}</span>
-            <button class="vote-btn ${downvoted}" onclick="handleVote('post', ${post.post_id}, -1)"><i class="fa-solid fa-arrow-down"></i></button>
+        <div class="post-votes">
+            <button class="btn-vote ${post.user_has_upvoted ? 'active' : ''}" onclick="vote('post', ${post.post_id}, 1)"><i class="fa-solid fa-arrow-up"></i></button>
+            <span class="vote-count">${post.upvotes - post.downvotes}</span>
+            <button class="btn-vote ${post.user_has_downvoted ? 'active' : ''}" onclick="vote('post', ${post.post_id}, -1)"><i class="fa-solid fa-arrow-down"></i></button>
         </div>
         <div class="post-content-area">
             ${acceptedHtml}
@@ -127,8 +133,8 @@ function createPostElement(post) {
                 ${tagsHtml ? `<span>•</span> ${tagsHtml}` : ''}
             </div>
             <h3 class="post-title">${post.title}</h3>
-            <div class="post-body markdown-body">${safeHtml}</div>
-            
+            <div class="post-body">${post.content}</div>
+            ${imageHtml}
             <div class="post-actions">
                 <button class="action-btn" onclick="toggleComments(${post.post_id})">
                     <i class="fa-regular fa-message"></i> ${post.comment_count} Comments
@@ -281,15 +287,35 @@ window.acceptAnswer = async function(postId, commentId) {
 };
 
 // Handle New Post Submission
+// Image label update
+document.getElementById('post-image').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        document.getElementById('post-image-label').textContent = file.name.substring(0, 15) + '...';
+    } else {
+        document.getElementById('post-image-label').textContent = 'Attach Image';
+    }
+});
+
 document.getElementById('btn-submit-post').addEventListener('click', async () => {
     const title = document.getElementById('post-title').value.trim();
     const content = document.getElementById('post-content').value.trim();
     const category = document.getElementById('post-category').value;
     const isAnonymous = document.getElementById('post-anonymous').checked;
+    const imageFile = document.getElementById('post-image').files[0];
     
     if (!title || !content) {
         alert("Title and content are required.");
         return;
+    }
+    
+    let image_base64 = null;
+    if (imageFile) {
+        const reader = new FileReader();
+        image_base64 = await new Promise((resolve) => {
+            reader.onload = (e) => resolve(e.target.result);
+            reader.readAsDataURL(imageFile);
+        });
     }
     
     let tags = [category];
@@ -302,14 +328,16 @@ document.getElementById('btn-submit-post').addEventListener('click', async () =>
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({ title, content, tags: JSON.stringify(tags), is_anonymous: isAnonymous })
+            body: JSON.stringify({ title, content, tags: JSON.stringify(tags), is_anonymous: isAnonymous, image_base64 })
         });
         
         if (res.ok) {
             document.getElementById('post-title').value = '';
             document.getElementById('post-content').value = '';
-            document.getElementById('post-tags').value = '';
+            document.getElementById('post-category').value = 'General';
             document.getElementById('post-anonymous').checked = false;
+            document.getElementById('post-image').value = '';
+            document.getElementById('post-image-label').textContent = 'Attach Image';
             fetchPosts();
         } else {
             const data = await res.json();

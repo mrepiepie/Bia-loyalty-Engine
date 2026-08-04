@@ -45,7 +45,52 @@ let appState = {
 
 // Formatting helpers
 function formatNumber(num) {
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return `AED ${num.toFixed(2)}`;
+}
+
+// Recent Community Posts Widget
+async function loadRecentCommunityPosts() {
+    const container = document.getElementById('recent-community-content');
+    if (!container) return;
+    
+    try {
+        const token = localStorage.getItem('token');
+        const res = await fetch('/api/community/posts?sort=new', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (!res.ok) throw new Error('Failed to fetch posts');
+        
+        const data = await res.json();
+        const posts = data.posts || [];
+        
+        if (posts.length === 0) {
+            container.innerHTML = '<p style="color:rgba(255,255,255,0.4); font-size: 0.85rem;">No recent community posts.</p>';
+            return;
+        }
+        
+        // Take top 3 posts
+        const recentPosts = posts.slice(0, 3);
+        
+        container.innerHTML = recentPosts.map(post => `
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 0.85rem;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.4rem;">
+                    <span style="color: #fff; font-weight: 600; font-size: 0.85rem;">${post.is_anonymous ? 'Anonymous' : post.name}</span>
+                    <span style="color: rgba(255,255,255,0.4); font-size: 0.75rem;">${new Date(post.created_at).toLocaleDateString()}</span>
+                </div>
+                <div style="color: #dfb15b; font-weight: 700; font-size: 0.9rem; margin-bottom: 0.4rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${post.title}</div>
+                ${post.image_url ? `<div style="font-size: 0.75rem; color: #14b8a6; margin-bottom: 0.3rem;"><i class="fa-solid fa-image"></i> Contains Attachment</div>` : ''}
+                <div style="display: flex; gap: 0.75rem; font-size: 0.75rem; color: rgba(255,255,255,0.5);">
+                    <span><i class="fa-solid fa-arrow-up"></i> ${post.upvotes - post.downvotes}</span>
+                    <span><i class="fa-regular fa-message"></i> ${post.comment_count}</span>
+                </div>
+            </div>
+        `).join('');
+        
+    } catch (err) {
+        console.error(err);
+        container.innerHTML = '<p style="color: #ef4444; font-size: 0.85rem;">Failed to load posts.</p>';
+    }
 }
 
 // Clean date helper
@@ -1322,6 +1367,7 @@ async function loadUserProfile(userId) {
         renderLedger();
         populateDashboardPartners();
         await loadStudentVouchers(userId);
+        await loadRecentCommunityPosts();
     } catch (err) {
         console.error('Error loading profile:', err);
     }

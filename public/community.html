@@ -262,6 +262,11 @@
                         <label style="display: flex; align-items: center; gap: 0.5rem; color: #888; cursor: pointer;">
                             <input type="checkbox" id="post-anonymous"> Post Anonymously
                         </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem; color: #888; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 6px;">
+                            <i class="fa-solid fa-image"></i>
+                            <span id="post-image-label" style="font-size: 0.85rem;">Attach Image</span>
+                            <input type="file" id="post-image" accept="image/*" style="display: none;">
+                        </label>
                     </div>
                     <button id="btn-submit-post" class="btn btn-primary">Publish Post</button>
                 </div>
