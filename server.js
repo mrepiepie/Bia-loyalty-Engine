@@ -2225,7 +2225,7 @@ app.get('/api/community/posts', requireAuth, async (req, res) => {
         if (sortBy === 'hot') orderBy = '(p.upvotes - p.downvotes) + p.comment_count DESC, p.created_at DESC';
         if (sortBy === 'top') orderBy = '(p.upvotes - p.downvotes) DESC, p.created_at DESC';
 
-        const posts = await getQueryAll(`
+        const posts = await allQuery(`
             SELECT p.*, u.name, u.programme,
             (SELECT COUNT(*) FROM community_comments WHERE post_id = p.post_id) as comment_count,
             EXISTS(SELECT 1 FROM community_votes WHERE target_type='post' AND target_id=p.post_id AND user_id=? AND vote_value=1) as user_has_upvoted,
@@ -2346,7 +2346,7 @@ app.get('/api/community/posts/:id/comments', requireAuth, async (req, res) => {
     try {
         res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
         const userId = req.user ? req.user.user_id : -1;
-        const comments = await getQueryAll(`
+        const comments = await allQuery(`
             SELECT c.*, u.name,
             EXISTS(SELECT 1 FROM community_votes WHERE target_type='comment' AND target_id=c.comment_id AND user_id=? AND vote_value=1) as user_has_upvoted,
             EXISTS(SELECT 1 FROM community_votes WHERE target_type='comment' AND target_id=c.comment_id AND user_id=? AND vote_value=-1) as user_has_downvoted
@@ -2461,7 +2461,7 @@ app.get('/api/community/admin/stats', requireAuth, async (req, res) => {
         
         const stats = await getQuery("SELECT (SELECT COUNT(*) FROM community_posts) as total_posts, (SELECT COUNT(*) FROM community_comments) as total_comments, (SELECT COUNT(DISTINCT user_id) FROM (SELECT user_id FROM community_posts UNION SELECT user_id FROM community_comments)) as active_contributors");
         
-        const moderationFeed = await getQueryAll(`
+        const moderationFeed = await allQuery(`
             SELECT 'post' as type, post_id as id, user_id, title as snippet, created_at FROM community_posts
             UNION ALL
             SELECT 'comment' as type, comment_id as id, user_id, substr(content, 1, 50) as snippet, created_at FROM community_comments
