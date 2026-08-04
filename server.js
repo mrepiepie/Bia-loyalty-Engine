@@ -313,6 +313,7 @@ async function initializeDatabase() {
             is_anonymous INTEGER DEFAULT 0,
             tags TEXT DEFAULT '[]',
             image_url TEXT,
+            is_locked INTEGER DEFAULT 0,
             upvotes INTEGER DEFAULT 0,
             downvotes INTEGER DEFAULT 0,
             accepted_answer_id INTEGER,
@@ -320,6 +321,7 @@ async function initializeDatabase() {
             FOREIGN KEY (user_id) REFERENCES users(user_id)
         )`);
         try { await runQuery('ALTER TABLE community_posts ADD COLUMN image_url TEXT'); } catch(e) {}
+        try { await runQuery('ALTER TABLE community_posts ADD COLUMN is_locked INTEGER DEFAULT 0'); } catch(e) {}
 
         await runQuery(`CREATE TABLE IF NOT EXISTS community_comments (
             comment_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -2375,7 +2377,10 @@ app.post('/api/community/posts/:id/comments', requireAuth, async (req, res) => {
         const postId = req.params.id;
         if (!content) return res.status(400).json({ error: 'Content required' });
 
-        
+        const post = await getQuery("SELECT is_locked FROM community_posts WHERE post_id = ?", [postId]);
+        if (!post) return res.status(404).json({ error: 'Post not found' });
+        if (post.is_locked) return res.status(403).json({ error: 'This post has been locked by an administrator.' });
+
         try {
             await runQuery('INSERT INTO community_comments (post_id, user_id, content, is_anonymous, parent_comment_id) VALUES (?, ?, ?, ?, ?)', 
                 [postId, req.user.user_id, content, is_anonymous ? 1 : 0, parent_comment_id || null]);
@@ -2425,6 +2430,18 @@ app.post('/api/community/comments/:id/vote', requireAuth, async (req, res) => {
     }
 });
 
+// Admin API: Lock/Unlock Post
+app.post('/api/admin/community/posts/:id/lock', requireAuth, async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized.' });
+        const { locked } = req.body;
+        await runQuery("UPDATE community_posts SET is_locked = ? WHERE post_id = ?", [locked ? 1 : 0, req.params.id]);
+        res.json({ message: 'Post lock status updated.' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // Admin Delete Post
 app.delete('/api/community/posts/:id', requireAuth, async (req, res) => {
     try {
@@ -2462,9 +2479,9 @@ app.get('/api/community/admin/stats', requireAuth, async (req, res) => {
         const stats = await getQuery("SELECT (SELECT COUNT(*) FROM community_posts) as total_posts, (SELECT COUNT(*) FROM community_comments) as total_comments, (SELECT COUNT(DISTINCT user_id) FROM (SELECT user_id FROM community_posts UNION SELECT user_id FROM community_comments)) as active_contributors");
         
         const moderationFeed = await allQuery(`
-            SELECT 'post' as type, post_id as id, user_id, title as snippet, created_at FROM community_posts
+            SELECT 'post' as type, post_id as id, user_id, title as snippet, created_at, is_locked FROM community_posts
             UNION ALL
-            SELECT 'comment' as type, comment_id as id, user_id, substr(content, 1, 50) as snippet, created_at FROM community_comments
+            SELECT 'comment' as type, comment_id as id, user_id, substr(content, 1, 50) as snippet, created_at, 0 as is_locked FROM community_comments
             ORDER BY created_at DESC LIMIT 50
         `);
         

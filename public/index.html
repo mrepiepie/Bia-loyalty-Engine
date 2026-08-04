@@ -1031,6 +1031,7 @@
                 <button class="nav-tab admin-only" data-target="admin-partners"><i class="fa-solid fa-handshake"></i> Partners</button>
                 <button class="nav-tab admin-only" data-target="admin-promos"><i class="fa-solid fa-gift" style="color: #dfb15b;"></i> Promo Codes</button>
                 <button class="nav-tab admin-only" data-target="admin-health"><i class="fa-solid fa-server"></i> System Health</button>
+                <button class="nav-tab admin-only" data-target="admin-community-hub"><i class="fa-solid fa-users text-gold"></i> Community Hub</button>
                 
                 <!-- Logout Button -->
                 <button class="nav-tab logout-btn" id="btn-logout"><i class="fa-solid fa-power-off"></i> Exit</button>
@@ -2420,6 +2421,63 @@
                             </thead>
                             <tbody id="admin-faqs-body">
                                 <tr><td colspan="5" class="no-data">Loading submitted questions...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADMIN: COMMUNITY HUB DASHBOARD -->
+            <div id="admin-community-hub" class="tab-content admin-only" style="display: none;">
+                <div class="admin-header-flex">
+                    <div class="admin-header-title">
+                        <h2><i class="fa-solid fa-users text-gold"></i> Community Hub Moderation</h2>
+                        <p>Oversee and moderate discussions, lock posts, and track active contributors.</p>
+                    </div>
+                    <button class="btn btn-secondary" onclick="loadAdminCommunityHub()"><i class="fa-solid fa-rotate-right"></i> Refresh Feed</button>
+                </div>
+
+                <div class="admin-analytics-grid" style="margin-top: 1.5rem; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;">
+                    <div class="admin-stat-card glassmorphic" style="text-align: center;">
+                        <span class="admin-stat-lbl">Total Posts</span>
+                        <strong class="admin-stat-val text-primary" id="admin-comm-hub-total-posts">0</strong>
+                    </div>
+                    <div class="admin-stat-card glassmorphic" style="text-align: center;">
+                        <span class="admin-stat-lbl">Total Comments</span>
+                        <strong class="admin-stat-val text-gold" id="admin-comm-hub-total-comments">0</strong>
+                    </div>
+                    <div class="admin-stat-card glassmorphic" style="text-align: center;">
+                        <span class="admin-stat-lbl">Active Contributors</span>
+                        <strong class="admin-stat-val text-emerald" id="admin-comm-hub-contributors">0</strong>
+                    </div>
+                </div>
+
+                <div class="card ledger-card glassmorphic" style="margin-top: 2rem;">
+                    <div class="ledger-header" style="flex-wrap: wrap; gap: 1rem;">
+                        <h3><i class="fa-solid fa-list"></i> Moderation Feed</h3>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <input type="text" id="admin-comm-search" placeholder="Search user ID or content..." style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.4rem 0.8rem; border-radius:6px; font-size:0.85rem;" onkeyup="filterAdminCommunityFeed()">
+                            <select id="admin-comm-type-filter" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.4rem; border-radius:6px; font-size:0.85rem;" onchange="filterAdminCommunityFeed()">
+                                <option value="all">All Content</option>
+                                <option value="post">Posts Only</option>
+                                <option value="comment">Comments Only</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="table-scroll-container" style="max-height: 500px; overflow-y: auto;">
+                        <table class="ledger-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>User ID</th>
+                                    <th>Content Snippet</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-community-hub-feed">
+                                <tr><td colspan="6" class="no-data">Loading moderation feed...</td></tr>
                             </tbody>
                         </table>
                     </div>

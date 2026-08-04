@@ -2333,7 +2333,8 @@ document.querySelectorAll('.nav-tab').forEach(btn => {
         if (target === 'admin-vouchers-mgmt') loadAdminVoucherReport();
         if (target === 'admin-students') loadProgrammeOverview();
         if (target === 'overview') loadStudentAnnouncements();
-          if (target === 'admin-faqs') initAdminFAQs();
+        if (target === 'admin-faqs') initAdminFAQs();
+        if (target === 'admin-community-hub') loadAdminCommunityHub();
       });
 });
 
@@ -7305,6 +7306,121 @@ async function claimEventPoints(eventId, btnElement) {
     const container = btnElement.closest('.event-claim-container');
     const input = container.querySelector('.event-claim-input');
     const claim_code = input.value.trim();
+
+// --- COMMUNITY ADMIN DASHBOARD LOGIC ---
+let adminCommunityFeedData = [];
+
+async function loadAdminCommunityHub() {
+    try {
+        const token = localStorage.getItem('token');
+        const res = await fetch('/api/community/admin/stats', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        
+        if (data.stats) {
+            document.getElementById('admin-comm-hub-total-posts').textContent = data.stats.total_posts || 0;
+            document.getElementById('admin-comm-hub-total-comments').textContent = data.stats.total_comments || 0;
+            document.getElementById('admin-comm-hub-contributors').textContent = data.stats.active_contributors || 0;
+        }
+        
+        adminCommunityFeedData = data.moderationFeed || [];
+        filterAdminCommunityFeed();
+    } catch (e) {
+        console.error('Error loading community hub stats:', e);
+        document.getElementById('admin-community-hub-feed').innerHTML = '<tr><td colspan="6" class="no-data">Failed to load data</td></tr>';
+    }
+}
+
+function filterAdminCommunityFeed() {
+    const searchStr = (document.getElementById('admin-comm-search').value || '').toLowerCase();
+    const typeFilter = document.getElementById('admin-comm-type-filter').value;
+    
+    const filtered = adminCommunityFeedData.filter(item => {
+        if (typeFilter !== 'all' && item.type !== typeFilter) return false;
+        if (searchStr) {
+            const matchesUser = item.user_id && item.user_id.toString().includes(searchStr);
+            const matchesContent = item.snippet && item.snippet.toLowerCase().includes(searchStr);
+            if (!matchesUser && !matchesContent) return false;
+        }
+        return true;
+    });
+    
+    renderAdminCommunityFeed(filtered);
+}
+
+function renderAdminCommunityFeed(items) {
+    const tbody = document.getElementById('admin-community-hub-feed');
+    if (!items || items.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="no-data">No content found.</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = items.map(item => {
+        const dateStr = new Date(item.created_at).toLocaleString();
+        const typeBadge = item.type === 'post' 
+            ? `<span class="badge" style="background:rgba(102, 252, 241, 0.1); color:#66fcf1; padding: 2px 6px; font-size: 0.7rem; border-radius: 4px;">POST</span>` 
+            : `<span class="badge" style="background:rgba(223, 177, 91, 0.1); color:#dfb15b; padding: 2px 6px; font-size: 0.7rem; border-radius: 4px;">COMMENT</span>`;
+            
+        const isLocked = item.is_locked ? '<i class="fa-solid fa-lock" style="color:#ef4444;" title="Locked"></i>' : '<i class="fa-solid fa-unlock text-emerald" title="Unlocked"></i>';
+        
+        const lockActionBtn = item.type === 'post' 
+            ? `<button class="btn btn-sm" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#fff; padding: 4px 8px; font-size: 0.75rem;" onclick="adminLockPost(${item.id}, ${item.is_locked ? 'false' : 'true'})">${item.is_locked ? 'Unlock' : 'Lock'}</button>`
+            : '';
+            
+        return `
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <td style="padding: 0.75rem;">${dateStr}</td>
+                <td style="padding: 0.75rem;">${typeBadge}</td>
+                <td style="padding: 0.75rem;"><strong style="color:rgba(255,255,255,0.9);">#${item.user_id}</strong></td>
+                <td style="padding: 0.75rem;"><div style="max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${item.snippet.replace(/"/g, '&quot;')}">${item.snippet}</div></td>
+                <td style="padding: 0.75rem;">${item.type === 'post' ? isLocked : '-'}</td>
+                <td style="padding: 0.75rem;">
+                    <div style="display:flex; gap:0.4rem; align-items:center;">
+                        ${lockActionBtn}
+                        <button class="btn btn-sm" style="background:rgba(239, 68, 68, 0.1); border:1px solid rgba(239, 68, 68, 0.2); color:#ef4444; padding: 4px 8px; font-size: 0.75rem;" onclick="adminDeleteCommunityContent('${item.type}', ${item.id})"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+async function adminLockPost(postId, lock) {
+    if (!confirm(`Are you sure you want to ${lock ? 'lock' : 'unlock'} this post?`)) return;
+    try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`/api/admin/community/posts/${postId}/lock`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}` 
+            },
+            body: JSON.stringify({ locked: lock })
+        });
+        if (!res.ok) throw new Error(await res.text());
+        showToast('Success', `Post has been ${lock ? 'locked' : 'unlocked'}.`, 'success');
+        loadAdminCommunityHub();
+    } catch (e) {
+        showToast('Error', e.message, 'error');
+    }
+}
+
+async function adminDeleteCommunityContent(type, id) {
+    if (!confirm(`Are you sure you want to delete this ${type}? This cannot be undone.`)) return;
+    try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`/api/community/${type}s/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error(await res.text());
+        showToast('Success', `${type.charAt(0).toUpperCase() + type.slice(1)} deleted.`, 'success');
+        loadAdminCommunityHub();
+    } catch (e) {
+        showToast('Error', e.message, 'error');
+    }
+}
 
     if (!claim_code) {
         showToast('Claim Error', 'Please enter a secret code.', 'error');
