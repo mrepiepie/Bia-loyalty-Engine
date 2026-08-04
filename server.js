@@ -305,6 +305,44 @@ async function initializeDatabase() {
             rewards TEXT
         )`);
 
+        await runQuery(`CREATE TABLE IF NOT EXISTS community_posts (
+            post_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            title TEXT NOT NULL,
+            content TEXT NOT NULL,
+            is_anonymous INTEGER DEFAULT 0,
+            tags TEXT DEFAULT '[]',
+            upvotes INTEGER DEFAULT 0,
+            downvotes INTEGER DEFAULT 0,
+            accepted_answer_id INTEGER,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(user_id)
+        )`);
+
+        await runQuery(`CREATE TABLE IF NOT EXISTS community_comments (
+            comment_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            post_id INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
+            parent_comment_id INTEGER,
+            content TEXT NOT NULL,
+            is_anonymous INTEGER DEFAULT 0,
+            upvotes INTEGER DEFAULT 0,
+            downvotes INTEGER DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (post_id) REFERENCES community_posts(post_id),
+            FOREIGN KEY (user_id) REFERENCES users(user_id)
+        )`);
+
+        await runQuery(`CREATE TABLE IF NOT EXISTS community_votes (
+            vote_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            target_type TEXT NOT NULL, -- 'post' or 'comment'
+            target_id INTEGER NOT NULL,
+            vote_value INTEGER NOT NULL, -- 1 for upvote, -1 for downvote
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(user_id, target_type, target_id)
+        )`);
+
         // Seed partners from partners.json if table is empty
         const { count: partnerCount } = await getQuery(`SELECT COUNT(*) as count FROM partners`);
         if (partnerCount === 0 && fs.existsSync(PARTNERS_FILE)) {
@@ -1543,7 +1581,7 @@ app.post('/api/redeem/confirm', async (req, res) => {
         const { user_id, points_deducted, discount_aed } = req.body;
         if (!user_id || !points_deducted || !discount_aed) return res.status(400).json({ error: 'Missing parameters' });
 
-        tx = await db.transaction('write');
+        tx = 
 
         const userRes = await tx.execute({
             sql: `SELECT email, points_balance FROM users WHERE user_id = ?`,
@@ -1640,7 +1678,7 @@ app.post('/api/redeem/collaborator', async (req, res) => {
             return res.status(400).json({ error: 'Missing parameters' });
         }
 
-        tx = await db.transaction('write');
+        tx = 
 
         const userRes = await tx.execute({
             sql: `SELECT email, points_balance FROM users WHERE user_id = ?`,
@@ -2214,15 +2252,15 @@ app.post('/api/community/posts', requireAuth, async (req, res) => {
         const { title, content, is_anonymous, tags } = req.body;
         if (!title || !content) return res.status(400).json({ error: 'Title and content required' });
 
-        await db.transaction('write');
+        
         try {
             await runQuery('INSERT INTO community_posts (user_id, title, content, is_anonymous, tags) VALUES (?, ?, ?, ?, ?)', 
                 [req.user.user_id, title, content, is_anonymous ? 1 : 0, tags || '[]']);
             
-            await db.execute('COMMIT');
+            
             res.json({ message: 'Post created successfully!' });
         } catch (e) {
-            await db.execute('ROLLBACK');
+            
             throw e;
         }
     } catch (err) {
@@ -2237,7 +2275,7 @@ app.post('/api/community/posts/:id/vote', requireAuth, async (req, res) => {
         const { value } = req.body; // 1 for upvote, -1 for downvote, 0 to remove
         if (value !== 1 && value !== -1 && value !== 0) return res.status(400).json({ error: 'Invalid vote value' });
         
-        await db.transaction('write');
+        
         try {
             const currentVote = await getQuery("SELECT vote_value FROM community_votes WHERE user_id=? AND target_type='post' AND target_id=?", [req.user.user_id, postId]);
             
@@ -2257,10 +2295,10 @@ app.post('/api/community/posts/:id/vote', requireAuth, async (req, res) => {
                 // Used to award points here. Points system removed from community.
             }
             
-            await db.execute('COMMIT');
+            
             res.json({ message: 'Vote recorded' });
         } catch (e) {
-            await db.execute('ROLLBACK');
+            
             throw e;
         }
     } catch (err) {
@@ -2273,7 +2311,7 @@ app.post('/api/community/posts/:postId/accept/:commentId', requireAuth, async (r
     try {
         const { postId, commentId } = req.params;
         
-        await db.transaction('write');
+        
         try {
             // Verify ownership of the post
             const post = await getQuery("SELECT user_id, accepted_answer_id FROM community_posts WHERE post_id=?", [postId]);
@@ -2289,10 +2327,10 @@ app.post('/api/community/posts/:postId/accept/:commentId', requireAuth, async (r
             // Update post
             await runQuery("UPDATE community_posts SET accepted_answer_id=? WHERE post_id=?", [commentId, postId]);
                 
-            await db.execute('COMMIT');
+            
             res.json({ message: 'Answer accepted successfully!' });
         } catch (e) {
-            await db.execute('ROLLBACK');
+            
             res.status(400).json({ error: e.message });
         }
     } catch (err) {
@@ -2333,15 +2371,15 @@ app.post('/api/community/posts/:id/comments', requireAuth, async (req, res) => {
         const postId = req.params.id;
         if (!content) return res.status(400).json({ error: 'Content required' });
 
-        await db.transaction('write');
+        
         try {
             await runQuery('INSERT INTO community_comments (post_id, user_id, content, is_anonymous, parent_comment_id) VALUES (?, ?, ?, ?, ?)', 
                 [postId, req.user.user_id, content, is_anonymous ? 1 : 0, parent_comment_id || null]);
             
-            await db.execute('COMMIT');
+            
             res.json({ message: 'Comment added successfully!' });
         } catch (e) {
-            await db.execute('ROLLBACK');
+            
             throw e;
         }
     } catch (err) {
@@ -2356,7 +2394,7 @@ app.post('/api/community/comments/:id/vote', requireAuth, async (req, res) => {
         const { value } = req.body; // 1 for upvote, -1 for downvote, 0 to remove
         if (value !== 1 && value !== -1 && value !== 0) return res.status(400).json({ error: 'Invalid vote value' });
         
-        await db.transaction('write');
+        
         try {
             const currentVote = await getQuery("SELECT vote_value FROM community_votes WHERE user_id=? AND target_type='comment' AND target_id=?", [req.user.user_id, commentId]);
             
@@ -2372,10 +2410,10 @@ app.post('/api/community/comments/:id/vote', requireAuth, async (req, res) => {
                 if (value === -1) await runQuery("UPDATE community_comments SET downvotes = downvotes + 1 WHERE comment_id=?", [commentId]);
             }
             
-            await db.execute('COMMIT');
+            
             res.json({ message: 'Vote recorded' });
         } catch (e) {
-            await db.execute('ROLLBACK');
+            
             throw e;
         }
     } catch (err) {
