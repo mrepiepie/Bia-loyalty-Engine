@@ -345,6 +345,7 @@ document.getElementById('btn-submit-post').addEventListener('click', async () =>
         }
     } catch (e) {
         console.error(e);
+        alert("Failed to submit post. If you attached an image, it might be too large.");
     }
 });
 

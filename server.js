@@ -2218,6 +2218,7 @@ app.post('/api/promos/redeem', async (req, res) => {
 // Get all posts (Publicly readable, but needs optionalAuth for upvote status)
 app.get('/api/community/posts', requireAuth, async (req, res) => {
     try {
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
         const userId = req.user ? req.user.user_id : -1;
         const sortBy = req.query.sort || 'new';
         let orderBy = 'p.created_at DESC';
@@ -2343,6 +2344,7 @@ app.post('/api/community/posts/:postId/accept/:commentId', requireAuth, async (r
 // Get comments for a post
 app.get('/api/community/posts/:id/comments', requireAuth, async (req, res) => {
     try {
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
         const userId = req.user ? req.user.user_id : -1;
         const comments = await getQueryAll(`
             SELECT c.*, u.name,
