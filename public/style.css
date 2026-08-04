@@ -7167,3 +7167,40 @@ body:not(.dark-theme) .logo-slot-name {
 .input-field:focus {
     border-color: rgba(102, 252, 241, 0.5);
 }
+
+/* Discover Tabs */
+.category-tab {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 0.75rem 1rem;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    color: #c5c6c7;
+    font-family: inherit;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.category-tab:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    transform: translateX(4px);
+}
+.category-tab.active {
+    background: rgba(102, 252, 241, 0.1);
+    color: #66fcf1;
+    border-color: rgba(102, 252, 241, 0.2);
+    font-weight: 600;
+}
+
+/* Premium Post Card Interactions */
+.post-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important;
+}
+.post-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    border-color: rgba(102, 252, 241, 0.2) !important;
+}

@@ -2,6 +2,7 @@
 
 let currentUser = null;
 let currentSort = 'hot';
+let currentCategory = 'Home';
 
 // Helper for Auth
 function requireAuth(callback) {
@@ -39,7 +40,6 @@ function updateNav() {
                 <div style="text-align: right; line-height: 1.2;">
                     <div style="color: #fff; font-weight: 600; font-size: 0.9rem;">${currentUser.name} ${isAdmin ? '<span style="color: #dfb15b; font-size: 0.7rem; margin-left: 4px; padding: 2px 6px; border: 1px solid #dfb15b; border-radius: 4px;">ADMIN</span>' : ''}</div>
                 </div>
-                <a href="/" class="btn btn-secondary btn-sm">Dashboard</a>
             </div>
         `;
         document.getElementById('create-post-box').style.display = 'block';
@@ -68,9 +68,23 @@ async function fetchPosts() {
         
         feed.innerHTML = '';
         if (data.posts && data.posts.length > 0) {
-            data.posts.forEach(post => {
-                feed.appendChild(createPostElement(post));
-            });
+            let filteredPosts = data.posts;
+            if (currentCategory !== 'Home') {
+                filteredPosts = data.posts.filter(p => {
+                    try {
+                        const t = JSON.parse(p.tags || '[]');
+                        return t.includes(currentCategory);
+                    } catch(e) { return false; }
+                });
+            }
+            
+            if (filteredPosts.length > 0) {
+                filteredPosts.forEach(post => {
+                    feed.appendChild(createPostElement(post));
+                });
+            } else {
+                feed.innerHTML = '<div style="text-align: center; padding: 3rem; color: #888;">No posts found in this category. Be the first to start a discussion!</div>';
+            }
         } else {
             feed.innerHTML = '<div style="text-align:center; color:#888; padding: 2rem;">No posts found. Be the first to start a discussion!</div>';
         }
@@ -270,7 +284,7 @@ window.acceptAnswer = async function(postId, commentId) {
 document.getElementById('btn-submit-post').addEventListener('click', async () => {
     const title = document.getElementById('post-title').value.trim();
     const content = document.getElementById('post-content').value.trim();
-    const tagsStr = document.getElementById('post-tags').value.trim();
+    const category = document.getElementById('post-category').value;
     const isAnonymous = document.getElementById('post-anonymous').checked;
     
     if (!title || !content) {
@@ -278,10 +292,7 @@ document.getElementById('btn-submit-post').addEventListener('click', async () =>
         return;
     }
     
-    let tags = [];
-    if (tagsStr) {
-        tags = tagsStr.split(',').map(t => t.trim()).filter(t => t.length > 0);
-    }
+    let tags = [category];
     
     const token = localStorage.getItem('token');
     try {
@@ -408,3 +419,13 @@ window.deleteCommunityItem = async function(type, id, btn) {
         btn.disabled = false;
     }
 };
+
+// Handle Discover Tabs
+document.querySelectorAll('.category-tab').forEach(tab => {
+    tab.addEventListener('click', (e) => {
+        document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+        e.target.classList.add('active');
+        currentCategory = e.target.getAttribute('data-category');
+        fetchPosts();
+    });
+});

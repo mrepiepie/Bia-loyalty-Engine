@@ -231,11 +231,11 @@
         <aside class="sidebar-left">
             <div class="card glassmorphic">
                 <h4 style="margin-top:0; color: #fff;"><i class="fa-solid fa-compass"></i> Discover</h4>
-                <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.5rem;">
-                    <li><a href="#" style="color: #66fcf1; text-decoration: none; display: block; padding: 0.5rem; background: rgba(102,252,241,0.1); border-radius: 8px;">🏠 Home</a></li>
-                    <li><a href="#" style="color: #c5c6c7; text-decoration: none; display: block; padding: 0.5rem;">📚 Academics</a></li>
-                    <li><a href="#" style="color: #c5c6c7; text-decoration: none; display: block; padding: 0.5rem;">💼 Internships</a></li>
-                    <li><a href="#" style="color: #c5c6c7; text-decoration: none; display: block; padding: 0.5rem;">🏢 Housing</a></li>
+                <ul id="discover-tabs" style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.5rem;">
+                    <li><button class="category-tab active" data-category="Home">🏠 Home</button></li>
+                    <li><button class="category-tab" data-category="Academics">📚 Academics</button></li>
+                    <li><button class="category-tab" data-category="Internships">💼 Internships</button></li>
+                    <li><button class="category-tab" data-category="Housing">🏢 Housing</button></li>
                 </ul>
                 
                 <hr style="border-color: rgba(255,255,255,0.05); margin: 1.5rem 0;">
@@ -253,7 +253,12 @@
                 
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <div style="display: flex; gap: 1rem; align-items: center;">
-                        <input type="text" id="post-tags" class="input-field" placeholder="Tags (comma separated)" style="width: 200px;">
+                        <select id="post-category" class="input-field" style="width: 200px; cursor: pointer;">
+                            <option value="General">General</option>
+                            <option value="Academics">Academics</option>
+                            <option value="Internships">Internships</option>
+                            <option value="Housing">Housing</option>
+                        </select>
                         <label style="display: flex; align-items: center; gap: 0.5rem; color: #888; cursor: pointer;">
                             <input type="checkbox" id="post-anonymous"> Post Anonymously
                         </label>
