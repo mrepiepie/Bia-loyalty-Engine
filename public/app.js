@@ -63,6 +63,8 @@ document.querySelectorAll('.nav-tab').forEach(btn => {
     if (btn.id === 'btn-logout') return;
 
     btn.addEventListener('click', () => {
+        if (btn.getAttribute('data-ignore-tab') === 'true') return;
+
         document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(c => {
             c.classList.remove('active');

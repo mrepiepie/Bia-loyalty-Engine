@@ -258,7 +258,7 @@
                             <input type="checkbox" id="post-anonymous"> Post Anonymously
                         </label>
                     </div>
-                    <button id="btn-submit-post" class="btn btn-primary">Post (Earn 10 pts)</button>
+                    <button id="btn-submit-post" class="btn btn-primary">Publish Post</button>
                 </div>
             </div>
 
@@ -281,20 +281,40 @@
         <aside class="sidebar-right">
             <div class="card glassmorphic" style="margin-bottom: 1.5rem;">
                 <h4 style="margin-top:0; color: #fff;"><i class="fa-solid fa-shield-halved"></i> Community Guidelines</h4>
-                <p style="font-size: 0.85rem; color: #888; margin-bottom: 0;">Be respectful, helpful, and earn BIA loyalty points for contributing high-quality answers.</p>
-                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.05);">
-                    <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.5rem;">
-                        <span>New Post</span> <span style="color:#66fcf1; font-weight: 700;">+10 pts</span>
+                <p style="font-size: 0.85rem; color: #888; margin-bottom: 0;">Be respectful, helpful, and contribute high-quality answers to foster a strong student network.</p>
+                <ul style="font-size: 0.85rem; color: #c5c6c7; margin-top: 1rem; padding-left: 1.2rem;">
+                    <li style="margin-bottom: 0.5rem;">Search before posting duplicate questions.</li>
+                    <li style="margin-bottom: 0.5rem;">Upvote helpful answers to guide others.</li>
+                    <li style="margin-bottom: 0.5rem;">Report inappropriate behavior.</li>
+                </ul>
+            </div>
+            
+            <!-- ADMIN MODERATION PANEL (Hidden by default) -->
+            <div id="admin-moderation-panel" class="card glassmorphic" style="display: none; border: 1px solid #dfb15b;">
+                <h4 style="margin-top:0; color: #dfb15b;"><i class="fa-solid fa-gavel"></i> Admin Moderation</h4>
+                <p style="font-size: 0.8rem; color: #888; margin-bottom: 1rem;">Community health statistics and recent posts for quick moderation.</p>
+                
+                <div style="display: flex; gap: 1rem; margin-bottom: 1rem; font-size: 0.85rem;">
+                    <div style="flex: 1; background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 8px; text-align: center;">
+                        <span style="color: #66fcf1; font-weight: bold;" id="admin-comm-total-posts">0</span><br>Posts
                     </div>
-                    <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.5rem;">
-                        <span>New Comment</span> <span style="color:#66fcf1; font-weight: 700;">+5 pts</span>
+                    <div style="flex: 1; background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 8px; text-align: center;">
+                        <span style="color: #66fcf1; font-weight: bold;" id="admin-comm-total-comments">0</span><br>Comments
                     </div>
-                    <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.5rem;">
-                        <span>Receive Upvote</span> <span style="color:#66fcf1; font-weight: 700;">+5 pts</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
-                        <span>Accepted Answer</span> <span style="color:#dfb15b; font-weight: 700;">+50 pts</span>
-                    </div>
+                </div>
+                
+                <div style="max-height: 400px; overflow-y: auto;">
+                    <table style="width: 100%; font-size: 0.8rem; text-align: left; border-collapse: collapse;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                <th style="padding-bottom: 0.5rem;">Content Snippet</th>
+                                <th style="padding-bottom: 0.5rem; text-align: right;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-comm-moderation-list">
+                            <!-- Injected by JS -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </aside>

@@ -2254,15 +2254,7 @@ app.post('/api/community/posts/:id/vote', requireAuth, async (req, res) => {
                 if (value === 1) await runQuery("UPDATE community_posts SET upvotes = upvotes + 1 WHERE post_id=?", [postId]);
                 if (value === -1) await runQuery("UPDATE community_posts SET downvotes = downvotes + 1 WHERE post_id=?", [postId]);
                 
-                // Award points for upvotes only
-                if (value === 1 && (!currentVote || currentVote.vote_value !== 1)) {
-                    const post = await getQuery("SELECT user_id FROM community_posts WHERE post_id=?", [postId]);
-                    if (post && post.user_id !== req.user.user_id) {
-                        await runQuery('UPDATE users SET points_balance = points_balance + 5 WHERE user_id = ?', [post.user_id]);
-                        await runQuery('INSERT INTO points_ledger (user_id, action_type, points, description) VALUES (?, ?, ?, ?)', 
-                            [post.user_id, 'EARN', 5, 'Received an upvote on your post']);
-                    }
-                }
+                // Used to award points here. Points system removed from community.
             }
             
             await db.execute('COMMIT');
@@ -2276,7 +2268,7 @@ app.post('/api/community/posts/:id/vote', requireAuth, async (req, res) => {
     }
 });
 
-// Accept an answer (Awards 50 points)
+// Accept an answer
 app.post('/api/community/posts/:postId/accept/:commentId', requireAuth, async (req, res) => {
     try {
         const { postId, commentId } = req.params;
@@ -2294,11 +2286,8 @@ app.post('/api/community/posts/:postId/accept/:commentId', requireAuth, async (r
             if (!comment) throw new Error("Comment not found on this post");
             if (comment.user_id === req.user.user_id) throw new Error("You cannot accept your own answer");
             
-            // Update post and award massive bounty
+            // Update post
             await runQuery("UPDATE community_posts SET accepted_answer_id=? WHERE post_id=?", [commentId, postId]);
-            await runQuery('UPDATE users SET points_balance = points_balance + 50 WHERE user_id = ?', [comment.user_id]);
-            await runQuery('INSERT INTO points_ledger (user_id, action_type, points, description) VALUES (?, ?, ?, ?)', 
-                [comment.user_id, 'EARN', 50, 'Your answer was Accepted by the author']);
                 
             await db.execute('COMMIT');
             res.json({ message: 'Answer accepted successfully!' });
@@ -2337,7 +2326,7 @@ app.get('/api/community/posts/:id/comments', requireAuth, async (req, res) => {
     }
 });
 
-// Add a comment (Awards 5 points)
+// Add a comment
 app.post('/api/community/posts/:id/comments', requireAuth, async (req, res) => {
     try {
         const { content, is_anonymous, parent_comment_id } = req.body;
@@ -2349,13 +2338,8 @@ app.post('/api/community/posts/:id/comments', requireAuth, async (req, res) => {
             await runQuery('INSERT INTO community_comments (post_id, user_id, content, is_anonymous, parent_comment_id) VALUES (?, ?, ?, ?, ?)', 
                 [postId, req.user.user_id, content, is_anonymous ? 1 : 0, parent_comment_id || null]);
             
-            // Award 5 points for commenting
-            await runQuery('UPDATE users SET points_balance = points_balance + 5 WHERE user_id = ?', [req.user.user_id]);
-            await runQuery('INSERT INTO points_ledger (user_id, action_type, points, description) VALUES (?, ?, ?, ?)', 
-                [req.user.user_id, 'EARN', 5, 'Contributed a comment']);
-            
             await db.execute('COMMIT');
-            res.json({ message: 'Comment added successfully and you earned 5 points!' });
+            res.json({ message: 'Comment added successfully!' });
         } catch (e) {
             await db.execute('ROLLBACK');
             throw e;
@@ -2394,6 +2378,55 @@ app.post('/api/community/comments/:id/vote', requireAuth, async (req, res) => {
             await db.execute('ROLLBACK');
             throw e;
         }
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Admin Delete Post
+app.delete('/api/community/posts/:id', requireAuth, async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Unauthorized. Admin access required.' });
+        }
+        await runQuery("DELETE FROM community_posts WHERE post_id = ?", [req.params.id]);
+        // Note: foreign keys (community_comments, tags, etc.) should cascade or be ignored for this MVP
+        res.json({ message: 'Post deleted successfully.' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Admin Delete Comment
+app.delete('/api/community/comments/:id', requireAuth, async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Unauthorized. Admin access required.' });
+        }
+        await runQuery("DELETE FROM community_comments WHERE comment_id = ?", [req.params.id]);
+        res.json({ message: 'Comment deleted successfully.' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Admin Community Stats & Moderation Feed
+app.get('/api/community/admin/stats', requireAuth, async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Unauthorized. Admin access required.' });
+        }
+        
+        const stats = await getQuery("SELECT (SELECT COUNT(*) FROM community_posts) as total_posts, (SELECT COUNT(*) FROM community_comments) as total_comments, (SELECT COUNT(DISTINCT user_id) FROM (SELECT user_id FROM community_posts UNION SELECT user_id FROM community_comments)) as active_contributors");
+        
+        const moderationFeed = await getQueryAll(`
+            SELECT 'post' as type, post_id as id, user_id, title as snippet, created_at FROM community_posts
+            UNION ALL
+            SELECT 'comment' as type, comment_id as id, user_id, substr(content, 1, 50) as snippet, created_at FROM community_comments
+            ORDER BY created_at DESC LIMIT 50
+        `);
+        
+        res.json({ stats, moderationFeed });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
