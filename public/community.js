@@ -141,8 +141,8 @@ function createPostElement(post) {
                 <span>${new Date(post.created_at).toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                 ${tagsHtml ? `<span>•</span> ${tagsHtml}` : ''}
             </div>
-            <h3 class="post-title">${post.title}</h3>
-            <div class="post-body">${post.content}</div>
+            <h3 class="post-title" id="post-title-text-${post.post_id}">${post.title}</h3>
+            <div class="post-body" id="post-body-text-${post.post_id}">${post.content}</div>
             ${imageHtml}
             <div class="post-actions">
                 <button class="action-btn" onclick="toggleComments(${post.post_id})">
@@ -152,6 +152,18 @@ function createPostElement(post) {
                     `<span style="color: #dfb15b; font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem;">
                         <i class="fa-solid fa-crown"></i> Accept an answer to help others!
                     </span>` : ''}
+                
+                ${currentUser && currentUser.role === 'admin' ? `
+                    <button class="action-btn" style="color:#dfb15b;" onclick="adminEditPost(${post.post_id})">
+                        <i class="fa-solid fa-pen"></i> Edit
+                    </button>
+                    <button class="action-btn" style="color:${post.is_locked ? '#ff4b4b' : '#66fcf1'};" onclick="adminLockPost(${post.post_id}, ${!post.is_locked})">
+                        <i class="fa-solid ${post.is_locked ? 'fa-lock' : 'fa-unlock'}"></i> ${post.is_locked ? 'Unlock' : 'Lock'}
+                    </button>
+                    <button class="action-btn" style="color:#ff4b4b;" onclick="adminDeleteCommunityContent('post', ${post.post_id})">
+                        <i class="fa-solid fa-trash"></i> Delete
+                    </button>
+                ` : ''}
             </div>
             
             <div id="comments-${post.post_id}" style="display: none; margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1rem;">
@@ -261,10 +273,14 @@ async function loadComments(postId) {
                 const acceptBtn = (currentUser && list.closest('.post-card').querySelector('.fa-crown') /* bit hacky check if author hasn't accepted yet */ && currentUser.name !== c.name) ?
                     `<button class="btn btn-sm" style="background: rgba(223, 177, 91, 0.2); color: #dfb15b; border: 1px solid #dfb15b; padding: 2px 8px; font-size: 0.7rem;" onclick="acceptAnswer(${postId}, ${c.comment_id})"><i class="fa-solid fa-check"></i> Accept as Answer</button>` : '';
 
+                const adminDeleteBtn = currentUser && currentUser.role === 'admin' ? 
+                    `<button class="btn btn-sm" style="background: rgba(255, 75, 75, 0.2); color: #ff4b4b; border: 1px solid #ff4b4b; padding: 2px 8px; font-size: 0.7rem; margin-left: 0.5rem;" onclick="adminDeleteCommunityContent('comment', ${c.comment_id})"><i class="fa-solid fa-trash"></i> Delete</button>` : '';
+
                 div.innerHTML = `
                     <div style="font-size: 0.8rem; color: #888; margin-bottom: 0.25rem;">
                         <strong style="color: #fff;">${c.name}</strong> • ${new Date(c.created_at).toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                         ${acceptBtn}
+                        ${adminDeleteBtn}
                     </div>
                     <div style="font-size: 0.95rem; margin-bottom: 0.5rem;">${c.content}</div>
                     <div style="display: flex; gap: 0.5rem; align-items: center;">
@@ -427,6 +443,76 @@ document.getElementById('btn-create-post-sidebar').addEventListener('click', () 
 })();
 
 // --- Admin Panel Logic ---
+
+window.adminLockPost = async function(postId, lock) {
+    if (!confirm(`Are you sure you want to ${lock ? 'lock' : 'unlock'} this post?`)) return;
+    try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`/api/admin/community/posts/${postId}/lock`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}` 
+            },
+            body: JSON.stringify({ locked: lock })
+        });
+        if (!res.ok) throw new Error(await res.text());
+        alert(`Post has been ${lock ? 'locked' : 'unlocked'}.`);
+        fetchPosts(true);
+    } catch (e) {
+        alert('Error: ' + e.message);
+    }
+};
+
+window.adminDeleteCommunityContent = async function(type, id) {
+    if (!confirm(`Are you sure you want to delete this ${type}? This cannot be undone.`)) return;
+    try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`/api/community/${type}s/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error(await res.text());
+        fetchPosts(true);
+    } catch (e) {
+        alert('Error: ' + e.message);
+    }
+};
+
+window.adminEditPost = async function(postId) {
+    const titleEl = document.getElementById(`post-title-text-${postId}`);
+    const bodyEl = document.getElementById(`post-body-text-${postId}`);
+    
+    if (!titleEl || !bodyEl) return;
+    
+    const newTitle = prompt("Edit Title:", titleEl.innerText);
+    if (newTitle === null) return;
+    
+    const newContent = prompt("Edit Content:", bodyEl.innerText);
+    if (newContent === null) return;
+    
+    if (!newTitle.trim() || !newContent.trim()) {
+        alert("Title and content cannot be empty.");
+        return;
+    }
+    
+    try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`/api/admin/community/posts/${postId}`, {
+            method: 'PUT',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}` 
+            },
+            body: JSON.stringify({ title: newTitle.trim(), content: newContent.trim() })
+        });
+        if (!res.ok) throw new Error(await res.text());
+        alert('Post updated successfully.');
+        fetchPosts(true);
+    } catch (e) {
+        alert('Error: ' + e.message);
+    }
+};
 
 async function loadAdminCommunityStats() {
     try {

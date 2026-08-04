@@ -2442,6 +2442,18 @@ app.post('/api/admin/community/posts/:id/lock', requireAuth, async (req, res) =>
     }
 });
 
+app.put('/api/admin/community/posts/:id', requireAuth, async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized.' });
+        const { title, content } = req.body;
+        if (!title || !content) return res.status(400).json({ error: 'Title and content are required.' });
+        await runQuery("UPDATE community_posts SET title = ?, content = ? WHERE post_id = ?", [title, content, req.params.id]);
+        res.json({ message: 'Post updated.' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // Admin Delete Post
 app.delete('/api/community/posts/:id', requireAuth, async (req, res) => {
     try {
