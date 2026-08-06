@@ -144,7 +144,7 @@ function createPostElement(post) {
             <h3 class="post-title" id="post-title-text-${post.post_id}">${post.title}</h3>
             <div class="post-body" id="post-body-text-${post.post_id}">${post.content}</div>
             ${imageHtml}
-            <div class="post-actions">
+            <div class="post-actions" style="display: flex; justify-content: space-between; align-items: center; width: 100%;"><div style="display: flex; align-items: center; gap: 1rem;">
                 <button class="action-btn" onclick="toggleComments(${post.post_id})">
                     <i class="fa-regular fa-message"></i> ${post.comment_count} Comments
                 </button>
@@ -164,6 +164,10 @@ function createPostElement(post) {
                         <i class="fa-solid fa-trash"></i> Delete
                     </button>
                 ` : ''}
+                </div>
+                <button onclick="openReportModal('post', ${post.post_id}, ${post.user_id})" class="btn btn-sm" style="background: none; border: none; color: rgba(239, 68, 68, 0.6); cursor: pointer; padding: 0.3rem 0.5rem; font-size: 0.75rem;">
+                    <i class="fa-solid fa-flag"></i> Report
+                </button>
             </div>
             
             <div id="comments-${post.post_id}" style="display: none; margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1rem;">
