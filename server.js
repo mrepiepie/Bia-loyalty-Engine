@@ -2749,22 +2749,6 @@ app.post('/api/admin/users/:id/warn', requireAdmin, async (req, res) => {
             [userId, req.user.user_id, reason || 'Violation of community guidelines']
         );
         
-        res.json({ message: 'Warning issued successfully' });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// Admin: Resolve Reports
-app.post('/api/admin/users/:id/resolve-reports', requireAdmin, async (req, res) => {
-    try {
-        await runQuery("UPDATE community_reports SET status = 'Resolved' WHERE reported_user_id = ?", [req.params.id]);
-        res.json({ message: 'Reports marked as resolved.' });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-        
         // Optional: Send email
         const user = await getQuery("SELECT email, name FROM users WHERE user_id = ?", [userId]);
         if (user) {
@@ -2782,6 +2766,16 @@ app.post('/api/admin/users/:id/resolve-reports', requireAdmin, async (req, res) 
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Failed to issue warning' });
+    }
+});
+
+// Admin: Resolve Reports
+app.post('/api/admin/users/:id/resolve-reports', requireAdmin, async (req, res) => {
+    try {
+        await runQuery("UPDATE community_reports SET status = 'Resolved' WHERE reported_user_id = ?", [req.params.id]);
+        res.json({ message: 'Reports marked as resolved.' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
 });
 
