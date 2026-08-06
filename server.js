@@ -59,8 +59,14 @@ async function moderateImage(base64Data) {
         const data = await response.json();
         
         if (data.status === 'success') {
-            // Sightengine recommends blocking if safe < 0.5
-            const isExplicit = data.nudity && data.nudity.safe < 0.5;
+            // Sightengine recommends blocking if safe < 0.5 for nudity, or if weapon/drugs/alcohol score is high
+            const hasNudity = data.nudity && data.nudity.safe < 0.5;
+            const hasWeapon = data.weapon && data.weapon > 0.5;
+            const hasDrugs = (data.drugs && data.drugs > 0.5) || (data.recreational_drugs && data.recreational_drugs > 0.5);
+            const hasAlcohol = data.alcohol && data.alcohol > 0.5;
+            
+            const isExplicit = hasNudity || hasWeapon || hasDrugs || hasAlcohol;
+            
             return {
                 isExplicit,
                 reason: isExplicit ? "Image blocked: Contains explicit or inappropriate content." : null
