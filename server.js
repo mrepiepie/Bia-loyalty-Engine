@@ -22,17 +22,57 @@ const profanityFilter = {
     }
 };
 
-// Image Moderation Placeholder
+// Sightengine Image Moderation
 async function moderateImage(base64Data) {
-    // For this demo, we'll simulate explicit image detection.
-    // In production, this would call Sightengine or AWS Rekognition API.
-    // Randomly flag ~20% of images as explicit for demonstration purposes.
     if (!base64Data) return { isExplicit: false };
-    const isExplicit = Math.random() < 0.2;
-    return { 
-        isExplicit, 
-        reason: isExplicit ? "Image flagged for explicit content (simulated)." : null 
-    };
+    
+    try {
+        // Sightengine credentials (uses env vars for security)
+        const apiUser = process.env.SIGHTENGINE_API_USER;
+        const apiSecret = process.env.SIGHTENGINE_API_SECRET;
+        
+        if (!apiUser || !apiSecret) {
+            console.warn("Sightengine API keys missing. Skipping image moderation.");
+            return { isExplicit: false };
+        }
+        
+        // Strip the data URI prefix if present
+        const base64Content = base64Data.includes(',') ? base64Data.split(',')[1] : base64Data;
+        const mimeMatch = base64Data.match(/^data:(image\/\w+);base64,/);
+        const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+        
+        // Convert base64 to Blob for native FormData
+        const buffer = Buffer.from(base64Content, 'base64');
+        const blob = new Blob([buffer], { type: mimeType });
+        
+        const formData = new FormData();
+        formData.append('models', 'nudity,wad'); // Check for nudity, weapons, drugs
+        formData.append('api_user', apiUser);
+        formData.append('api_secret', apiSecret);
+        formData.append('media', blob, 'upload.jpg');
+        
+        const response = await fetch('https://api.sightengine.com/1.0/check.json', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            // Sightengine recommends blocking if safe < 0.5
+            const isExplicit = data.nudity && data.nudity.safe < 0.5;
+            return {
+                isExplicit,
+                reason: isExplicit ? "Image blocked: Contains explicit or inappropriate content." : null
+            };
+        } else {
+            console.error("Sightengine API Error:", data.error);
+            return { isExplicit: false }; // Fail open if API error
+        }
+    } catch (err) {
+        console.error("Error moderating image:", err);
+        return { isExplicit: false };
+    }
 }
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_placeholder_key');
