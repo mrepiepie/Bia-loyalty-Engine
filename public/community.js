@@ -165,7 +165,7 @@ function createPostElement(post) {
                     </button>
                 ` : ''}
                 </div>
-                <button onclick="deletePost(${post.post_id})" class="btn btn-sm admin-only-btn" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 0.3rem 0.5rem; font-size: 0.75rem;"><i class="fa-solid fa-trash"></i> Delete</button>
+                ${currentUser && currentUser.role === 'admin' ? `<button onclick="deletePost(${post.post_id})" class="btn btn-sm admin-only-btn" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 0.3rem 0.5rem; font-size: 0.75rem;"><i class="fa-solid fa-trash"></i> Delete</button>` : ''}
                 <button onclick="openReportModal('post', ${post.post_id}, ${post.user_id})" class="btn btn-sm" style="background: none; border: none; color: rgba(239, 68, 68, 0.6); cursor: pointer; padding: 0.3rem 0.5rem; font-size: 0.75rem;">
                     <i class="fa-solid fa-flag"></i> Report
                 </button>
