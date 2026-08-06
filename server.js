@@ -9,9 +9,15 @@ const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-bia-key-2026';
 const { createClient } = require('@libsql/client');
 const { Resend } = require('resend');
 
-// Profanity Filter
-const { Filter } = require('bad-words');
-const profanityFilter = new Filter();
+// Custom Profanity Filter (Vercel Safe)
+const badWordsList = ['fuck', 'bitch', 'shit', 'asshole', 'cunt', 'dick', 'pussy', 'whore', 'slut', 'fag', 'bastard'];
+const profanityRegex = new RegExp(`\\b(${badWordsList.join('|')})\\b`, 'gi');
+const profanityFilter = {
+    clean: (text) => {
+        if (!text) return text;
+        return text.replace(profanityRegex, '####');
+    }
+};
 
 // Image Moderation Placeholder
 async function moderateImage(base64Data) {
