@@ -73,11 +73,11 @@ async function moderateImage(base64Data) {
             };
         } else {
             console.error("Sightengine API Error:", data.error);
-            return { isExplicit: false }; // Fail open if API error
+            return { isExplicit: true, reason: 'Sightengine API Error: ' + (data.error ? data.error.message : JSON.stringify(data)) }; 
         }
     } catch (err) {
         console.error("Error moderating image:", err);
-        return { isExplicit: false };
+        return { isExplicit: true, reason: 'Internal error calling Sightengine API: ' + err.message };
     }
 }
 
