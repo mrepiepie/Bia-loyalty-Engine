@@ -3,6 +3,9 @@
 let currentUser = null;
 let currentSort = 'hot';
 let currentCategory = 'Home';
+let latestPostId = 0;
+let pendingNewPosts = [];
+let pollingInterval = null;
 
 // Helper for Auth
 function requireAuth(callback) {
@@ -43,6 +46,8 @@ function updateNav() {
             </div>
         `;
         document.getElementById('create-post-box').style.display = 'block';
+        const myPostsTab = document.getElementById('my-posts-tab');
+        if (myPostsTab) myPostsTab.style.display = 'block';
         
         if (isAdmin) {
             document.getElementById('admin-moderation-panel').style.display = 'block';
@@ -53,6 +58,8 @@ function updateNav() {
     } else {
         navAuthState.innerHTML = `<a href="/" class="btn btn-primary btn-sm">Sign In / Register</a>`;
         document.getElementById('create-post-box').style.display = 'none';
+        const myPostsTab = document.getElementById('my-posts-tab');
+        if (myPostsTab) myPostsTab.style.display = 'none';
     }
 }
 
@@ -70,13 +77,18 @@ async function fetchPosts(isSilent = false) {
     if (token) headers['Authorization'] = `Bearer ${token}`;
     
     try {
-        const res = await fetch(`/api/community/posts?sort=${currentSort}&_t=${Date.now()}`, { headers });
+        let url = `/api/community/posts?sort=${currentSort}&_t=${Date.now()}`;
+        if (currentCategory === 'Mine') url += '&filter=mine';
+        const res = await fetch(url, { headers });
         const data = await res.json();
         
         feed.innerHTML = '';
         if (data.posts && data.posts.length > 0) {
             let filteredPosts = data.posts;
-            if (currentCategory !== 'Home') {
+            const maxId = Math.max(...data.posts.map(p => p.post_id));
+            if (maxId > latestPostId) latestPostId = maxId;
+
+            if (currentCategory !== 'Home' && currentCategory !== 'Mine') {
                 filteredPosts = data.posts.filter(p => {
                     try {
                         const t = JSON.parse(p.tags || '[]');
@@ -759,4 +771,85 @@ window.toggleMuteUser = async function(userId, isCurrentlyMuted) {
         console.error(e);
         alert('An error occurred');
     }
+};
+
+
+// --- POLLING LOGIC ---
+function startPolling() {
+    if (pollingInterval) clearInterval(pollingInterval);
+    pendingNewPosts = []; // Reset on new view
+    const bubble = document.getElementById('new-posts-bubble');
+    if (bubble) bubble.style.display = 'none';
+
+    pollingInterval = setInterval(async () => {
+        if (!latestPostId) return;
+        const headers = {};
+        const token = localStorage.getItem('token');
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+        
+        let url = `/api/community/posts?sort=${currentSort}&since_id=${latestPostId}`;
+        if (currentCategory === 'Mine') url += '&filter=mine';
+        
+        try {
+            const res = await fetch(url, { headers });
+            if (!res.ok) return;
+            const data = await res.json();
+            
+            if (data.posts && data.posts.length > 0) {
+                let newPosts = data.posts;
+                if (currentCategory !== 'Home' && currentCategory !== 'Mine') {
+                    newPosts = data.posts.filter(p => {
+                        try {
+                            const t = JSON.parse(p.tags || '[]');
+                            return t.includes(currentCategory);
+                        } catch(e) { return false; }
+                    });
+                }
+                
+                if (newPosts.length > 0) {
+                    pendingNewPosts = [...newPosts, ...pendingNewPosts];
+                    // Remove duplicates just in case
+                    const uniqueIds = new Set();
+                    pendingNewPosts = pendingNewPosts.filter(p => {
+                        if (uniqueIds.has(p.post_id)) return false;
+                        uniqueIds.add(p.post_id);
+                        return true;
+                    });
+                    
+                    const maxId = Math.max(...pendingNewPosts.map(p => p.post_id));
+                    if (maxId > latestPostId) latestPostId = maxId;
+                    
+                    if (bubble) {
+                        const countSpan = document.getElementById('new-posts-count');
+                        if (countSpan) countSpan.innerText = pendingNewPosts.length;
+                        bubble.style.display = 'block';
+                    }
+                }
+            }
+        } catch (e) {
+            console.error('Polling error', e);
+        }
+    }, 15000);
+}
+
+window.loadNewPosts = function() {
+    const feed = document.getElementById('feed-container');
+    const bubble = document.getElementById('new-posts-bubble');
+    
+    // Sort ascending so when we prepend, the highest ID ends up on top
+    pendingNewPosts.sort((a,b) => a.post_id - b.post_id);
+    
+    pendingNewPosts.forEach(post => {
+        const el = createPostElement(post);
+        // Prepend animation class
+        el.style.animation = 'popIn 0.4s ease';
+        if (feed.firstChild) {
+            feed.insertBefore(el, feed.firstChild);
+        } else {
+            feed.appendChild(el);
+        }
+    });
+    
+    pendingNewPosts = [];
+    if (bubble) bubble.style.display = 'none';
 };

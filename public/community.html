@@ -236,6 +236,7 @@
                     <li><button class="category-tab" data-category="Academics">📚 Academics</button></li>
                     <li><button class="category-tab" data-category="Internships">💼 Internships</button></li>
                     <li><button class="category-tab" data-category="Housing">🏢 Housing</button></li>
+                    <li id="my-posts-tab" style="display: none; margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.05);"><button class="category-tab" data-category="Mine" style="color: #66fcf1;">👤 My Posts</button></li>
                 </ul>
                 
                 <hr style="border-color: rgba(255,255,255,0.05); margin: 1.5rem 0;">
@@ -285,6 +286,12 @@
                 <button class="sort-btn active" data-sort="hot"><i class="fa-solid fa-fire"></i> Hot</button>
                 <button class="sort-btn" data-sort="new"><i class="fa-solid fa-certificate"></i> New</button>
                 <button class="sort-btn" data-sort="top"><i class="fa-solid fa-arrow-trend-up"></i> Top</button>
+            </div>
+
+            <div id="new-posts-bubble" style="display: none; position: sticky; top: 80px; z-index: 100; text-align: center; margin-bottom: 1rem; pointer-events: none;">
+                <button onclick="loadNewPosts()" style="pointer-events: auto; background: #66fcf1; color: #0b0c10; font-weight: bold; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; box-shadow: 0 4px 12px rgba(102,252,241,0.3); transition: transform 0.2s ease;">
+                    ↑ <span id="new-posts-count">0</span> New Posts
+                </button>
             </div>
 
             <div id="feed-container">

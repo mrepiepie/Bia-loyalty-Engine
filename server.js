@@ -2321,9 +2321,25 @@ app.get('/api/community/posts', requireAuth, async (req, res) => {
         res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
         const userId = req.user ? req.user.user_id : -1;
         const sortBy = req.query.sort || 'new';
+        const filter = req.query.filter || 'all';
+        const sinceId = req.query.since_id ? parseInt(req.query.since_id) : 0;
+        
         let orderBy = 'p.created_at DESC';
         if (sortBy === 'hot') orderBy = '(p.upvotes - p.downvotes) + comment_count DESC, p.created_at DESC';
         if (sortBy === 'top') orderBy = '(p.upvotes - p.downvotes) DESC, p.created_at DESC';
+
+        let whereClause = '1=1';
+        let queryParams = [userId, userId];
+        
+        if (filter === 'mine') {
+            whereClause += ' AND p.user_id = ?';
+            queryParams.push(userId);
+        }
+        
+        if (sinceId > 0) {
+            whereClause += ' AND p.post_id > ?';
+            queryParams.push(sinceId);
+        }
 
         const posts = await allQuery(`
             SELECT p.*, u.name, u.programme,
@@ -2332,8 +2348,9 @@ app.get('/api/community/posts', requireAuth, async (req, res) => {
             EXISTS(SELECT 1 FROM community_votes WHERE target_type='post' AND target_id=p.post_id AND user_id=? AND vote_value=-1) as user_has_downvoted
             FROM community_posts p
             JOIN users u ON p.user_id = u.user_id
+            WHERE ${whereClause}
             ORDER BY ${orderBy}
-        `, [userId, userId]);
+        `, queryParams);
         
         // Sanitize anonymous posts
         posts.forEach(p => {
