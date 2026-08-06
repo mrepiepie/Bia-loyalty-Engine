@@ -633,9 +633,7 @@ window.openReportModal = function(targetType, targetId, targetUserId) {
     document.getElementById('report-modal').style.display = 'flex';
 };
 
-const btnSubmitReport = document.getElementById('btn-submit-report');
-if (btnSubmitReport) {
-    btnSubmitReport.addEventListener('click', async () => {
+window.submitReport = async function() {
         const targetType = document.getElementById('report-target-type').value;
         const targetId = document.getElementById('report-target-id').value;
         const targetUser = document.getElementById('report-target-user').value;
@@ -670,5 +668,4 @@ if (btnSubmitReport) {
             console.error(e);
             alert('An error occurred while submitting the report.');
         }
-    });
-}
+};

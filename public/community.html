@@ -334,7 +334,7 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js"></script>
-    <script src="community.js?v=2.0.2"></script>
+    <script src="community.js?v=2.0.3"></script>
 
 
     <!-- Report Modal -->
@@ -357,7 +357,7 @@
             
             <div style="display: flex; gap: 1rem; justify-content: flex-end;">
                 <button class="btn btn-secondary" onclick="document.getElementById('report-modal').style.display='none'">Cancel</button>
-                <button class="btn btn-primary" id="btn-submit-report" style="background: #ef4444; border-color: #ef4444;">Submit Report</button>
+                <button class="btn btn-primary" id="btn-submit-report" onclick="submitReport()" style="background: #ef4444; border-color: #ef4444;">Submit Report</button>
             </div>
         </div>
     </div>
