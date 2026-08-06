@@ -10,7 +10,16 @@ const { createClient } = require('@libsql/client');
 const { Resend } = require('resend');
 
 // Custom Profanity Filter (Vercel Safe)
-const badWordsList = ['fuck', 'bitch', 'shit', 'asshole', 'cunt', 'dick', 'pussy', 'whore', 'slut', 'fag', 'bastard', 'nigger', 'nigga'];
+const badWordsList = [
+    'fuck', 'fucks', 'fucking', 'fucker', 
+    'bitch', 'bitches', 'shit', 'shits', 'shitty',
+    'asshole', 'assholes', 'cunt', 'cunts', 
+    'dick', 'dicks', 'pussy', 'pussies', 
+    'whore', 'whores', 'slut', 'sluts', 
+    'fag', 'fags', 'faggot', 'faggots',
+    'bastard', 'bastards', 'nigger', 'niggers', 
+    'nigga', 'niggas'
+];
 const profanityRegex = new RegExp(`\\b(${badWordsList.join('|')})\\b`, 'gi');
 const profanityFilter = {
     clean: (text) => {
