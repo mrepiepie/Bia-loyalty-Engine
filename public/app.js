@@ -8638,7 +8638,7 @@ async function loadAdminReports() {
                     ${userStats.reports.map(r => `
                         <div style="font-size: 0.8rem; color: rgba(255,255,255,0.8); margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
                             <span style="color: #dfb15b;">[${escapeHTML(r.category)}]</span>: ${escapeHTML(r.reason || 'No reason provided')} 
-                            <br><span style="font-size: 0.7rem; color: rgba(255,255,255,0.4);">Reported by ${escapeHTML(r.reporter_name)} on ${new Date(r.created_at).toLocaleDateString()}</span>
+                            <br><span style="font-size: 0.7rem; color: rgba(255,255,255,0.4);">Reported by ${escapeHTML(r.reporter_name)} on ${new Date(r.created_at).toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                         </div>
                     `).join('')}
                 </div>

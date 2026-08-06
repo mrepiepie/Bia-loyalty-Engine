@@ -651,8 +651,8 @@ if (btnSubmitReport) {
                     'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({
-                    target_type: targetType,
-                    target_id: targetId,
+                    post_id: targetType === 'post' ? targetId : null,
+                    comment_id: targetType === 'comment' ? targetId : null,
                     reported_user_id: targetUser || null,
                     category,
                     reason

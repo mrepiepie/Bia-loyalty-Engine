@@ -2635,8 +2635,20 @@ const PORT = process.env.PORT || 3001;
 // Submit a report
 app.post('/api/community/reports', requireAuth, async (req, res) => {
     try {
-        const { reported_user_id, post_id, comment_id, category, reason } = req.body;
-        if (!reported_user_id || !category) return res.status(400).json({ error: 'Reported user and category required' });
+        let { reported_user_id, post_id, comment_id, category, reason } = req.body;
+        
+        // Auto-resolve reported_user_id if missing (e.g. anonymous post)
+        if (!reported_user_id) {
+            if (post_id) {
+                const post = await getQuery("SELECT user_id FROM community_posts WHERE post_id = ?", [post_id]);
+                if (post) reported_user_id = post.user_id;
+            } else if (comment_id) {
+                const comment = await getQuery("SELECT user_id FROM community_comments WHERE comment_id = ?", [comment_id]);
+                if (comment) reported_user_id = comment.user_id;
+            }
+        }
+        
+        if (!reported_user_id || !category) return res.status(400).json({ error: 'Could not determine the reported user.' });
         
         await runQuery(
             `INSERT INTO community_reports (reporter_id, reported_user_id, post_id, comment_id, category, reason) 
