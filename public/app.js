@@ -8619,7 +8619,7 @@ async function loadAdminReports() {
         }
         
         container.innerHTML = data.map(userStats => `
-            <div class="card" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+            <div class="card" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px; margin-bottom: 1rem; ${!userStats.has_pending ? 'opacity: 0.6;' : ''}">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
                     <div>
                         <h4 style="margin: 0 0 0.2rem 0; color: #fff;">${escapeHTML(userStats.reported_user_name)} <span style="font-size: 0.75rem; color: #ef4444; background: rgba(239, 68, 68, 0.1); padding: 0.2rem 0.5rem; border-radius: 12px; margin-left: 0.5rem;">${userStats.total_reports} Reports</span></h4>
@@ -8713,3 +8713,24 @@ window.toggleMuteUser = async function(userId, isCurrentlyMuted) {
         showToast('Error', e.message, 'error');
     }
 };
+
+async function resolveUserReports(userId) {
+    if (!confirm('Mark all reports for this user as resolved?')) return;
+    try {
+        const res = await fetch(`/api/admin/users/${userId}/resolve-reports`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        if (res.ok) {
+            showToast('Success', 'Reports resolved', 'success');
+            loadAdminReports(); // Refresh the list so it sinks to the bottom
+        } else {
+            const data = await res.json();
+            showToast('Error', data.error || 'Failed to resolve reports', 'error');
+        }
+    } catch (e) {
+        showToast('Error', 'Network error', 'error');
+    }
+}

@@ -2704,6 +2704,7 @@ app.get('/api/admin/reports', requireAdmin, async (req, res) => {
                 u.is_muted,
                 u.muted_until,
                 COUNT(r.report_id) as total_reports,
+                MAX(CASE WHEN r.status = 'Pending' THEN 1 ELSE 0 END) as has_pending,
                 json_group_array(
                     json_object(
                         'report_id', r.report_id,
@@ -2721,7 +2722,7 @@ app.get('/api/admin/reports', requireAdmin, async (req, res) => {
             JOIN users u ON r.reported_user_id = u.user_id
             LEFT JOIN users reporter ON r.reporter_id = reporter.user_id
             GROUP BY r.reported_user_id
-            ORDER BY total_reports DESC, r.created_at DESC
+            ORDER BY has_pending DESC, total_reports DESC, r.created_at DESC
         `;
         const aggregatedReports = await allQuery(query);
         
@@ -2747,6 +2748,22 @@ app.post('/api/admin/users/:id/warn', requireAdmin, async (req, res) => {
             "INSERT INTO user_warnings (user_id, admin_id, reason) VALUES (?, ?, ?)",
             [userId, req.user.user_id, reason || 'Violation of community guidelines']
         );
+        
+        res.json({ message: 'Warning issued successfully' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Admin: Resolve Reports
+app.post('/api/admin/users/:id/resolve-reports', requireAdmin, async (req, res) => {
+    try {
+        await runQuery("UPDATE community_reports SET status = 'Resolved' WHERE reported_user_id = ?", [req.params.id]);
+        res.json({ message: 'Reports marked as resolved.' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
         
         // Optional: Send email
         const user = await getQuery("SELECT email, name FROM users WHERE user_id = ?", [userId]);
