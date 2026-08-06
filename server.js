@@ -9,6 +9,23 @@ const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-bia-key-2026';
 const { createClient } = require('@libsql/client');
 const { Resend } = require('resend');
 
+// Profanity Filter
+const { Filter } = require('bad-words');
+const profanityFilter = new Filter();
+
+// Image Moderation Placeholder
+async function moderateImage(base64Data) {
+    // For this demo, we'll simulate explicit image detection.
+    // In production, this would call Sightengine or AWS Rekognition API.
+    // Randomly flag ~20% of images as explicit for demonstration purposes.
+    if (!base64Data) return { isExplicit: false };
+    const isExplicit = Math.random() < 0.2;
+    return { 
+        isExplicit, 
+        reason: isExplicit ? "Image flagged for explicit content (simulated)." : null 
+    };
+}
+
 const resend = new Resend(process.env.RESEND_API_KEY || 're_placeholder_key');
 
 // Helper function to send voucher emails
@@ -2254,9 +2271,20 @@ app.get('/api/community/posts', requireAuth, async (req, res) => {
 // Create a new post
 app.post('/api/community/posts', requireAuth, async (req, res) => {
     try {
-        const { title, content, is_anonymous, tags, image_base64 } = req.body;
+        let { title, content, is_anonymous, tags, image_base64 } = req.body;
         if (!title || !content) return res.status(400).json({ error: 'Title and content required' });
 
+        // Apply profanity filter
+        title = profanityFilter.clean(title);
+        content = profanityFilter.clean(content);
+
+        // Image moderation check
+        if (image_base64) {
+            const modResult = await moderateImage(image_base64);
+            if (modResult.isExplicit) {
+                return res.status(400).json({ error: 'Image rejected: Contains inappropriate or explicit content.' });
+            }
+        }
         
         try {
             await runQuery('INSERT INTO community_posts (user_id, title, content, is_anonymous, tags, image_url) VALUES (?, ?, ?, ?, ?, ?)', 
@@ -2373,9 +2401,12 @@ app.get('/api/community/posts/:id/comments', requireAuth, async (req, res) => {
 // Add a comment
 app.post('/api/community/posts/:id/comments', requireAuth, async (req, res) => {
     try {
-        const { content, is_anonymous, parent_comment_id } = req.body;
+        let { content, is_anonymous, parent_comment_id } = req.body;
         const postId = req.params.id;
         if (!content) return res.status(400).json({ error: 'Content required' });
+
+        // Apply profanity filter
+        content = profanityFilter.clean(content);
 
         const post = await getQuery("SELECT is_locked FROM community_posts WHERE post_id = ?", [postId]);
         if (!post) return res.status(404).json({ error: 'Post not found' });
