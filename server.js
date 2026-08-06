@@ -228,6 +228,7 @@ async function initializeDatabase() {
             role TEXT DEFAULT 'student', student_id TEXT UNIQUE, referral_code TEXT UNIQUE, current_tier TEXT DEFAULT 'Bronze',
             referral_count INTEGER DEFAULT 0, points_balance INTEGER DEFAULT 0, programme TEXT DEFAULT 'General'
         )`);
+        try { await runQuery('ALTER TABLE users ADD COLUMN is_muted INTEGER DEFAULT 0'); } catch(e) {}
 
         await runQuery(`CREATE TABLE IF NOT EXISTS announcements (
             announcement_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -417,6 +418,30 @@ async function initializeDatabase() {
             vote_value INTEGER NOT NULL, -- 1 for upvote, -1 for downvote
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             UNIQUE(user_id, target_type, target_id)
+        )`);
+
+        await runQuery(`CREATE TABLE IF NOT EXISTS community_reports (
+            report_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            reporter_id INTEGER NOT NULL,
+            reported_user_id INTEGER NOT NULL,
+            post_id INTEGER,
+            comment_id INTEGER,
+            category TEXT NOT NULL,
+            reason TEXT,
+            status TEXT DEFAULT 'Pending',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (reporter_id) REFERENCES users(user_id),
+            FOREIGN KEY (reported_user_id) REFERENCES users(user_id)
+        )`);
+
+        await runQuery(`CREATE TABLE IF NOT EXISTS user_warnings (
+            warning_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            admin_id INTEGER NOT NULL,
+            reason TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(user_id),
+            FOREIGN KEY (admin_id) REFERENCES users(user_id)
         )`);
 
         // Seed partners from partners.json if table is empty
@@ -2326,6 +2351,12 @@ app.get('/api/community/posts', requireAuth, async (req, res) => {
 // Create a new post
 app.post('/api/community/posts', requireAuth, async (req, res) => {
     try {
+        // Check if user is muted
+        const user = await getQuery("SELECT is_muted FROM users WHERE user_id = ?", [req.user.user_id]);
+        if (user && user.is_muted === 1) {
+            return res.status(403).json({ error: 'Your account has been temporarily muted from community participation.' });
+        }
+        
         let { title, content, is_anonymous, tags, image_base64 } = req.body;
         if (!title || !content) return res.status(400).json({ error: 'Title and content required' });
 
@@ -2456,6 +2487,12 @@ app.get('/api/community/posts/:id/comments', requireAuth, async (req, res) => {
 // Add a comment
 app.post('/api/community/posts/:id/comments', requireAuth, async (req, res) => {
     try {
+        // Check if user is muted
+        const user = await getQuery("SELECT is_muted FROM users WHERE user_id = ?", [req.user.user_id]);
+        if (user && user.is_muted === 1) {
+            return res.status(403).json({ error: 'Your account has been temporarily muted from community participation.' });
+        }
+
         let { content, is_anonymous, parent_comment_id } = req.body;
         const postId = req.params.id;
         if (!content) return res.status(400).json({ error: 'Content required' });
@@ -2592,6 +2629,125 @@ app.get('/api/community/admin/stats', requireAuth, async (req, res) => {
 // ==========================================
 
 const PORT = process.env.PORT || 3001;
+
+// --- COMMUNITY REPORTING & MODERATION ROUTES ---
+
+// Submit a report
+app.post('/api/community/reports', requireAuth, async (req, res) => {
+    try {
+        const { reported_user_id, post_id, comment_id, category, reason } = req.body;
+        if (!reported_user_id || !category) return res.status(400).json({ error: 'Reported user and category required' });
+        
+        await runQuery(
+            `INSERT INTO community_reports (reporter_id, reported_user_id, post_id, comment_id, category, reason) 
+             VALUES (?, ?, ?, ?, ?, ?)`,
+            [req.user.user_id, reported_user_id, post_id || null, comment_id || null, category, reason || null]
+        );
+
+        // Proactive efficiency: Auto-hide check
+        if (post_id) {
+            const { count } = await getQuery("SELECT COUNT(*) as count FROM community_reports WHERE post_id = ?", [post_id]);
+            if (count >= 3) {
+                // Auto-hide the post by locking it
+                await runQuery("UPDATE community_posts SET is_locked = 1 WHERE post_id = ?", [post_id]);
+            }
+        }
+
+        res.json({ message: 'Report submitted successfully' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to submit report' });
+    }
+});
+
+// Admin: Get Aggregated Reports
+app.get('/api/admin/reports', requireAdmin, async (req, res) => {
+    try {
+        const query = `
+            SELECT 
+                r.reported_user_id,
+                u.name as reported_user_name,
+                u.email as reported_user_email,
+                u.is_muted,
+                COUNT(r.report_id) as total_reports,
+                json_group_array(
+                    json_object(
+                        'report_id', r.report_id,
+                        'category', r.category,
+                        'reason', r.reason,
+                        'post_id', r.post_id,
+                        'comment_id', r.comment_id,
+                        'created_at', r.created_at,
+                        'status', r.status,
+                        'reporter_id', r.reporter_id,
+                        'reporter_name', reporter.name
+                    )
+                ) as reports
+            FROM community_reports r
+            JOIN users u ON r.reported_user_id = u.user_id
+            LEFT JOIN users reporter ON r.reporter_id = reporter.user_id
+            GROUP BY r.reported_user_id
+            ORDER BY total_reports DESC, r.created_at DESC
+        `;
+        const aggregatedReports = await allQuery(query);
+        
+        const formatted = aggregatedReports.map(r => ({
+            ...r,
+            reports: JSON.parse(r.reports)
+        }));
+        
+        res.json(formatted);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to fetch reports' });
+    }
+});
+
+// Admin: Issue Warning
+app.post('/api/admin/users/:id/warn', requireAdmin, async (req, res) => {
+    try {
+        const { reason } = req.body;
+        const userId = req.params.id;
+        
+        await runQuery(
+            "INSERT INTO user_warnings (user_id, admin_id, reason) VALUES (?, ?, ?)",
+            [userId, req.user.user_id, reason || 'Violation of community guidelines']
+        );
+        
+        // Optional: Send email
+        const user = await getQuery("SELECT email, name FROM users WHERE user_id = ?", [userId]);
+        if (user) {
+            try {
+                await resend.emails.send({
+                    from: 'admin@resend.dev',
+                    to: user.email,
+                    subject: 'BIA Community Hub: Official Warning',
+                    html: `<p>Hi ${user.name},</p><p>You have received a warning from the community moderators.</p><p>Reason: ${reason}</p><p>Please adhere to the community guidelines.</p>`
+                });
+            } catch (e) { console.error("Failed to send warning email", e); }
+        }
+        
+        res.json({ message: 'Warning issued successfully' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to issue warning' });
+    }
+});
+
+// Admin: Toggle Mute
+app.post('/api/admin/users/:id/mute', requireAdmin, async (req, res) => {
+    try {
+        const { is_muted } = req.body;
+        const userId = req.params.id;
+        
+        await runQuery("UPDATE users SET is_muted = ? WHERE user_id = ?", [is_muted ? 1 : 0, userId]);
+        
+        res.json({ message: `User successfully ${is_muted ? 'muted' : 'unmuted'}` });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to mute user' });
+    }
+});
 
 // Export for Vercel serverless
 module.exports = app;

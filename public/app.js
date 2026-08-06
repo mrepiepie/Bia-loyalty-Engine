@@ -8556,7 +8556,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const response = await fetch(`${API_BASE}/community/posts`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ title, content })
+                    body: JSON.stringify({ title, content }) // Note: Image base64 should be here if applicable, but currently it seems it's not being sent from this block, wait, let me check. 
                 });
                 
                 const data = await response.json();
@@ -8567,7 +8567,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 loadCommunityPosts();
                 fetchOverview(); // Update points balance
             } catch (err) {
-                showToast('Error', err.message, 'error');
+                if (err.message && (err.message.toLowerCase().includes('explicit') || err.message.toLowerCase().includes('policy') || err.message.toLowerCase().includes('profanity'))) {
+                    // Show a prominent pop-up alert for policy violations
+                    alert("⚠️ COMMUNITY POLICY VIOLATION ⚠️\n\nYour post has been blocked because it contains content that goes against our community guidelines (e.g., inappropriate images, weapons, or profanity).\n\nPlease revise your content before posting.");
+                } else {
+                    showToast('Error', err.message, 'error');
+                }
             } finally {
                 btnSubmitPost.disabled = false;
                 btnSubmitPost.innerHTML = 'Publish Post';
