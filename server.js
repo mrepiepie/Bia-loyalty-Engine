@@ -2584,8 +2584,9 @@ app.delete('/api/community/posts/:id', requireAuth, async (req, res) => {
         if (req.user.role !== 'admin') {
             return res.status(403).json({ error: 'Unauthorized. Admin access required.' });
         }
+        await runQuery("DELETE FROM community_reports WHERE post_id = ?", [req.params.id]);
+        await runQuery("DELETE FROM community_comments WHERE post_id = ?", [req.params.id]);
         await runQuery("DELETE FROM community_posts WHERE post_id = ?", [req.params.id]);
-        // Note: foreign keys (community_comments, tags, etc.) should cascade or be ignored for this MVP
         res.json({ message: 'Post deleted successfully.' });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -2598,6 +2599,8 @@ app.delete('/api/community/comments/:id', requireAuth, async (req, res) => {
         if (req.user.role !== 'admin') {
             return res.status(403).json({ error: 'Unauthorized. Admin access required.' });
         }
+        await runQuery("DELETE FROM community_reports WHERE comment_id = ?", [req.params.id]);
+        await runQuery("DELETE FROM community_comments WHERE parent_comment_id = ?", [req.params.id]);
         await runQuery("DELETE FROM community_comments WHERE comment_id = ?", [req.params.id]);
         res.json({ message: 'Comment deleted successfully.' });
     } catch (err) {
