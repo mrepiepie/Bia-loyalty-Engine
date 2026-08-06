@@ -8587,4 +8587,116 @@ document.addEventListener('DOMContentLoaded', () => {
             loadCommunityPosts();
         });
     }
+
+    const adminReportsBtn = document.querySelector('button[data-target="admin-reports"]');
+    if (adminReportsBtn) {
+        adminReportsBtn.addEventListener('click', () => {
+            loadAdminReports();
+        });
+    }
 });
+
+// ----------------------------------------------------
+// Admin: Reports & Moderation
+// ----------------------------------------------------
+async function loadAdminReports() {
+    const container = document.getElementById('admin-reports-container');
+    if (!container) return;
+    
+    container.innerHTML = '<div style="color: rgba(255,255,255,0.5);">Loading reports...</div>';
+    
+    try {
+        const res = await fetch('/api/admin/reports', {
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+        const data = await res.json();
+        
+        if (!res.ok) throw new Error(data.error || 'Failed to load reports');
+        
+        if (data.length === 0) {
+            container.innerHTML = '<div style="color: rgba(255,255,255,0.5);">No pending reports.</div>';
+            return;
+        }
+        
+        container.innerHTML = data.map(userStats => `
+            <div class="card" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                    <div>
+                        <h4 style="margin: 0 0 0.2rem 0; color: #fff;">${escapeHTML(userStats.reported_user_name)} <span style="font-size: 0.75rem; color: #ef4444; background: rgba(239, 68, 68, 0.1); padding: 0.2rem 0.5rem; border-radius: 12px; margin-left: 0.5rem;">${userStats.total_reports} Reports</span></h4>
+                        <div style="font-size: 0.8rem; color: rgba(255,255,255,0.5);">${escapeHTML(userStats.reported_user_email)}</div>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button onclick="warnUser(${userStats.reported_user_id})" class="btn btn-secondary btn-sm" style="font-size: 0.75rem;"><i class="fa-solid fa-triangle-exclamation"></i> Warn</button>
+                        <button onclick="toggleMuteUser(${userStats.reported_user_id}, ${userStats.is_muted})" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; color: ${userStats.is_muted ? '#4ade80' : '#ef4444'}; border-color: ${userStats.is_muted ? 'rgba(74, 222, 128, 0.2)' : 'rgba(239, 68, 68, 0.2)'};">
+                            <i class="fa-solid ${userStats.is_muted ? 'fa-microphone' : 'fa-microphone-lines-slash'}"></i> ${userStats.is_muted ? 'Unmute' : 'Mute'}
+                        </button>
+                    </div>
+                </div>
+                
+                <div style="background: rgba(0,0,0,0.3); border-radius: 6px; padding: 0.8rem; max-height: 200px; overflow-y: auto;">
+                    <h5 style="margin: 0 0 0.5rem 0; font-size: 0.8rem; color: rgba(255,255,255,0.6);">Report Details:</h5>
+                    ${userStats.reports.map(r => `
+                        <div style="font-size: 0.8rem; color: rgba(255,255,255,0.8); margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <span style="color: #dfb15b;">[${escapeHTML(r.category)}]</span>: ${escapeHTML(r.reason || 'No reason provided')} 
+                            <br><span style="font-size: 0.7rem; color: rgba(255,255,255,0.4);">Reported by ${escapeHTML(r.reporter_name)} on ${new Date(r.created_at).toLocaleDateString()}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `).join('');
+        
+    } catch (err) {
+        container.innerHTML = `<div style="color: #ef4444;">${err.message}</div>`;
+    }
+}
+
+window.warnUser = async function(userId) {
+    const reason = prompt("Enter warning reason (sent to user via email):", "Violation of community guidelines");
+    if (!reason) return;
+    
+    try {
+        const res = await fetch(`/api/admin/users/${userId}/warn`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}` 
+            },
+            body: JSON.stringify({ reason })
+        });
+        
+        if (res.ok) {
+            showToast('Warning Sent', 'User has been officially warned.', 'success');
+        } else {
+            const data = await res.json();
+            showToast('Error', data.error, 'error');
+        }
+    } catch (e) {
+        showToast('Error', e.message, 'error');
+    }
+};
+
+window.toggleMuteUser = async function(userId, currentlyMuted) {
+    if (!confirm(`Are you sure you want to ${currentlyMuted ? 'unmute' : 'mute'} this user?`)) return;
+    
+    try {
+        const res = await fetch(`/api/admin/users/${userId}/mute`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}` 
+            },
+            body: JSON.stringify({ is_muted: !currentlyMuted })
+        });
+        
+        if (res.ok) {
+            showToast('Success', `User ${currentlyMuted ? 'unmuted' : 'muted'} successfully.`, 'success');
+            loadAdminReports(); // Refresh
+        } else {
+            const data = await res.json();
+            showToast('Error', data.error, 'error');
+        }
+    } catch (e) {
+        showToast('Error', e.message, 'error');
+    }
+};
+
