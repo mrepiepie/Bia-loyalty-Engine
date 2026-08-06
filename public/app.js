@@ -8675,21 +8675,35 @@ window.warnUser = async function(userId) {
     }
 };
 
-window.toggleMuteUser = async function(userId, currentlyMuted) {
-    if (!confirm(`Are you sure you want to ${currentlyMuted ? 'unmute' : 'mute'} this user?`)) return;
-    
+window.toggleMuteUser = async function(userId, isCurrentlyMuted) {
+    let durationHours = null;
+    if (!isCurrentlyMuted) {
+        const input = prompt("How many hours should this user be muted for? (e.g., 24 for one day, 168 for one week)", "24");
+        if (input === null) return; // User cancelled
+        durationHours = parseInt(input);
+        if (isNaN(durationHours) || durationHours <= 0) {
+            alert("Invalid duration. Please enter a valid number of hours.");
+            return;
+        }
+    } else {
+        if (!confirm("Are you sure you want to unmute this user early?")) return;
+    }
+
     try {
         const res = await fetch(`/api/admin/users/${userId}/mute`, {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}` 
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
-            body: JSON.stringify({ is_muted: !currentlyMuted })
+            body: JSON.stringify({ 
+                is_muted: !isCurrentlyMuted,
+                duration_hours: durationHours
+            })
         });
         
         if (res.ok) {
-            showToast('Success', `User ${currentlyMuted ? 'unmuted' : 'muted'} successfully.`, 'success');
+            showToast('Success', `User successfully ${!isCurrentlyMuted ? 'muted for ' + durationHours + ' hours' : 'unmuted'}`, 'success');
             loadAdminReports(); // Refresh
         } else {
             const data = await res.json();
@@ -8699,4 +8713,3 @@ window.toggleMuteUser = async function(userId, currentlyMuted) {
         showToast('Error', e.message, 'error');
     }
 };
-

@@ -229,6 +229,7 @@ async function initializeDatabase() {
             referral_count INTEGER DEFAULT 0, points_balance INTEGER DEFAULT 0, programme TEXT DEFAULT 'General'
         )`);
         try { await runQuery('ALTER TABLE users ADD COLUMN is_muted INTEGER DEFAULT 0'); } catch(e) {}
+        try { await runQuery('ALTER TABLE users ADD COLUMN muted_until TEXT DEFAULT NULL'); } catch(e) {}
 
         await runQuery(`CREATE TABLE IF NOT EXISTS announcements (
             announcement_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -2352,8 +2353,8 @@ app.get('/api/community/posts', requireAuth, async (req, res) => {
 app.post('/api/community/posts', requireAuth, async (req, res) => {
     try {
         // Check if user is muted
-        const user = await getQuery("SELECT is_muted FROM users WHERE user_id = ?", [req.user.user_id]);
-        if (user && user.is_muted === 1) {
+        const user = await getQuery("SELECT is_muted, muted_until FROM users WHERE user_id = ?", [req.user.user_id]);
+        if (user && (user.is_muted === 1 || (user.muted_until && new Date(user.muted_until) > new Date()))) {
             return res.status(403).json({ error: 'Your account has been temporarily muted from community participation.' });
         }
         
@@ -2488,8 +2489,8 @@ app.get('/api/community/posts/:id/comments', requireAuth, async (req, res) => {
 app.post('/api/community/posts/:id/comments', requireAuth, async (req, res) => {
     try {
         // Check if user is muted
-        const user = await getQuery("SELECT is_muted FROM users WHERE user_id = ?", [req.user.user_id]);
-        if (user && user.is_muted === 1) {
+        const user = await getQuery("SELECT is_muted, muted_until FROM users WHERE user_id = ?", [req.user.user_id]);
+        if (user && (user.is_muted === 1 || (user.muted_until && new Date(user.muted_until) > new Date()))) {
             return res.status(403).json({ error: 'Your account has been temporarily muted from community participation.' });
         }
 
@@ -2681,6 +2682,7 @@ app.get('/api/admin/reports', requireAdmin, async (req, res) => {
                 u.name as reported_user_name,
                 u.email as reported_user_email,
                 u.is_muted,
+                u.muted_until,
                 COUNT(r.report_id) as total_reports,
                 json_group_array(
                     json_object(
@@ -2749,12 +2751,17 @@ app.post('/api/admin/users/:id/warn', requireAdmin, async (req, res) => {
 // Admin: Toggle Mute
 app.post('/api/admin/users/:id/mute', requireAdmin, async (req, res) => {
     try {
-        const { is_muted } = req.body;
+        const { is_muted, duration_hours } = req.body;
         const userId = req.params.id;
         
-        await runQuery("UPDATE users SET is_muted = ? WHERE user_id = ?", [is_muted ? 1 : 0, userId]);
+        let mutedUntil = null;
+        if (is_muted && duration_hours) {
+            mutedUntil = new Date(Date.now() + duration_hours * 3600000).toISOString();
+        }
         
-        res.json({ message: `User successfully ${is_muted ? 'muted' : 'unmuted'}` });
+        await runQuery("UPDATE users SET is_muted = ?, muted_until = ? WHERE user_id = ?", [is_muted ? 1 : 0, mutedUntil, userId]);
+        
+        res.json({ message: `User successfully ${is_muted ? 'muted for ' + duration_hours + ' hours' : 'unmuted'}` });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Failed to mute user' });
