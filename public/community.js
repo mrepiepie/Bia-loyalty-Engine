@@ -165,6 +165,7 @@ function createPostElement(post) {
                     </button>
                 ` : ''}
                 </div>
+                <button onclick="deletePost(${post.post_id})" class="btn btn-sm admin-only-btn" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 0.3rem 0.5rem; font-size: 0.75rem;"><i class="fa-solid fa-trash"></i> Delete</button>
                 <button onclick="openReportModal('post', ${post.post_id}, ${post.user_id})" class="btn btn-sm" style="background: none; border: none; color: rgba(239, 68, 68, 0.6); cursor: pointer; padding: 0.3rem 0.5rem; font-size: 0.75rem;">
                     <i class="fa-solid fa-flag"></i> Report
                 </button>
@@ -597,3 +598,27 @@ document.querySelectorAll('.category-tab').forEach(tab => {
         fetchPosts();
     });
 });
+
+// Delete Post (Admin Only)
+window.deletePost = async function(postId) {
+    if (!confirm('Are you sure you want to delete this post? This action cannot be undone.')) return;
+    
+    try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`/api/community/posts/${postId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (res.ok) {
+            alert('Post deleted successfully.');
+            loadFeed(); // Refresh the feed
+        } else {
+            const data = await res.json();
+            alert(data.error || 'Failed to delete post. You might not have Admin permissions.');
+        }
+    } catch (e) {
+        console.error(e);
+        alert('An error occurred.');
+    }
+};
