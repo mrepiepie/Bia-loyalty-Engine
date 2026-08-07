@@ -8600,11 +8600,27 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Add interceptor to load community posts when tab is clicked
     const communityTabBtn = document.querySelector('button[data-target="community-hub"]');
+    let communityPollInterval = null;
+
     if (communityTabBtn) {
         communityTabBtn.addEventListener('click', () => {
             loadCommunityPosts();
+            if (!communityPollInterval) {
+                communityPollInterval = setInterval(loadCommunityPosts, 5000);
+            }
         });
     }
+
+    // Stop polling if we navigate away from community tab
+    document.querySelectorAll('.sidebar-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            const target = e.currentTarget.getAttribute('data-target');
+            if (target !== 'community' && communityPollInterval) {
+                clearInterval(communityPollInterval);
+                communityPollInterval = null;
+            }
+        });
+    });
 
     const adminReportsBtn = document.querySelector('button[data-target="admin-reports"]');
     if (adminReportsBtn) {
