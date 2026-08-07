@@ -853,3 +853,41 @@ window.loadNewPosts = function() {
     pendingNewPosts = [];
     if (bubble) bubble.style.display = 'none';
 };
+
+
+// Custom Dropdown Logic
+document.addEventListener('DOMContentLoaded', () => {
+    const selected = document.getElementById('category-dropdown-selected');
+    const options = document.getElementById('category-dropdown-options');
+    const hiddenInput = document.getElementById('post-category');
+    
+    if (selected && options) {
+        selected.addEventListener('click', (e) => {
+            options.classList.toggle('show');
+            e.stopPropagation();
+        });
+        
+        options.querySelectorAll('.custom-dropdown-option').forEach(opt => {
+            opt.addEventListener('click', (e) => {
+                const val = opt.getAttribute('data-value');
+                hiddenInput.value = val;
+                selected.querySelector('span').textContent = val;
+                options.classList.remove('show');
+            });
+        });
+        
+        document.addEventListener('click', () => {
+            options.classList.remove('show');
+        });
+    }
+
+    // Image Remove Logic
+    const removeBtn = document.getElementById('btn-remove-image');
+    if (removeBtn) {
+        removeBtn.addEventListener('click', () => {
+            document.getElementById('post-image').value = '';
+            document.getElementById('post-image-label').textContent = 'Attach Image';
+            removeBtn.style.display = 'none';
+        });
+    }
+});

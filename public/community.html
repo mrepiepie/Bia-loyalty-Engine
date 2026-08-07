@@ -209,6 +209,57 @@
         }
         @keyframes popIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
     </style>
+
+<style>
+.custom-dropdown {
+    position: relative;
+    width: 200px;
+    user-select: none;
+}
+.custom-dropdown-selected {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: border-color 0.2s;
+}
+.custom-dropdown-selected:hover {
+    border-color: rgba(255,255,255,0.3);
+}
+.custom-dropdown-options {
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 0;
+    width: 100%;
+    background: #111;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    z-index: 999;
+    display: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    overflow: hidden;
+}
+.custom-dropdown-options.show {
+    display: block;
+}
+.custom-dropdown-option {
+    padding: 10px 12px;
+    color: #ccc;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+}
+.custom-dropdown-option:hover {
+    background: #3b82f6;
+    color: #fff;
+}
+</style>
 </head>
 <body class="dark-theme">
 
