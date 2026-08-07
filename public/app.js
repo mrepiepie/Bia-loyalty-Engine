@@ -7330,23 +7330,41 @@ let adminCommunityFeedData = [];
 
 async function loadAdminCommunityHub() {
     try {
+        const feedElement = document.getElementById('admin-community-hub-feed');
+        if (feedElement) feedElement.innerHTML = '<tr><td colspan="6" style="padding:1rem;text-align:center;color:#dfb15b;">DEBUG: Fetching stats from server...</td></tr>';
+        
         const token = localStorage.getItem('token');
+        if (!token) {
+            if (feedElement) feedElement.innerHTML = '<tr><td colspan="6" style="padding:1rem;text-align:center;color:red;">DEBUG: No auth token found!</td></tr>';
+            return;
+        }
+
         const res = await fetch('/api/community/admin/stats?t=' + Date.now(), {
             headers: { 'Authorization': `Bearer ${token}` }
         });
+        
+        if (!res.ok) {
+            const errText = await res.text();
+            if (feedElement) feedElement.innerHTML = `<tr><td colspan="6" style="padding:1rem;text-align:center;color:red;">DEBUG: Server returned ${res.status}: ${errText.substring(0, 50)}</td></tr>`;
+            return;
+        }
+        
         const data = await res.json();
         
         if (data.stats) {
             document.getElementById('admin-comm-hub-total-posts').textContent = data.stats.total_posts || 0;
             document.getElementById('admin-comm-hub-total-comments').textContent = data.stats.total_comments || 0;
             document.getElementById('admin-comm-hub-contributors').textContent = data.stats.active_contributors || 0;
+        } else {
+            document.getElementById('admin-comm-hub-total-posts').textContent = 'ERR';
         }
         
         adminCommunityFeedData = data.moderationFeed || [];
         filterAdminCommunityFeed();
     } catch (e) {
         console.error('Error loading community hub stats:', e);
-        document.getElementById('admin-community-hub-feed').innerHTML = '<tr><td colspan="6" class="no-data">Failed to load data</td></tr>';
+        const feedElement = document.getElementById('admin-community-hub-feed');
+        if (feedElement) feedElement.innerHTML = `<tr><td colspan="6" style="padding:1rem;text-align:center;color:red;">DEBUG ERROR: ${e.message}</td></tr>`;
     }
 }
 
