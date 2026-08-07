@@ -2655,7 +2655,15 @@ app.get('/api/community/admin/stats', requireAuth, async (req, res) => {
             return res.status(403).json({ error: 'Unauthorized. Admin access required.' });
         }
         
-        const stats = await getQuery("SELECT (SELECT COUNT(*) FROM community_posts) as total_posts, (SELECT COUNT(*) FROM community_comments) as total_comments, (SELECT COUNT(DISTINCT user_id) FROM (SELECT user_id FROM community_posts UNION SELECT user_id FROM community_comments)) as active_contributors");
+        let stats = { total_posts: 0, total_comments: 0, active_contributors: 0 };
+        try {
+            const resStats = await getQuery("SELECT (SELECT COUNT(*) FROM community_posts) as total_posts, (SELECT COUNT(*) FROM community_comments) as total_comments, (SELECT COUNT(DISTINCT user_id) FROM (SELECT user_id FROM community_posts UNION SELECT user_id FROM community_comments)) as active_contributors");
+            stats = resStats || stats;
+        } catch (dbErr) {
+            const resStats = await getQuery("SELECT (SELECT COUNT(*) FROM community_posts) as total_posts, (SELECT COUNT(DISTINCT user_id) FROM community_posts) as active_contributors");
+            stats.total_posts = resStats ? resStats.total_posts : 0;
+            stats.active_contributors = resStats ? resStats.active_contributors : 0;
+        }
         
         // Fix for @libsql/client returning BigInt for COUNT(*) aggregations
         if (stats) {
@@ -2666,12 +2674,20 @@ app.get('/api/community/admin/stats', requireAuth, async (req, res) => {
             }
         }
         
-        const moderationFeed = await allQuery(`
-            SELECT 'post' as type, post_id as id, user_id, title as snippet, created_at, is_locked FROM community_posts
-            UNION ALL
-            SELECT 'comment' as type, comment_id as id, user_id, substr(content, 1, 50) as snippet, created_at, 0 as is_locked FROM community_comments
-            ORDER BY created_at DESC LIMIT 50
-        `);
+        let moderationFeed = [];
+        try {
+            moderationFeed = await allQuery(`
+                SELECT 'post' as type, post_id as id, user_id, title as snippet, created_at, is_locked FROM community_posts
+                UNION ALL
+                SELECT 'comment' as type, comment_id as id, user_id, content as snippet, created_at, 0 as is_locked FROM community_comments
+                ORDER BY created_at DESC LIMIT 100
+            `);
+        } catch (feedErr) {
+            moderationFeed = await allQuery(`
+                SELECT 'post' as type, post_id as id, user_id, title as snippet, created_at, is_locked FROM community_posts
+                ORDER BY created_at DESC LIMIT 100
+            `);
+        }
         
         res.json({ stats, moderationFeed });
     } catch (err) {
