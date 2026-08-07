@@ -79,6 +79,7 @@ async function fetchPosts(isSilent = false) {
     try {
         let url = `/api/community/posts?sort=${currentSort}&_t=${Date.now()}`;
         if (currentCategory === 'Mine') url += '&filter=mine';
+        if (currentCategory === 'Archived') url += '&filter=archived';
         const res = await fetch(url, { headers });
         const data = await res.json();
         
@@ -88,7 +89,7 @@ async function fetchPosts(isSilent = false) {
             const maxId = Math.max(...data.posts.map(p => p.post_id));
             if (maxId > latestPostId) latestPostId = maxId;
 
-            if (currentCategory !== 'Home' && currentCategory !== 'Mine') {
+            if (currentCategory !== 'Home' && currentCategory !== 'Mine' && currentCategory !== 'Archived') {
                 filteredPosts = data.posts.filter(p => {
                     try {
                         const t = JSON.parse(p.tags || '[]');
@@ -484,6 +485,12 @@ window.adminLockPost = async function(postId, lock) {
     } catch (e) {
         alert('Error: ' + e.message);
     }
+};
+
+window.viewArchivedPosts = function() {
+    currentCategory = 'Archived';
+    document.querySelectorAll('.sidebar-nav li').forEach(li => li.classList.remove('active'));
+    fetchPosts();
 };
 
 window.clearOldPosts = async function() {

@@ -2350,6 +2350,13 @@ app.get('/api/community/posts', requireAuth, async (req, res) => {
         if (filter === 'mine') {
             whereClause += ' AND p.user_id = ?';
             queryParams.push(userId);
+        } else if (filter === 'archived') {
+            // Only allow admins to view archived posts in the archived view
+            if (req.user && req.user.role === 'admin') {
+                whereClause += ' AND p.is_archived = 1';
+            } else {
+                whereClause += ' AND p.is_archived = 0';
+            }
         } else {
             whereClause += ' AND p.is_archived = 0';
         }
