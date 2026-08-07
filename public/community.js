@@ -141,54 +141,55 @@ function createPostElement(post) {
     const imageHtml = post.image_url ? `<img src="${post.image_url}" style="max-width: 100%; max-height: 400px; border-radius: 8px; margin-top: 1rem; margin-bottom: 0.5rem; display: block; object-fit: cover;" alt="Post Attachment">` : '';
 
     div.innerHTML = `
-        <div class="post-votes">
-            <button class="btn-vote ${post.user_has_upvoted ? 'active' : ''}" onclick="handleVote('post', ${post.post_id}, 1, this)"><i class="fa-solid fa-arrow-up"></i></button>
+        <div class="vote-col">
+            <button class="vote-btn ${post.user_has_upvoted ? 'upvoted' : ''}" onclick="handleVote('post', ${post.post_id}, 1, this)"><i class="fa-solid fa-arrow-up"></i></button>
             <span class="vote-count">${post.upvotes - post.downvotes}</span>
-            <button class="btn-vote ${post.user_has_downvoted ? 'active' : ''}" onclick="handleVote('post', ${post.post_id}, -1, this)"><i class="fa-solid fa-arrow-down"></i></button>
+            <button class="vote-btn ${post.user_has_downvoted ? 'downvoted' : ''}" onclick="handleVote('post', ${post.post_id}, -1, this)"><i class="fa-solid fa-arrow-down"></i></button>
         </div>
         <div class="post-content-area">
             ${acceptedHtml}
             <div class="post-meta">
-                <span style="color: #fff; font-weight: 600;">${post.name}</span>
-                ${post.programme ? `<span style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; font-size: 0.7rem;">${post.programme}</span>` : ''}
-                <span>•</span>
+                <span style="color: var(--text-primary); font-weight: 600;">${post.name}</span>
+                ${post.programme ? `<span style="background: var(--panel-bg); padding: 2px 8px; border-radius: 999px; font-size: 0.7rem; border: 1px solid var(--panel-border);">${post.programme}</span>` : ''}
+                <span style="opacity: 0.5;">•</span>
                 <span>${new Date(post.created_at).toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
-                ${tagsHtml ? `<span>•</span> ${tagsHtml}` : ''}
+                ${tagsHtml ? `<span style="opacity: 0.5;">•</span> ${tagsHtml}` : ''}
             </div>
             <h3 class="post-title" id="post-title-text-${post.post_id}">${post.title}</h3>
             <div class="post-body" id="post-body-text-${post.post_id}">${post.content}</div>
             ${imageHtml}
-            <div class="post-actions" style="display: flex; justify-content: space-between; align-items: center; width: 100%;"><div style="display: flex; align-items: center; gap: 1rem;">
-                <button class="action-btn" onclick="toggleComments(${post.post_id})">
-                    <i class="fa-regular fa-message"></i> ${post.comment_count} Comments
-                </button>
-                ${currentUser && currentUser.user_id === post.user_id && !post.accepted_answer_id ? 
-                    `<span style="color: #dfb15b; font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem;">
-                        <i class="fa-solid fa-crown"></i> Accept an answer to help others!
-                    </span>` : ''}
-                
-                ${currentUser && currentUser.role === 'admin' ? `
-                    <button class="action-btn" style="color:#dfb15b;" onclick="adminEditPost(${post.post_id})">
-                        <i class="fa-solid fa-pen"></i> Edit
+            <div class="post-actions" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <button class="action-btn" onclick="toggleComments(${post.post_id})">
+                        <i class="fa-regular fa-message"></i> ${post.comment_count} Comments
                     </button>
-                    <button class="action-btn" style="color:${post.is_locked ? '#ff4b4b' : '#66fcf1'};" onclick="adminLockPost(${post.post_id}, ${!post.is_locked})">
-                        <i class="fa-solid ${post.is_locked ? 'fa-lock' : 'fa-unlock'}"></i> ${post.is_locked ? 'Unlock' : 'Lock'}
-                    </button>
-                    <button class="action-btn" style="color:#ff4b4b;" onclick="adminDeleteCommunityContent('post', ${post.post_id})">
-                        <i class="fa-solid fa-trash"></i> Delete
-                    </button>
-                ` : ''}
+                    ${currentUser && currentUser.user_id === post.user_id && !post.accepted_answer_id ? 
+                        `<span style="color: #dfb15b; font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem; font-family: var(--font-ui); font-weight: 500;">
+                            <i class="fa-solid fa-crown"></i> Accept an answer to help others!
+                        </span>` : ''}
+                    
+                    ${currentUser && currentUser.role === 'admin' ? `
+                        <button class="action-btn" style="color:#dfb15b;" onclick="adminEditPost(${post.post_id})">
+                            <i class="fa-solid fa-pen"></i> Edit
+                        </button>
+                        <button class="action-btn" style="color:${post.is_locked ? 'var(--danger)' : 'var(--accent-primary)'};" onclick="adminLockPost(${post.post_id}, ${!post.is_locked})">
+                            <i class="fa-solid ${post.is_locked ? 'fa-lock' : 'fa-unlock'}"></i> ${post.is_locked ? 'Unlock' : 'Lock'}
+                        </button>
+                        <button class="action-btn" style="color:var(--danger);" onclick="adminDeleteCommunityContent('post', ${post.post_id})">
+                            <i class="fa-solid fa-trash"></i> Delete
+                        </button>
+                    ` : ''}
                 </div>
-                <button onclick="openReportModal('post', ${post.post_id}, ${post.user_id})" class="btn btn-sm" style="background: none; border: none; color: rgba(239, 68, 68, 0.6); cursor: pointer; padding: 0.3rem 0.5rem; font-size: 0.75rem;">
-                    <i class="fa-solid fa-flag"></i> Report
+                <button onclick="openReportModal('post', ${post.post_id}, ${post.user_id})" class="btn-modern" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; border-color: transparent;">
+                    <i class="fa-solid fa-flag" style="color: var(--danger);"></i> Report
                 </button>
             </div>
             
-            <div id="comments-${post.post_id}" style="display: none; margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1rem;">
+            <div id="comments-${post.post_id}" style="display: none; margin-top: 1.5rem; border-top: 1px solid var(--panel-border); padding-top: 1.5rem;">
                 <div id="comments-list-${post.post_id}"></div>
-                <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
-                    <input type="text" id="comment-input-${post.post_id}" class="input-field" placeholder="Add a comment..." style="flex:1;" onkeypress="if(event.key === 'Enter') submitComment(${post.post_id})">
-                    <button class="btn btn-primary" onclick="submitComment(${post.post_id})">Reply</button>
+                <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem;">
+                    <input type="text" id="comment-input-${post.post_id}" class="modern-input" placeholder="Add a comment..." style="flex:1; background: rgba(255,255,255,0.03); border: 1px solid var(--panel-border); border-radius: 999px; padding: 0.5rem 1rem;" onkeypress="if(event.key === 'Enter') submitComment(${post.post_id})">
+                    <button class="btn-modern btn-modern-primary" onclick="submitComment(${post.post_id})">Reply</button>
                 </div>
             </div>
         </div>
@@ -282,29 +283,29 @@ async function loadComments(postId) {
         if (data.comments && data.comments.length > 0) {
             data.comments.forEach(c => {
                 const div = document.createElement('div');
-                div.style.cssText = 'padding: 0.75rem; background: rgba(0,0,0,0.2); border-radius: 8px; margin-bottom: 0.5rem;';
+                div.style.cssText = 'padding: 1rem; background: rgba(255,255,255,0.02); border: 1px solid var(--panel-border); border-radius: 12px; margin-bottom: 0.75rem;';
                 
                 const upvoted = c.user_has_upvoted ? 'upvoted' : '';
                 const downvoted = c.user_has_downvoted ? 'downvoted' : '';
                 const score = c.upvotes - c.downvotes;
                 
                 const acceptBtn = (currentUser && list.closest('.post-card').querySelector('.fa-crown') /* bit hacky check if author hasn't accepted yet */ && currentUser.name !== c.name) ?
-                    `<button class="btn btn-sm" style="background: rgba(223, 177, 91, 0.2); color: #dfb15b; border: 1px solid #dfb15b; padding: 2px 8px; font-size: 0.7rem;" onclick="acceptAnswer(${postId}, ${c.comment_id})"><i class="fa-solid fa-check"></i> Accept as Answer</button>` : '';
+                    `<button class="btn-modern" style="color: #dfb15b; padding: 2px 8px; font-size: 0.7rem; border-color: rgba(223, 177, 91, 0.3);" onclick="acceptAnswer(${postId}, ${c.comment_id})"><i class="fa-solid fa-check"></i> Accept as Answer</button>` : '';
 
                 const adminDeleteBtn = currentUser && currentUser.role === 'admin' ? 
-                    `<button class="btn btn-sm" style="background: rgba(255, 75, 75, 0.2); color: #ff4b4b; border: 1px solid #ff4b4b; padding: 2px 8px; font-size: 0.7rem; margin-left: 0.5rem;" onclick="adminDeleteCommunityContent('comment', ${c.comment_id})"><i class="fa-solid fa-trash"></i> Delete</button>` : '';
+                    `<button class="btn-modern" style="color: var(--danger); padding: 2px 8px; font-size: 0.7rem; margin-left: 0.5rem; border-color: rgba(239, 68, 68, 0.3);" onclick="adminDeleteCommunityContent('comment', ${c.comment_id})"><i class="fa-solid fa-trash"></i> Delete</button>` : '';
 
                 div.innerHTML = `
-                    <div style="font-size: 0.8rem; color: #888; margin-bottom: 0.25rem;">
-                        <strong style="color: #fff;">${c.name}</strong> • ${new Date(c.created_at).toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <strong style="color: var(--text-primary);">${c.name}</strong> • ${new Date(c.created_at).toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                         ${acceptBtn}
                         ${adminDeleteBtn}
                     </div>
-                    <div style="font-size: 0.95rem; margin-bottom: 0.5rem;">${c.content}</div>
+                    <div style="font-size: 0.95rem; margin-bottom: 0.75rem; color: var(--text-secondary); line-height: 1.5;">${c.content}</div>
                     <div style="display: flex; gap: 0.5rem; align-items: center;">
-                        <button class="vote-btn ${upvoted}" style="font-size: 0.9rem;" onclick="handleVote('comment', ${c.comment_id}, 1, this)"><i class="fa-solid fa-arrow-up"></i></button>
-                        <span style="font-size: 0.9rem; font-weight: bold; color: ${score > 0 ? '#66fcf1' : (score < 0 ? '#ff4b4b' : '#fff')}">${score}</span>
-                        <button class="vote-btn ${downvoted}" style="font-size: 0.9rem;" onclick="handleVote('comment', ${c.comment_id}, -1, this)"><i class="fa-solid fa-arrow-down"></i></button>
+                        <button class="vote-btn ${upvoted}" style="font-size: 0.85rem; padding: 2px;" onclick="handleVote('comment', ${c.comment_id}, 1, this)"><i class="fa-solid fa-arrow-up"></i></button>
+                        <span style="font-size: 0.85rem; font-weight: 600; color: ${score > 0 ? 'var(--accent-primary)' : (score < 0 ? 'var(--danger)' : 'var(--text-primary)')}">${score}</span>
+                        <button class="vote-btn ${downvoted}" style="font-size: 0.85rem; padding: 2px;" onclick="handleVote('comment', ${c.comment_id}, -1, this)"><i class="fa-solid fa-arrow-down"></i></button>
                     </div>
                 `;
                 list.appendChild(div);

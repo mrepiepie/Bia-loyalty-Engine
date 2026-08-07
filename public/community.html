@@ -13,38 +13,52 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css?v=2.0.0">
     <style>
-        /* Specific Community Layout Styles */
-        body {
-            background-color: #0b0c10;
-            color: #c5c6c7;
+        :root {
+            --bg-color: #09090b; /* Zinc 950 */
+            --panel-bg: rgba(255, 255, 255, 0.02);
+            --panel-border: rgba(255, 255, 255, 0.05);
+            --panel-hover: rgba(255, 255, 255, 0.04);
+            --text-primary: #fafafa;
+            --text-secondary: #a1a1aa; /* Zinc 400 */
+            --accent-primary: #3b82f6; /* Modern Blue */
+            --accent-glow: rgba(59, 130, 246, 0.2);
+            --danger: #ef4444;
+            --font-ui: 'Plus Jakarta Sans', sans-serif;
+            --font-heading: 'Outfit', sans-serif;
         }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: var(--font-ui);
+            -webkit-font-smoothing: antialiased;
+            overflow-y: scroll;
+        }
+        
+        /* Modern Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-color); }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
         
         .community-layout {
             display: grid;
-            grid-template-columns: 250px 1fr 300px;
-            gap: 2rem;
-            max-width: 1400px;
+            grid-template-columns: 240px 1fr 280px;
+            gap: 2.5rem;
+            max-width: 1300px;
             margin: 0 auto;
             padding: 2rem;
             padding-top: 100px; /* Space for navbar */
         }
         
         @media (max-width: 1100px) {
-            .community-layout {
-                grid-template-columns: 1fr 300px;
-            }
-            .sidebar-left {
-                display: none;
-            }
+            .community-layout { grid-template-columns: 1fr 280px; }
+            .sidebar-left { display: none; }
         }
         
         @media (max-width: 800px) {
-            .community-layout {
-                grid-template-columns: 1fr;
-            }
-            .sidebar-right {
-                display: none;
-            }
+            .community-layout { grid-template-columns: 1fr; }
+            .sidebar-right { display: none; }
         }
         
         /* Navbar */
@@ -52,9 +66,10 @@
             position: fixed;
             top: 0; left: 0; right: 0;
             height: 70px;
-            background: rgba(11, 12, 16, 0.85);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            background: rgba(9, 9, 11, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--panel-border);
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -63,216 +78,277 @@
         }
         
         .nav-logo {
-            font-family: 'DM Serif Display', serif;
             font-size: 1.5rem;
-            color: #66fcf1;
             text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .nav-logo-bia {
+            font-family: 'DM Serif Display', serif;
+            background: linear-gradient(135deg, #fff 0%, #a1a1aa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .nav-logo-community {
+            font-family: var(--font-heading);
+            font-weight: 300;
+            color: var(--text-secondary);
+            font-size: 1.3rem;
+            letter-spacing: -0.5px;
         }
 
-        /* Post Cards (Reddit Style) */
-        .post-card {
-            display: flex;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.08);
+        .btn-modern {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            border: 1px solid var(--panel-border);
+            border-radius: 999px;
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            font-family: var(--font-ui);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-modern:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
+        }
+        
+        .btn-modern-primary {
+            background: var(--text-primary);
+            color: var(--bg-color);
+            border: none;
+        }
+        .btn-modern-primary:hover {
+            background: #e4e4e7; /* Zinc 200 */
+        }
+
+        /* Glass Panel Base */
+        .glass-panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.2);
+            transition: border-color 0.3s ease;
+        }
+
+        /* Discover Tabs */
+        .category-tab {
+            width: 100%;
+            text-align: left;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 0.75rem 1rem;
             border-radius: 12px;
-            margin-bottom: 1rem;
-            transition: all 0.2s ease;
-            overflow: hidden;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
         }
-        
-        .post-card:hover {
-            border-color: rgba(102, 252, 241, 0.3);
-            background: rgba(255,255,255,0.05);
+        .category-tab:hover {
+            background: var(--panel-hover);
+            color: var(--text-primary);
         }
-        
-        .vote-col {
+        .category-tab.active {
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text-primary);
+        }
+        .category-tab i {
+            font-size: 1.1rem;
+            opacity: 0.7;
+        }
+        .category-tab.active i { opacity: 1; }
+
+        /* Create Post Box */
+        #create-post-box {
+            padding: 1.5rem;
+            margin-bottom: 2rem;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            padding: 1rem;
-            background: rgba(0,0,0,0.2);
-            border-right: 1px solid rgba(255,255,255,0.05);
-            min-width: 60px;
+            gap: 1rem;
         }
         
-        .vote-btn {
-            background: none;
+        .modern-input {
+            width: 100%;
+            background: transparent;
             border: none;
-            color: #888;
-            cursor: pointer;
-            font-size: 1.2rem;
-            transition: all 0.2s ease;
-            padding: 0.25rem;
+            color: var(--text-primary);
+            font-family: var(--font-ui);
+            padding: 0;
+            outline: none;
         }
         
-        .vote-btn:hover { color: #fff; }
-        .vote-btn.upvoted { color: #66fcf1; }
-        .vote-btn.downvoted { color: #ff4b4b; }
-        
-        .post-content-area {
-            padding: 1.5rem;
-            flex: 1;
-        }
-        
-        .post-meta {
-            font-size: 0.85rem;
-            color: #888;
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .tag-pill {
-            background: rgba(102, 252, 241, 0.1);
-            color: #66fcf1;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-        
-        .post-title {
-            font-family: 'Outfit', sans-serif;
+        #post-title {
             font-size: 1.25rem;
-            color: #fff;
-            margin: 0 0 0.75rem 0;
             font-weight: 600;
+            font-family: var(--font-heading);
         }
+        #post-title::placeholder { color: rgba(255,255,255,0.2); }
         
-        .post-body {
+        #post-content {
             font-size: 0.95rem;
             line-height: 1.6;
-            margin-bottom: 1rem;
-            color: #c5c6c7;
+            resize: none;
+            color: var(--text-secondary);
         }
+        #post-content::placeholder { color: rgba(255,255,255,0.15); }
         
-        .post-actions {
+        .create-post-actions {
             display: flex;
-            gap: 1.5rem;
-        }
-        
-        .action-btn {
-            background: none;
-            border: none;
-            color: #888;
-            cursor: pointer;
-            font-size: 0.9rem;
-            display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 0.5rem;
-            transition: color 0.2s ease;
+            padding-top: 1rem;
+            border-top: 1px solid var(--panel-border);
         }
-        
-        .action-btn:hover { color: #66fcf1; }
+
+        /* Custom Dropdown */
+        .custom-dropdown { position: relative; width: 140px; user-select: none; }
+        .custom-dropdown-selected {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--panel-border);
+            color: var(--text-secondary);
+            padding: 6px 12px;
+            border-radius: 999px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .custom-dropdown-selected:hover { border-color: rgba(255,255,255,0.15); color: var(--text-primary); }
+        .custom-dropdown-options {
+            position: absolute; top: calc(100% + 5px); left: 0; width: 100%;
+            background: #18181b; /* Zinc 900 */
+            border: 1px solid var(--panel-border);
+            border-radius: 12px;
+            z-index: 999; display: none;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            padding: 0.25rem;
+        }
+        .custom-dropdown-options.show { display: block; animation: fadeDown 0.2s ease; }
+        .custom-dropdown-option {
+            padding: 8px 12px; color: var(--text-secondary); cursor: pointer; font-size: 0.85rem;
+            border-radius: 8px; transition: all 0.15s;
+        }
+        .custom-dropdown-option:hover { background: rgba(255,255,255,0.05); color: var(--text-primary); }
+
+        @keyframes fadeDown { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
 
         /* Sort Bar */
         .sort-bar {
-            display: flex;
-            gap: 1rem;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 8px;
-            padding: 0.5rem 1rem;
-            margin-bottom: 1.5rem;
+            display: flex; gap: 0.5rem; margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--panel-border);
+            padding-bottom: 1rem;
         }
-        
         .sort-btn {
-            background: none;
-            border: none;
-            color: #888;
-            font-weight: 600;
-            cursor: pointer;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            transition: all 0.2s ease;
+            background: transparent; border: none;
+            color: var(--text-secondary); font-weight: 500;
+            cursor: pointer; padding: 0.5rem 1rem; border-radius: 999px;
+            transition: all 0.2s; font-family: var(--font-ui); font-size: 0.9rem;
+            display: flex; align-items: center; gap: 0.4rem;
+        }
+        .sort-btn.active { background: rgba(255,255,255,0.08); color: var(--text-primary); }
+        .sort-btn:hover:not(.active) { color: var(--text-primary); }
+
+        /* Post Cards */
+        .post-card {
+            display: flex;
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 16px;
+            margin-bottom: 1.25rem;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
+            position: relative;
+        }
+        .post-card:hover {
+            border-color: rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.03);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px -4px rgba(0,0,0,0.3);
         }
         
-        .sort-btn.active {
-            background: rgba(102, 252, 241, 0.15);
-            color: #66fcf1;
+        .vote-col {
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+            padding: 1.25rem 0.5rem; background: rgba(255,255,255,0.01);
+            border-right: 1px solid var(--panel-border); min-width: 50px;
         }
-        .sort-btn:hover:not(.active) {
-            background: rgba(255,255,255,0.1);
-            color: #fff;
+        .vote-btn {
+            background: none; border: none; color: rgba(255,255,255,0.2);
+            cursor: pointer; font-size: 1rem; padding: 0.25rem;
+            transition: all 0.2s;
         }
+        .vote-btn:hover { color: var(--text-primary); transform: scale(1.1); }
+        .vote-btn.upvoted { color: var(--accent-primary); }
+        .vote-btn.downvoted { color: var(--danger); }
+        .vote-count {
+            font-size: 0.85rem; font-weight: 600; color: var(--text-primary);
+            margin: 0.25rem 0;
+        }
+        
+        .post-content-area { padding: 1.25rem; flex: 1; }
+        .post-meta {
+            font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.75rem;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .tag-pill {
+            background: rgba(255,255,255,0.05); color: var(--text-secondary);
+            padding: 2px 8px; border-radius: 999px; font-size: 0.7rem; font-weight: 500;
+            border: 1px solid var(--panel-border);
+        }
+        .post-title {
+            font-family: var(--font-heading); font-size: 1.15rem; color: var(--text-primary);
+            margin: 0 0 0.5rem 0; font-weight: 500; letter-spacing: -0.3px;
+        }
+        .post-body {
+            font-size: 0.9rem; line-height: 1.6; margin-bottom: 1rem; color: var(--text-secondary);
+        }
+        .post-actions { display: flex; gap: 1rem; }
+        .action-btn {
+            background: none; border: none; color: var(--text-secondary);
+            cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem;
+            transition: color 0.2s; font-family: var(--font-ui); font-weight: 500;
+        }
+        .action-btn:hover { color: var(--text-primary); }
 
-        /* Lead Capture Modal */
+        /* Report Modal */
         .lead-modal-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
             display: none; justify-content: center; align-items: center; z-index: 9999;
         }
         .lead-modal {
-            background: #1f2833; padding: 3rem; border-radius: 16px; border: 1px solid rgba(102, 252, 241, 0.3);
-            text-align: center; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: #0f1115; padding: 2.5rem; border-radius: 20px; border: 1px solid var(--panel-border);
+            max-width: 400px; width: 100%; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            animation: modalFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        @keyframes popIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes modalFadeIn { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
     </style>
-
-<style>
-.custom-dropdown {
-    position: relative;
-    width: 200px;
-    user-select: none;
-}
-.custom-dropdown-selected {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.1);
-    color: #fff;
-    padding: 8px 12px;
-    border-radius: 6px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: border-color 0.2s;
-}
-.custom-dropdown-selected:hover {
-    border-color: rgba(255,255,255,0.3);
-}
-.custom-dropdown-options {
-    position: absolute;
-    top: calc(100% + 5px);
-    left: 0;
-    width: 100%;
-    background: #111;
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 6px;
-    z-index: 999;
-    display: none;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-    overflow: hidden;
-}
-.custom-dropdown-options.show {
-    display: block;
-}
-.custom-dropdown-option {
-    padding: 10px 12px;
-    color: #ccc;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: background 0.2s;
-}
-.custom-dropdown-option:hover {
-    background: #3b82f6;
-    color: #fff;
-}
-</style>
 </head>
-<body class="dark-theme">
+<body>
 
     <!-- Navbar -->
     <nav class="community-nav">
-        <div style="display: flex; align-items: center; gap: 1.5rem;">
-            <a href="/" class="nav-logo">BIA <span style="color:#fff;">Community</span></a>
-            <a href="/" class="btn btn-sm" style="background: rgba(255, 255, 255, 0.1); color: #fff; text-decoration: none; border: 1px solid rgba(255, 255, 255, 0.2);"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</a>
-        </div>
-        
-        <div id="nav-auth-state">
-            <!-- Injected by JS: Either Login button or User Profile info -->
-            <a href="/" class="btn btn-primary btn-sm">Sign In / Register</a>
+        <a href="/" class="nav-logo">
+            <span class="nav-logo-bia">BIA</span>
+            <span class="nav-logo-community">Community</span>
+        </a>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <a href="/" class="btn-modern"><i class="fa-solid fa-arrow-left" style="font-size: 0.8rem;"></i> Dashboard</a>
+            <div id="nav-auth-state">
+                <a href="/" class="btn-modern btn-modern-primary">Sign In</a>
+            </div>
         </div>
     </nav>
 
@@ -280,27 +356,25 @@
         
         <!-- Left Sidebar: Topics/Nav -->
         <aside class="sidebar-left">
-            <div class="card glassmorphic">
-                <h4 style="margin-top:0; color: #fff;"><i class="fa-solid fa-compass"></i> Discover</h4>
-                <ul id="discover-tabs" style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.5rem;">
-                    <li><button class="category-tab active" data-category="Home">🏠 Home</button></li>
-                    <li><button class="category-tab" data-category="Academics">📚 Academics</button></li>
-                    <li><button class="category-tab" data-category="Internships">💼 Internships</button></li>
-                    <li><button class="category-tab" data-category="Housing">🏢 Housing</button></li>
-                    <li id="my-posts-tab" style="display: none; margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.05);"><button class="category-tab" data-category="Mine" style="color: #66fcf1;">👤 My Posts</button></li>
+            <div class="glass-panel" style="padding: 1rem;">
+                <h4 style="margin: 0 0 1rem 0.5rem; color: var(--text-secondary); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Discover</h4>
+                <ul id="discover-tabs" style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.25rem;">
+                    <li><button class="category-tab active" data-category="Home"><i class="fa-solid fa-house-chimney"></i> Home</button></li>
+                    <li><button class="category-tab" data-category="Academics"><i class="fa-solid fa-book-open"></i> Academics</button></li>
+                    <li><button class="category-tab" data-category="Internships"><i class="fa-solid fa-briefcase"></i> Internships</button></li>
+                    <li><button class="category-tab" data-category="Housing"><i class="fa-solid fa-building"></i> Housing</button></li>
+                    <li id="my-posts-tab" style="display: none; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--panel-border);">
+                        <button class="category-tab" data-category="Mine" style="color: var(--text-primary);"><i class="fa-regular fa-user"></i> My Posts</button>
+                    </li>
                 </ul>
                 
-                <hr style="border-color: rgba(255,255,255,0.05); margin: 1.5rem 0;">
-                
-                <button id="btn-create-post-sidebar" class="btn btn-primary" style="width: 100%;"><i class="fa-solid fa-plus"></i> Create Post</button>
+                <button id="btn-create-post-sidebar" class="btn-modern btn-modern-primary" style="width: 100%; justify-content: center; margin-top: 1.5rem; padding: 0.75rem;"><i class="fa-solid fa-plus"></i> New Post</button>
             </div>
 
-            <div id="admin-reports-sidebar" class="card glassmorphic admin-only-block" style="display: none; margin-top: 1.5rem; padding: 1rem;">
-                <h4 style="margin-top:0; color: #ef4444; font-size: 0.95rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; margin-bottom: 1rem;">
-                    <i class="fa-solid fa-shield-halved"></i> Reports
-                </h4>
-                <div id="sidebar-reports-container" style="max-height: 400px; overflow-y: auto; padding-right: 0.5rem;">
-                    <div style="color: rgba(255,255,255,0.5); font-size: 0.8rem; text-align: center;">Loading reports...</div>
+            <div id="admin-reports-sidebar" class="glass-panel admin-only-block" style="display: none; margin-top: 1.5rem; padding: 1rem; border-color: rgba(239, 68, 68, 0.2);">
+                <h4 style="margin: 0 0 1rem 0.5rem; color: var(--danger); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Reports</h4>
+                <div id="sidebar-reports-container" style="max-height: 300px; overflow-y: auto; padding-right: 0.25rem;">
+                    <div style="color: var(--text-secondary); font-size: 0.8rem; text-align: center;">Loading...</div>
                 </div>
             </div>
         </aside>
@@ -308,16 +382,15 @@
         <!-- Main Feed -->
         <main class="feed-main">
             <!-- Create Post Box (For logged in users) -->
-            <div id="create-post-box" class="card glassmorphic" style="display: none; margin-bottom: 1.5rem; overflow: visible !important;">
-                <input type="text" id="post-title" class="input-field" placeholder="Title of your post" style="margin-bottom: 1rem; font-size: 1.1rem; font-weight: 600;">
-                <textarea id="post-content" class="input-field" placeholder="What are your thoughts? (Markdown supported)" rows="4" style="margin-bottom: 1rem; resize: vertical;"></textarea>
+            <div id="create-post-box" class="glass-panel" style="display: none;">
+                <input type="text" id="post-title" class="modern-input" placeholder="Title of your post">
+                <textarea id="post-content" class="modern-input" placeholder="What are your thoughts? (Markdown supported)" rows="3"></textarea>
                 
-                <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div class="create-post-actions">
                     <div style="display: flex; gap: 1rem; align-items: center;">
-                        
                         <div class="custom-dropdown" id="category-dropdown-container">
                             <div class="custom-dropdown-selected" id="category-dropdown-selected">
-                                <span>General</span> <i class="fa-solid fa-chevron-down" style="font-size: 0.75rem; color: #888;"></i>
+                                <span>General</span> <i class="fa-solid fa-chevron-down" style="font-size: 0.6rem;"></i>
                             </div>
                             <div class="custom-dropdown-options" id="category-dropdown-options">
                                 <div class="custom-dropdown-option" data-value="General">General</div>
@@ -328,79 +401,75 @@
                             <input type="hidden" id="post-category" value="General">
                         </div>
                         
-                        <label style="display: flex; align-items: center; gap: 0.5rem; color: #888; cursor: pointer;">
-                            <input type="checkbox" id="post-anonymous"> Post Anonymously
+                        <label style="display: flex; align-items: center; gap: 0.4rem; color: var(--text-secondary); font-size: 0.85rem; cursor: pointer; user-select: none;">
+                            <input type="checkbox" id="post-anonymous" style="accent-color: var(--text-primary);"> Anonymous
                         </label>
-                        <div style="display: flex; align-items: center; gap: 0.5rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding-right: 4px;">
-                            <label style="display: flex; align-items: center; gap: 0.5rem; color: #888; cursor: pointer; padding: 4px 10px; margin: 0;">
-                                <i class="fa-solid fa-image"></i>
-                                <span id="post-image-label" style="font-size: 0.85rem;">Attach Image</span>
+                        
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <label style="display: flex; align-items: center; gap: 0.4rem; color: var(--text-secondary); font-size: 0.85rem; cursor: pointer; margin: 0; transition: color 0.2s;">
+                                <i class="fa-regular fa-image"></i>
+                                <span id="post-image-label">Attach</span>
                                 <input type="file" id="post-image" accept="image/*" style="display: none;">
                             </label>
-                            <button id="btn-remove-image" style="display: none; background: transparent; border: none; color: #ef4444; cursor: pointer; padding: 4px; border-radius: 4px;" title="Remove Image">
+                            <button id="btn-remove-image" style="display: none; background: transparent; border: none; color: var(--danger); cursor: pointer; padding: 2px;" title="Remove">
                                 <i class="fa-solid fa-xmark"></i>
                             </button>
                         </div>
                     </div>
-                    <button id="btn-submit-post" class="btn btn-primary">Publish Post</button>
+                    <button id="btn-submit-post" class="btn-modern btn-modern-primary">Publish</button>
                 </div>
             </div>
 
             <div class="sort-bar">
-                <button class="sort-btn active" data-sort="hot"><i class="fa-solid fa-fire"></i> Hot</button>
-                <button class="sort-btn" data-sort="new"><i class="fa-solid fa-certificate"></i> New</button>
-                <button class="sort-btn" data-sort="top"><i class="fa-solid fa-arrow-trend-up"></i> Top</button>
+                <button class="sort-btn active" data-sort="hot"><i class="fa-solid fa-fire" style="font-size: 0.85rem;"></i> Hot</button>
+                <button class="sort-btn" data-sort="new"><i class="fa-regular fa-clock" style="font-size: 0.85rem;"></i> New</button>
+                <button class="sort-btn" data-sort="top"><i class="fa-solid fa-arrow-trend-up" style="font-size: 0.85rem;"></i> Top</button>
             </div>
 
-            <div id="new-posts-bubble" style="display: none; position: sticky; top: 80px; z-index: 100; text-align: center; margin-bottom: 1rem; pointer-events: none;">
-                <button onclick="loadNewPosts()" style="pointer-events: auto; background: #66fcf1; color: #0b0c10; font-weight: bold; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; box-shadow: 0 4px 12px rgba(102,252,241,0.3); transition: transform 0.2s ease;">
+            <div id="new-posts-bubble" style="display: none; position: sticky; top: 90px; z-index: 100; text-align: center; margin-bottom: 1.5rem; pointer-events: none;">
+                <button onclick="loadNewPosts()" style="pointer-events: auto; background: var(--text-primary); color: var(--bg-color); font-weight: 500; font-family: var(--font-ui); font-size: 0.85rem; border: none; padding: 6px 16px; border-radius: 999px; cursor: pointer; box-shadow: 0 4px 12px rgba(255,255,255,0.1); transition: transform 0.2s ease;">
                     ↑ <span id="new-posts-count">0</span> New Posts
                 </button>
             </div>
 
             <div id="feed-container">
                 <!-- Posts injected here via JS -->
-                <div style="text-align: center; padding: 3rem; color: #888;">
-                    <i class="fa-solid fa-circle-notch fa-spin fa-2x"></i>
-                    <p>Loading posts...</p>
+                <div style="text-align: center; padding: 4rem; color: var(--text-secondary);">
+                    <i class="fa-solid fa-circle-notch fa-spin fa-2x" style="opacity: 0.5;"></i>
                 </div>
             </div>
         </main>
 
-        <!-- Right Sidebar: Leaderboard & Guidelines -->
+        <!-- Right Sidebar: Guidelines & Admin -->
         <aside class="sidebar-right">
-            <div class="card glassmorphic" style="margin-bottom: 1.5rem;">
-                <h4 style="margin-top:0; color: #fff;"><i class="fa-solid fa-shield-halved"></i> Community Guidelines</h4>
-                <p style="font-size: 0.85rem; color: #888; margin-bottom: 0;">Be respectful, helpful, and contribute high-quality answers to foster a strong student network.</p>
-                <ul style="font-size: 0.85rem; color: #c5c6c7; margin-top: 1rem; padding-left: 1.2rem;">
-                    <li style="margin-bottom: 0.5rem;">Search before posting duplicate questions.</li>
-                    <li style="margin-bottom: 0.5rem;">Upvote helpful answers to guide others.</li>
-                    <li style="margin-bottom: 0.5rem;">Report inappropriate behavior.</li>
+            <div class="glass-panel" style="margin-bottom: 1.5rem; padding: 1.25rem;">
+                <h4 style="margin: 0 0 1rem 0; color: var(--text-primary); font-family: var(--font-heading); font-size: 1.1rem; font-weight: 500;">Community Guidelines</h4>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem;">Be respectful, helpful, and contribute high-quality answers to foster a strong student network.</p>
+                <ul style="font-size: 0.85rem; color: var(--text-secondary); margin: 0; padding-left: 1.2rem; line-height: 1.6; display: flex; flex-direction: column; gap: 0.5rem;">
+                    <li>Search before posting duplicate questions.</li>
+                    <li>Upvote helpful answers to guide others.</li>
+                    <li>Report inappropriate behavior.</li>
                 </ul>
             </div>
             
-            <!-- ADMIN MODERATION PANEL (Hidden by default) -->
-            <div id="admin-moderation-panel" class="card glassmorphic" style="display: none; border: 1px solid #dfb15b;">
-                <h4 style="margin-top:0; color: #dfb15b;"><i class="fa-solid fa-gavel"></i> Admin Moderation</h4>
-                <p style="font-size: 0.8rem; color: #888; margin-bottom: 1rem;">Community health statistics and recent posts for quick moderation.</p>
+            <!-- ADMIN MODERATION PANEL -->
+            <div id="admin-moderation-panel" class="glass-panel" style="display: none; padding: 1.25rem; border: 1px solid rgba(223, 177, 91, 0.2); background: rgba(223, 177, 91, 0.02);">
+                <h4 style="margin: 0 0 0.5rem 0; color: #dfb15b; font-family: var(--font-heading); font-weight: 500;"><i class="fa-solid fa-gavel" style="font-size: 0.9rem;"></i> Admin Moderation</h4>
+                <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 1.25rem;">Live health metrics and recent content.</p>
                 
-                <div style="display: flex; gap: 1rem; margin-bottom: 1rem; font-size: 0.85rem;">
-                    <div style="flex: 1; background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 8px; text-align: center;">
-                        <span style="color: #66fcf1; font-weight: bold;" id="admin-comm-total-posts">0</span><br>Posts
+                <div style="display: flex; gap: 0.75rem; margin-bottom: 1.25rem;">
+                    <div style="flex: 1; background: rgba(255,255,255,0.03); border: 1px solid var(--panel-border); padding: 0.75rem; border-radius: 12px; text-align: center;">
+                        <div style="color: #dfb15b; font-size: 1.25rem; font-weight: 600; font-family: var(--font-heading);" id="admin-comm-total-posts">0</div>
+                        <div style="color: var(--text-secondary); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0.25rem;">Posts</div>
                     </div>
-                    <div style="flex: 1; background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 8px; text-align: center;">
-                        <span style="color: #66fcf1; font-weight: bold;" id="admin-comm-total-comments">0</span><br>Comments
+                    <div style="flex: 1; background: rgba(255,255,255,0.03); border: 1px solid var(--panel-border); padding: 0.75rem; border-radius: 12px; text-align: center;">
+                        <div style="color: #dfb15b; font-size: 1.25rem; font-weight: 600; font-family: var(--font-heading);" id="admin-comm-total-comments">0</div>
+                        <div style="color: var(--text-secondary); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0.25rem;">Comments</div>
                     </div>
                 </div>
                 
-                <div style="max-height: 400px; overflow-y: auto;">
-                    <table style="width: 100%; font-size: 0.8rem; text-align: left; border-collapse: collapse;">
-                        <thead>
-                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-                                <th style="padding-bottom: 0.5rem;">Content Snippet</th>
-                                <th style="padding-bottom: 0.5rem; text-align: right;">Action</th>
-                            </tr>
-                        </thead>
+                <div style="max-height: 350px; overflow-y: auto; margin: -0.5rem; padding: 0.5rem;">
+                    <table style="width: 100%; font-size: 0.8rem; text-align: left; border-collapse: separate; border-spacing: 0 0.5rem;">
                         <tbody id="admin-comm-moderation-list">
                             <!-- Injected by JS -->
                         </tbody>
@@ -414,30 +483,29 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js"></script>
-    <script src="community.js?v=2.0.3"></script>
-
+    <script src="community.js?v=2.0.4"></script>
 
     <!-- Report Modal -->
-    <div id="report-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); z-index: 99999; align-items: center; justify-content: center; box-sizing: border-box;">
-        <div class="modal-content glassmorphic" style="max-width: 450px; width: 90%; padding: 2rem;">
-            <h3><i class="fa-solid fa-flag" style="color: #ef4444;"></i> Report Content</h3>
-            <p style="color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-bottom: 1rem;">Help us keep the community safe. What's wrong with this content?</p>
+    <div id="report-modal" class="lead-modal-overlay">
+        <div class="lead-modal">
+            <h3 style="margin: 0 0 0.5rem 0; font-family: var(--font-heading); font-size: 1.25rem; font-weight: 500;">Report Content</h3>
+            <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1.5rem; line-height: 1.5;">Help us keep the community safe. What's wrong with this content?</p>
             <input type="hidden" id="report-target-type">
             <input type="hidden" id="report-target-id">
             <input type="hidden" id="report-target-user">
             
-            <select id="report-category" style="width: 100%; padding: 0.8rem; border-radius: 6px; background: rgba(0,0,0,0.4); color: white; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 1rem;">
+            <select id="report-category" style="width: 100%; padding: 0.75rem; border-radius: 12px; background: rgba(255,255,255,0.03); color: var(--text-primary); border: 1px solid var(--panel-border); margin-bottom: 1rem; font-family: var(--font-ui); font-size: 0.9rem; outline: none;">
                 <option value="spam">Spam or Misleading</option>
                 <option value="harassment">Harassment or Bullying</option>
                 <option value="inappropriate">Inappropriate/Explicit Content</option>
                 <option value="guidelines">Breaks Community Guidelines</option>
             </select>
             
-            <textarea id="report-reason" placeholder="Additional details (optional)..." style="width: 100%; height: 80px; padding: 0.8rem; border-radius: 6px; background: rgba(0,0,0,0.4); color: white; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 1rem;"></textarea>
+            <textarea id="report-reason" placeholder="Additional details (optional)..." style="width: 100%; height: 80px; padding: 0.75rem; border-radius: 12px; background: rgba(255,255,255,0.03); color: var(--text-primary); border: 1px solid var(--panel-border); margin-bottom: 1.5rem; font-family: var(--font-ui); font-size: 0.9rem; resize: none; outline: none;"></textarea>
             
-            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
-                <button class="btn btn-secondary" onclick="document.getElementById('report-modal').style.display='none'">Cancel</button>
-                <button class="btn btn-primary" id="btn-submit-report" onclick="submitReport()" style="background: #ef4444; border-color: #ef4444;">Submit Report</button>
+            <div style="display: flex; gap: 0.75rem; justify-content: stretch;">
+                <button class="btn-modern" style="flex: 1; justify-content: center;" onclick="document.getElementById('report-modal').style.display='none'">Cancel</button>
+                <button class="btn-modern btn-modern-primary" id="btn-submit-report" onclick="submitReport()" style="flex: 1; justify-content: center; background: var(--danger); color: #fff;">Submit Report</button>
             </div>
         </div>
     </div>
