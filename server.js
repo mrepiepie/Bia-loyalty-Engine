@@ -2869,6 +2869,20 @@ app.post('/api/admin/users/:id/mute', requireAdmin, async (req, res) => {
     }
 });
 
+// --- TEMPORARY TEST ENDPOINT ---
+app.get('/api/test-posts', async (req, res) => {
+    try {
+        const posts = await allQuery("SELECT * FROM community_posts LIMIT 5");
+        let stats = null;
+        try {
+            stats = await getQuery("SELECT (SELECT COUNT(*) FROM community_posts) as total_posts, (SELECT COUNT(DISTINCT user_id) FROM community_posts) as active_contributors");
+        } catch(e) { stats = e.message; }
+        res.json({ success: true, posts, stats });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 // Export for Vercel serverless
 module.exports = app;
 
