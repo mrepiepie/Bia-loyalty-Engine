@@ -2870,7 +2870,7 @@
     <!-- Comprehensive FAQ Modal -->
     <div id="faq-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(10, 11, 14, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 25000; align-items: center; justify-content: center;">
         <div class="card glassmorphic spotlight-card" style="max-width: 650px; width: 90%; padding: 2.25rem; border: 1px solid rgba(223, 177, 91, 0.15); border-radius: 16px; position: relative; background: #0c0d12; box-shadow: 0 20px 50px rgba(0,0,0,0.6); max-height: 85vh; display: flex; flex-direction: column;">
-            <button onclick="document.getElementById('faq-modal').style.display='none'" style="position: absolute; top: 1.25rem; right: 1.25rem; background: none; border: none; color: rgba(255,255,255,0.4); cursor: pointer; font-size: 1.25rem; transition: color 0.15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.4)'">
+            <button class="modal-close-btn" onclick="document.getElementById('faq-modal').style.display='none'">
                 <i class="fa-solid fa-xmark"></i>
             </button>
             <h3 style="margin-top: 0; color: #EFECE3; font-family: 'DM Serif Display', serif; font-size: 1.75rem; margin-bottom: 0.5rem;"><i class="fa-solid fa-circle-question" style="color: #dfb15b; font-size: 1.3rem; margin-right: 0.5rem;"></i> Frequently Asked Questions</h3>
