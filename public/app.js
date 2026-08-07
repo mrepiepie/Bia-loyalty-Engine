@@ -2334,7 +2334,6 @@ document.querySelectorAll('.nav-tab').forEach(btn => {
         if (target === 'admin-students') loadProgrammeOverview();
         if (target === 'overview') loadStudentAnnouncements();
         if (target === 'admin-faqs') initAdminFAQs();
-        if (target === 'admin-community-hub') loadAdminCommunityHub();
       });
 });
 
@@ -7283,8 +7282,6 @@ async function fetchSystemHealth() {
     }
 }
 
-let adminCommunityPollInterval = null;
-
 // Hook into the tab navigation to start/stop polling
 document.addEventListener('click', (e) => {
     const tabBtn = e.target.closest('.nav-tab');
@@ -7302,19 +7299,6 @@ document.addEventListener('click', (e) => {
             if (healthPollInterval) {
                 clearInterval(healthPollInterval);
                 healthPollInterval = null;
-            }
-        }
-        
-        // Community Hub Polling
-        if (target === 'admin-community-hub') {
-            loadAdminCommunityHub();
-            if (!adminCommunityPollInterval) {
-                adminCommunityPollInterval = setInterval(loadAdminCommunityHub, 5000); // Poll every 5 seconds
-            }
-        } else {
-            if (adminCommunityPollInterval) {
-                clearInterval(adminCommunityPollInterval);
-                adminCommunityPollInterval = null;
             }
         }
     }
