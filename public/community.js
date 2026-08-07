@@ -418,9 +418,13 @@ document.getElementById('btn-submit-post').addEventListener('click', async () =>
             document.getElementById('post-title').value = '';
             document.getElementById('post-content').value = '';
             document.getElementById('post-category').value = 'General';
+            const selectedSpan = document.querySelector('#category-dropdown-selected span');
+            if(selectedSpan) selectedSpan.textContent = 'General';
             document.getElementById('post-anonymous').checked = false;
             document.getElementById('post-image').value = '';
             document.getElementById('post-image-label').textContent = 'Attach Image';
+            const removeBtn = document.getElementById('btn-remove-image');
+            if(removeBtn) removeBtn.style.display = 'none';
             fetchPosts(true);
         } else {
             const data = await res.json();
