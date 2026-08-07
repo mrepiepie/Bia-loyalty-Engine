@@ -486,6 +486,26 @@ window.adminLockPost = async function(postId, lock) {
     }
 };
 
+window.clearOldPosts = async function() {
+    if (!confirm('Are you sure you want to permanently delete ALL community posts older than 1 month? This will also delete their comments, votes, and reports. This action CANNOT be undone.')) return;
+    
+    try {
+        const token = localStorage.getItem('token');
+        const res = await fetch('/api/admin/community/clear-old-posts', {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (!res.ok) throw new Error(await res.text());
+        
+        const data = await res.json();
+        alert(`Success: ${data.message}`);
+        fetchPosts(true); // Refresh feed
+    } catch (e) {
+        alert('Error clearing old posts: ' + e.message);
+    }
+};
+
 window.adminDeleteCommunityContent = async function(type, id) {
     if (!confirm(`Are you sure you want to delete this ${type}? This cannot be undone.`)) return;
     try {

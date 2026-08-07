@@ -2617,6 +2617,50 @@ app.put('/api/admin/community/posts/:id', requireAuth, async (req, res) => {
     }
 });
 
+// Admin Clear Old Posts (> 1 month)
+app.delete('/api/admin/community/clear-old-posts', requireAuth, async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Unauthorized. Admin access required.' });
+        }
+        
+        // Find all posts older than 1 month
+        const oldPosts = await dbAll("SELECT post_id FROM community_posts WHERE created_at < datetime('now', '-1 month')");
+        
+        if (!oldPosts || oldPosts.length === 0) {
+            return res.json({ message: 'No old posts found to delete.', count: 0 });
+        }
+        
+        const postIds = oldPosts.map(p => p.post_id);
+        const placeholders = postIds.map(() => '?').join(',');
+        
+        // Find all comments associated with these posts to delete their votes/reports
+        const comments = await dbAll(`SELECT comment_id FROM community_comments WHERE post_id IN (${placeholders})`, postIds);
+        const commentIds = comments.map(c => c.comment_id);
+        
+        // Delete reports for comments
+        if (commentIds.length > 0) {
+            const commentPlaceholders = commentIds.map(() => '?').join(',');
+            await runQuery(`DELETE FROM community_reports WHERE comment_id IN (${commentPlaceholders})`, commentIds);
+            await runQuery(`DELETE FROM community_votes WHERE target_type = 'comment' AND target_id IN (${commentPlaceholders})`, commentIds);
+        }
+        
+        // Delete reports and votes for posts
+        await runQuery(`DELETE FROM community_reports WHERE post_id IN (${placeholders})`, postIds);
+        await runQuery(`DELETE FROM community_votes WHERE target_type = 'post' AND target_id IN (${placeholders})`, postIds);
+        
+        // Delete comments
+        await runQuery(`DELETE FROM community_comments WHERE post_id IN (${placeholders})`, postIds);
+        
+        // Delete posts
+        await runQuery(`DELETE FROM community_posts WHERE post_id IN (${placeholders})`, postIds);
+        
+        res.json({ message: `Successfully deleted ${postIds.length} old posts.`, count: postIds.length });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // Admin Delete Post
 app.delete('/api/community/posts/:id', requireAuth, async (req, res) => {
     try {

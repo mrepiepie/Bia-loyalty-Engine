@@ -383,6 +383,11 @@
             <div id="admin-moderation-panel" class="card glassmorphic" style="display: none; border: 1px solid #dfb15b;">
                 <h4 style="margin-top:0; color: #dfb15b;"><i class="fa-solid fa-gavel"></i> Admin Moderation</h4>
                 <p style="font-size: 0.8rem; color: #888; margin-bottom: 1rem;">Community health statistics and recent posts for quick moderation.</p>
+                <div style="margin-bottom: 1rem;">
+                    <button class="btn btn-sm" style="background: rgba(255, 75, 75, 0.2); color: #ff4b4b; border: 1px solid #ff4b4b; width: 100%;" onclick="clearOldPosts()">
+                        <i class="fa-solid fa-trash-can"></i> Clear Old Posts (> 1 Month)
+                    </button>
+                </div>
                 
                 <div style="display: flex; gap: 1rem; margin-bottom: 1rem; font-size: 0.85rem;">
                     <div style="flex: 1; background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 8px; text-align: center;">
