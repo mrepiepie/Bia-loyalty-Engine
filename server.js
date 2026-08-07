@@ -2660,9 +2660,11 @@ app.get('/api/community/admin/stats', requireAuth, async (req, res) => {
             const resStats = await getQuery("SELECT (SELECT COUNT(*) FROM community_posts) as total_posts, (SELECT COUNT(*) FROM community_comments) as total_comments, (SELECT COUNT(DISTINCT user_id) FROM (SELECT user_id FROM community_posts UNION SELECT user_id FROM community_comments)) as active_contributors");
             stats = resStats || stats;
         } catch (dbErr) {
-            const resStats = await getQuery("SELECT (SELECT COUNT(*) FROM community_posts) as total_posts, (SELECT COUNT(DISTINCT user_id) FROM community_posts) as active_contributors");
-            stats.total_posts = resStats ? resStats.total_posts : 0;
-            stats.active_contributors = resStats ? resStats.active_contributors : 0;
+            try {
+                const resStats = await getQuery("SELECT (SELECT COUNT(*) FROM community_posts) as total_posts, (SELECT COUNT(DISTINCT user_id) FROM community_posts) as active_contributors");
+                stats.total_posts = resStats ? resStats.total_posts : 0;
+                stats.active_contributors = resStats ? resStats.active_contributors : 0;
+            } catch(e) {}
         }
         
         // Fix for @libsql/client returning BigInt for COUNT(*) aggregations
@@ -2683,10 +2685,20 @@ app.get('/api/community/admin/stats', requireAuth, async (req, res) => {
                 ORDER BY created_at DESC LIMIT 100
             `);
         } catch (feedErr) {
-            moderationFeed = await allQuery(`
-                SELECT 'post' as type, post_id as id, user_id, title as snippet, created_at, is_locked FROM community_posts
-                ORDER BY created_at DESC LIMIT 100
-            `);
+            try {
+                // If is_locked column is missing, this will fail, so we try without it as a last resort
+                moderationFeed = await allQuery(`
+                    SELECT 'post' as type, post_id as id, user_id, title as snippet, created_at, is_locked FROM community_posts
+                    ORDER BY created_at DESC LIMIT 100
+                `);
+            } catch(e) {
+                try {
+                    moderationFeed = await allQuery(`
+                        SELECT 'post' as type, post_id as id, user_id, title as snippet, created_at, 0 as is_locked FROM community_posts
+                        ORDER BY created_at DESC LIMIT 100
+                    `);
+                } catch(e2) {}
+            }
         }
         
         res.json({ stats, moderationFeed });
