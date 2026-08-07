@@ -7283,11 +7283,16 @@ async function fetchSystemHealth() {
     }
 }
 
+let adminCommunityPollInterval = null;
+
 // Hook into the tab navigation to start/stop polling
 document.addEventListener('click', (e) => {
     const tabBtn = e.target.closest('.nav-tab');
     if (tabBtn) {
-        if (tabBtn.getAttribute('data-target') === 'admin-health') {
+        const target = tabBtn.getAttribute('data-target');
+        
+        // Health Dashboard Polling
+        if (target === 'admin-health') {
             fetchSystemHealth(); // Fetch immediately
             if (!healthPollInterval) {
                 healthPollInterval = setInterval(fetchSystemHealth, 2000); // Poll every 2 seconds
@@ -7297,6 +7302,19 @@ document.addEventListener('click', (e) => {
             if (healthPollInterval) {
                 clearInterval(healthPollInterval);
                 healthPollInterval = null;
+            }
+        }
+        
+        // Community Hub Polling
+        if (target === 'admin-community-hub') {
+            loadAdminCommunityHub();
+            if (!adminCommunityPollInterval) {
+                adminCommunityPollInterval = setInterval(loadAdminCommunityHub, 5000); // Poll every 5 seconds
+            }
+        } else {
+            if (adminCommunityPollInterval) {
+                clearInterval(adminCommunityPollInterval);
+                adminCommunityPollInterval = null;
             }
         }
     }
