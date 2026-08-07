@@ -2628,6 +2628,7 @@ app.delete('/api/community/comments/:id', requireAuth, async (req, res) => {
 // Admin Community Stats & Moderation Feed
 app.get('/api/community/admin/stats', requireAuth, async (req, res) => {
     try {
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
         if (req.user.role !== 'admin') {
             return res.status(403).json({ error: 'Unauthorized. Admin access required.' });
         }
