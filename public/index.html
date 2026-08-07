@@ -2447,9 +2447,23 @@
                 <div class="admin-header-flex">
                     <div class="admin-header-title">
                         <h2><i class="fa-solid fa-users text-gold"></i> Community Hub Moderation</h2>
-                        <p style="color: rgba(255,255,255,0.7); margin-top: 0.5rem; font-size: 0.95rem;">
-                            Launch the Inline Moderation Workspace to edit, lock, and delete posts natively.
-                        </p>
+                        <p>Launch the Inline Moderation Workspace to edit, lock, and delete posts natively.</p>
+                    </div>
+                    <button class="btn btn-secondary" onclick="loadAdminCommunityHub()"><i class="fa-solid fa-rotate-right"></i> Refresh Stats</button>
+                </div>
+
+                <div class="admin-analytics-grid" style="margin-top: 1.5rem; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;">
+                    <div class="admin-stat-card glassmorphic" style="text-align: center;">
+                        <span class="admin-stat-lbl">Total Posts</span>
+                        <strong class="admin-stat-val text-primary" id="admin-comm-hub-total-posts">0</strong>
+                    </div>
+                    <div class="admin-stat-card glassmorphic" style="text-align: center;">
+                        <span class="admin-stat-lbl">Total Comments</span>
+                        <strong class="admin-stat-val text-gold" id="admin-comm-hub-total-comments">0</strong>
+                    </div>
+                    <div class="admin-stat-card glassmorphic" style="text-align: center;">
+                        <span class="admin-stat-lbl">Active Contributors</span>
+                        <strong class="admin-stat-val text-emerald" id="admin-comm-hub-contributors">0</strong>
                     </div>
                 </div>
 
