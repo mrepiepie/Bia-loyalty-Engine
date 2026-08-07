@@ -7331,7 +7331,7 @@ let adminCommunityFeedData = [];
 async function loadAdminCommunityHub() {
     try {
         const token = localStorage.getItem('token');
-        const res = await fetch('/api/community/admin/stats', {
+        const res = await fetch('/api/community/admin/stats?t=' + Date.now(), {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await res.json();
