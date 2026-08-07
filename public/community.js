@@ -487,7 +487,7 @@ window.adminLockPost = async function(postId, lock) {
 };
 
 window.clearOldPosts = async function() {
-    if (!confirm('Are you sure you want to permanently delete ALL community posts older than 1 month? This will also delete their comments, votes, and reports. This action CANNOT be undone.')) return;
+    if (!confirm('Are you sure you want to archive ALL community posts older than 1 month? They will be hidden from the main feed but remain visible in the authors\' "My Posts" tab.')) return;
     
     try {
         const token = localStorage.getItem('token');

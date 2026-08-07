@@ -411,6 +411,7 @@ async function initializeDatabase() {
         )`);
         try { await runQuery('ALTER TABLE community_posts ADD COLUMN image_url TEXT'); } catch(e) {}
         try { await runQuery('ALTER TABLE community_posts ADD COLUMN is_locked INTEGER DEFAULT 0'); } catch(e) {}
+        try { await runQuery('ALTER TABLE community_posts ADD COLUMN is_archived INTEGER DEFAULT 0'); } catch(e) {}
 
         await runQuery(`CREATE TABLE IF NOT EXISTS community_comments (
             comment_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -2349,6 +2350,8 @@ app.get('/api/community/posts', requireAuth, async (req, res) => {
         if (filter === 'mine') {
             whereClause += ' AND p.user_id = ?';
             queryParams.push(userId);
+        } else {
+            whereClause += ' AND p.is_archived = 0';
         }
         
         if (sinceId > 0) {
@@ -2624,38 +2627,20 @@ app.delete('/api/admin/community/clear-old-posts', requireAuth, async (req, res)
             return res.status(403).json({ error: 'Unauthorized. Admin access required.' });
         }
         
-        // Find all posts older than 1 month
-        const oldPosts = await allQuery("SELECT post_id FROM community_posts WHERE created_at < datetime('now', '-1 month')");
+        // Find all active posts older than 1 month
+        const oldPosts = await allQuery("SELECT post_id FROM community_posts WHERE created_at < datetime('now', '-1 month') AND is_archived = 0");
         
         if (!oldPosts || oldPosts.length === 0) {
-            return res.json({ message: 'No old posts found to delete.', count: 0 });
+            return res.json({ message: 'No old posts found to archive.', count: 0 });
         }
         
         const postIds = oldPosts.map(p => p.post_id);
         const placeholders = postIds.map(() => '?').join(',');
         
-        // Find all comments associated with these posts to delete their votes/reports
-        const comments = await allQuery(`SELECT comment_id FROM community_comments WHERE post_id IN (${placeholders})`, postIds);
-        const commentIds = comments.map(c => c.comment_id);
+        // Archive the posts
+        await runQuery(`UPDATE community_posts SET is_archived = 1 WHERE post_id IN (${placeholders})`, postIds);
         
-        // Delete reports for comments
-        if (commentIds.length > 0) {
-            const commentPlaceholders = commentIds.map(() => '?').join(',');
-            await runQuery(`DELETE FROM community_reports WHERE comment_id IN (${commentPlaceholders})`, commentIds);
-            await runQuery(`DELETE FROM community_votes WHERE target_type = 'comment' AND target_id IN (${commentPlaceholders})`, commentIds);
-        }
-        
-        // Delete reports and votes for posts
-        await runQuery(`DELETE FROM community_reports WHERE post_id IN (${placeholders})`, postIds);
-        await runQuery(`DELETE FROM community_votes WHERE target_type = 'post' AND target_id IN (${placeholders})`, postIds);
-        
-        // Delete comments
-        await runQuery(`DELETE FROM community_comments WHERE post_id IN (${placeholders})`, postIds);
-        
-        // Delete posts
-        await runQuery(`DELETE FROM community_posts WHERE post_id IN (${placeholders})`, postIds);
-        
-        res.json({ message: `Successfully deleted ${postIds.length} old posts.`, count: postIds.length });
+        res.json({ message: `Successfully archived ${postIds.length} old posts.`, count: postIds.length });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
