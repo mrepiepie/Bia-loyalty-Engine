@@ -7337,9 +7337,7 @@ async function loadAdminCommunityHub() {
         const data = await res.json();
         
         if (data.stats) {
-            document.getElementById('admin-comm-hub-total-posts').textContent = data.stats.total_posts || 0;
-            document.getElementById('admin-comm-hub-total-comments').textContent = data.stats.total_comments || 0;
-            document.getElementById('admin-comm-hub-contributors').textContent = data.stats.active_contributors || 0;
+            // Stats removed at user request
         }
         
         adminCommunityFeedData = data.moderationFeed || [];
