@@ -2477,6 +2477,38 @@
                         <i class="fa-solid fa-rocket"></i> Launch Moderation Workspace
                     </a>
                 </div>
+
+                <!-- The Moderation Feed (Missing earlier) -->
+                <div class="card glassmorphic" style="margin-top: 2rem;">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h3><i class="fa-solid fa-clock-rotate-left"></i> Live Moderation Feed</h3>
+                        <div style="display: flex; gap: 1rem;">
+                            <select id="admin-comm-type-filter" class="form-input" style="width: auto;" onchange="filterAdminCommunityFeed()">
+                                <option value="all">All Content</option>
+                                <option value="post">Posts Only</option>
+                                <option value="comment">Comments Only</option>
+                            </select>
+                            <input type="text" id="admin-comm-search" class="form-input" placeholder="Search User ID or snippet..." onkeyup="filterAdminCommunityFeed()">
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table" style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); text-align: left;">
+                                    <th style="padding: 1rem; color: #888;">Type</th>
+                                    <th style="padding: 1rem; color: #888;">ID</th>
+                                    <th style="padding: 1rem; color: #888;">User ID</th>
+                                    <th style="padding: 1rem; color: #888;">Snippet</th>
+                                    <th style="padding: 1rem; color: #888;">Date</th>
+                                    <th style="padding: 1rem; color: #888;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-community-hub-feed">
+                                <!-- Feed populates here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
 
         </main>
