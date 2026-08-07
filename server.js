@@ -2625,7 +2625,7 @@ app.delete('/api/admin/community/clear-old-posts', requireAuth, async (req, res)
         }
         
         // Find all posts older than 1 month
-        const oldPosts = await dbAll("SELECT post_id FROM community_posts WHERE created_at < datetime('now', '-1 month')");
+        const oldPosts = await allQuery("SELECT post_id FROM community_posts WHERE created_at < datetime('now', '-1 month')");
         
         if (!oldPosts || oldPosts.length === 0) {
             return res.json({ message: 'No old posts found to delete.', count: 0 });
@@ -2635,7 +2635,7 @@ app.delete('/api/admin/community/clear-old-posts', requireAuth, async (req, res)
         const placeholders = postIds.map(() => '?').join(',');
         
         // Find all comments associated with these posts to delete their votes/reports
-        const comments = await dbAll(`SELECT comment_id FROM community_comments WHERE post_id IN (${placeholders})`, postIds);
+        const comments = await allQuery(`SELECT comment_id FROM community_comments WHERE post_id IN (${placeholders})`, postIds);
         const commentIds = comments.map(c => c.comment_id);
         
         // Delete reports for comments
