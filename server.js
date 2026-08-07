@@ -198,6 +198,21 @@ console.log(`Connected to database at ${dbUrl}`);
 let dbInitialized = false;
 
 // SQLite Promise Wrappers (Updated for @libsql/client)
+// Helper function to recursively convert BigInt to Number in query results
+const fixBigInt = (obj) => {
+    if (obj === null || obj === undefined) return obj;
+    if (typeof obj === 'bigint') return Number(obj);
+    if (Array.isArray(obj)) return obj.map(fixBigInt);
+    if (typeof obj === 'object') {
+        const newObj = {};
+        for (let key in obj) {
+            newObj[key] = fixBigInt(obj[key]);
+        }
+        return newObj;
+    }
+    return obj;
+};
+
 const runQuery = async (sql, params = []) => {
     const res = await db.execute({ sql, args: params });
     return { 
@@ -208,12 +223,12 @@ const runQuery = async (sql, params = []) => {
 
 const getQuery = async (sql, params = []) => {
     const res = await db.execute({ sql, args: params });
-    return res.rows[0];
+    return fixBigInt(res.rows[0]);
 };
 
 const allQuery = async (sql, params = []) => {
     const res = await db.execute({ sql, args: params });
-    return res.rows;
+    return fixBigInt(res.rows);
 };
 
 // Initialize the database asynchronously
@@ -2641,6 +2656,15 @@ app.get('/api/community/admin/stats', requireAuth, async (req, res) => {
         }
         
         const stats = await getQuery("SELECT (SELECT COUNT(*) FROM community_posts) as total_posts, (SELECT COUNT(*) FROM community_comments) as total_comments, (SELECT COUNT(DISTINCT user_id) FROM (SELECT user_id FROM community_posts UNION SELECT user_id FROM community_comments)) as active_contributors");
+        
+        // Fix for @libsql/client returning BigInt for COUNT(*) aggregations
+        if (stats) {
+            for (let key in stats) {
+                if (typeof stats[key] === 'bigint') {
+                    stats[key] = Number(stats[key]);
+                }
+            }
+        }
         
         const moderationFeed = await allQuery(`
             SELECT 'post' as type, post_id as id, user_id, title as snippet, created_at, is_locked FROM community_posts
