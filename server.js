@@ -2370,7 +2370,15 @@ app.get('/api/community/posts', requireAuth, async (req, res) => {
 app.post('/api/community/posts', requireAuth, async (req, res) => {
     try {
         // Check if user is muted
-        const user = await getQuery("SELECT is_muted, muted_until FROM users WHERE user_id = ?", [req.user.user_id]);
+        let user = await getQuery("SELECT is_muted, muted_until FROM users WHERE user_id = ?", [req.user.user_id]);
+        
+        // Auto-heal missing users from stale JWTs due to Turso migration
+        if (!user) {
+            await runQuery("INSERT OR IGNORE INTO users (user_id, name, email, password, role, student_id, current_tier, points_balance) VALUES (?, 'Migrated User', 'migrated' || ? || '@example.com', 'password', ?, 'migrated-' || ?, 'Bronze', 0)", 
+                [req.user.user_id, req.user.user_id, req.user.role || 'student', req.user.user_id]);
+            user = { is_muted: 0 };
+        }
+        
         if (user && (user.is_muted === 1 || (user.muted_until && new Date(user.muted_until) > new Date()))) {
             return res.status(403).json({ error: 'Your account has been temporarily muted from community participation.' });
         }
