@@ -7327,8 +7327,10 @@ body:not(.dark-theme) .logo-slot-name {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
     border-color: rgba(102, 252, 241, 0.2) !important;
 }
-b o d y : n o t ( . d a r k - t h e m e )   . m o d a l - c l o s e - b t n   {   c o l o r :   r g b a ( 0 ,   0 ,   0 ,   0 . 4 )   ! i m p o r t a n t ;   }  
- b o d y : n o t ( . d a r k - t h e m e )   . m o d a l - c l o s e - b t n : h o v e r   {   c o l o r :   v a r ( - - t e x t - m a i n )   ! i m p o r t a n t ;   b a c k g r o u n d :   r g b a ( 0 ,   0 ,   0 ,   0 . 0 5 ) ;   }  
+b o d y : n o t ( . d a r k - t h e m e )   . m o d a l - c l o s e - b t n   {   c o l o r :   r g b a ( 0 ,   0 ,   0 ,   0 . 4 )   ! i m p o r t a n t ;   } 
+ 
+ b o d y : n o t ( . d a r k - t h e m e )   . m o d a l - c l o s e - b t n : h o v e r   {   c o l o r :   v a r ( - - t e x t - m a i n )   ! i m p o r t a n t ;   b a c k g r o u n d :   r g b a ( 0 ,   0 ,   0 ,   0 . 0 5 ) ;   } 
+ 
  
 /* Light mode text contrast enhancements over WebGL Shader */
 body:not(.dark-theme) .hero-subtitle,
@@ -7337,6 +7339,6 @@ body:not(.dark-theme) .hud-text,
 body:not(.dark-theme) .nav-link-item,
 body:not(.dark-theme) .logo-text,
 body:not(.dark-theme) .bottom-subtext {
-    text-shadow: 0 0 20px rgba(255, 255, 255, 0.9), 0 0 40px rgba(255, 255, 255, 0.8), 0 0 10px rgba(255, 255, 255, 0.6);
+    color: #000000 !important; font-weight: 700 !important;
 }
 
