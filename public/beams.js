@@ -45,9 +45,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function updateCanvasSize() {
         const dpr = window.devicePixelRatio || 1;
-        const rect = canvas.getBoundingClientRect();
-        canvas.width = rect.width * dpr;
-        canvas.height = rect.height * dpr;
+        canvas.width = window.innerWidth * dpr;
+        canvas.height = window.innerHeight * 1.3 * dpr; // 130vh
         ctx.scale(dpr, dpr);
 
         const totalBeams = MINIMUM_BEAMS * 1.5;
