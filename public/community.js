@@ -175,6 +175,9 @@ function createPostElement(post) {
                     <button class="action-btn" style="color:${post.is_locked ? '#ff4b4b' : '#66fcf1'};" onclick="adminLockPost(${post.post_id}, ${!post.is_locked})">
                         <i class="fa-solid ${post.is_locked ? 'fa-lock' : 'fa-unlock'}"></i> ${post.is_locked ? 'Unlock' : 'Lock'}
                     </button>
+                    <button class="action-btn" style="color:${post.is_archived ? '#66fcf1' : '#ff4b4b'};" onclick="${post.is_archived ? `adminRestorePost(${post.post_id})` : `adminArchivePost(${post.post_id})`}">
+                        <i class="fa-solid ${post.is_archived ? 'fa-box-open' : 'fa-box-archive'}"></i> ${post.is_archived ? 'Restore' : 'Archive'}
+                    </button>
                     <button class="action-btn" style="color:#ff4b4b;" onclick="adminDeleteCommunityContent('post', ${post.post_id})">
                         <i class="fa-solid fa-trash"></i> Delete
                     </button>
@@ -525,6 +528,36 @@ window.adminDeleteCommunityContent = async function(type, id) {
         fetchPosts(true);
     } catch (e) {
         alert('Error: ' + e.message);
+    }
+};
+
+window.adminArchivePost = async function(postId) {
+    if (!confirm('Are you sure you want to archive this post? It will be hidden from the main feed and locked.')) return;
+    try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`/api/admin/community/posts/${postId}/archive`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error(await res.text());
+        fetchPosts(true);
+    } catch (e) {
+        alert('Error archiving post: ' + e.message);
+    }
+};
+
+window.adminRestorePost = async function(postId) {
+    if (!confirm('Are you sure you want to restore this post? It will be visible in the main feed and unlocked.')) return;
+    try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`/api/admin/community/posts/${postId}/restore`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error(await res.text());
+        fetchPosts(true);
+    } catch (e) {
+        alert('Error restoring post: ' + e.message);
     }
 };
 

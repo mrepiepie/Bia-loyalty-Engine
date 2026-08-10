@@ -2644,10 +2644,36 @@ app.delete('/api/admin/community/clear-old-posts', requireAuth, async (req, res)
         const postIds = oldPosts.map(p => p.post_id);
         const placeholders = postIds.map(() => '?').join(',');
         
-        // Archive the posts
-        await runQuery(`UPDATE community_posts SET is_archived = 1 WHERE post_id IN (${placeholders})`, postIds);
+        // Archive and lock the posts
+        await runQuery(`UPDATE community_posts SET is_archived = 1, is_locked = 1 WHERE post_id IN (${placeholders})`, postIds);
         
         res.json({ message: `Successfully archived ${postIds.length} old posts.`, count: postIds.length });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Admin Archive Post
+app.post('/api/admin/community/posts/:id/archive', requireAuth, async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Unauthorized. Admin access required.' });
+        }
+        await runQuery("UPDATE community_posts SET is_archived = 1, is_locked = 1 WHERE post_id = ?", [req.params.id]);
+        res.json({ message: 'Post archived and locked successfully.' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Admin Restore Post
+app.post('/api/admin/community/posts/:id/restore', requireAuth, async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Unauthorized. Admin access required.' });
+        }
+        await runQuery("UPDATE community_posts SET is_archived = 0, is_locked = 0 WHERE post_id = ?", [req.params.id]);
+        res.json({ message: 'Post restored and unlocked successfully.' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
