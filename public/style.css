@@ -7368,13 +7368,22 @@ body:not(.dark-theme) .modal-close-btn:hover { color: var(--text-main) !importan
 
 /* Background Theme Toggling */
 #beams-canvas, .beams-overlay {
-    display: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 body.dark-theme #beams-canvas, body.dark-theme .beams-overlay {
-    display: block;
+    opacity: 1;
+    visibility: visible;
+}
+#webgl-canvas {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 body.dark-theme #webgl-canvas {
-    display: none;
+    opacity: 0;
+    visibility: hidden;
 }
 
 @keyframes beamsOverlayPulse {
