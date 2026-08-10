@@ -7341,19 +7341,19 @@ body:not(.dark-theme) .modal-close-btn:hover { color: var(--text-main) !importan
 }
 
 #app-body:not(.dark-theme) .hero-body-text {
-    color: #333333 !important;
+    color: #060606 !important;
     font-weight: 600 !important;
     text-shadow: none !important;
 }
 #app-body:not(.dark-theme) .hero-body-text * {
-    color: #333333 !important;
+    color: #060606 !important;
     text-shadow: none !important;
 }
 
 #app-body:not(.dark-theme) .hud-text,
 #app-body:not(.dark-theme) .nav-link-item,
 #app-body:not(.dark-theme) .bottom-subtext {
-    color: #222222 !important;
+    color: #060606 !important;
     font-weight: 700 !important;
     text-shadow: none !important;
 }
