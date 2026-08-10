@@ -153,13 +153,10 @@ vec3 hueRotate(vec3 col, float a) {
 }
 
 vec3 shade(vec2 uv, vec2 p, float t) {
-  vec2 q = p * 1.6;
-  float amp = 0.25 + u_intensity * 0.85;
-  for (float i = 1.0; i < 5.0; i += 1.0) {
-    q.x += amp / i * cos(i * 2.4 * q.y + t * 0.8 + u_seed);
-    q.y += amp / i * cos(i * 1.7 * q.x + t * 0.6);
-  }
-  return palette(0.5 + 0.5 * sin(q.x + q.y));
+  float a = fbm(p * 2.0 + u_seed) * 6.2831;
+  vec2 dir = vec2(cos(a), sin(a));
+  float v = fbm(p * 3.0 + dir * (u_intensity * 2.0) + t * 0.12);
+  return palette(v);
 }
 
 void main() {
@@ -316,24 +313,24 @@ function initWebGL() {
     const uSpaceLoc = gl.getUniformLocation(program, "u_space");
     const uCursorLoc = gl.getUniformLocation(program, "u_cursor");
 
-    // Static uniform values based on prompt
+    // Static uniform values based on prompt for Flow field
     const colors = [
-        0.008, 0.004, 0.039,
-        0.016, 0.020, 0.180,
-        0.239, 0.173, 0.553,
-        0.569, 0.420, 0.749,
+        0.000, 0.000, 0.000,
+        0.525, 0.525, 0.796,
+        0.333, 0.333, 0.518,
+        1.000, 1.000, 1.000,
         0,0,0, 0,0,0, 0,0,0, 0,0,0 // padding for 8 vec3s
     ];
     
     // Send static uniforms
     gl.uniform3fv(uColorsLoc, colors);
-    gl.uniform4f(uShapeLoc, 1.26, 0.28, 0.50, 0.00);
-    gl.uniform4f(uSurfaceLoc, 2.40, 1.11, 0.00, 1.00);
+    gl.uniform4f(uShapeLoc, 1.50, 0.55, 0.50, 0.00);
+    gl.uniform4f(uSurfaceLoc, 2.40, 1.00, 0.00, 1.00);
     
-    // Used grain 14/100 -> 0.14 instead of 0.05 from comment just in case
-    gl.uniform4f(uFinishLoc, 0.00, 0.00, 0.00, 0.14); 
+    // grain 12/100 -> 0.12
+    gl.uniform4f(uFinishLoc, 0.00, 0.00, 0.00, 0.12); 
     
-    gl.uniform4f(uTransformLoc, 1581.0, 0.00, 0.00, 0.0);
+    gl.uniform4f(uTransformLoc, 1.0, 0.00, 0.00, 0.0);
     gl.uniform4f(uSpaceLoc, 0.00, 0.00, 0.00, 0.00);
     gl.uniform4f(uCursorLoc, 0.0, 2.0, 0.65, 0.46); // Cursor presence 0
 
@@ -357,8 +354,8 @@ function initWebGL() {
         const now = Date.now();
         const seconds = (now - startTime) / 1000;
         
-        // u_scene: width, height, time * 0.76, colorCount
-        gl.uniform4f(uSceneLoc, canvas.width, canvas.height, seconds * 0.76, 4.0);
+        // u_scene: width, height, time * 0.86, colorCount
+        gl.uniform4f(uSceneLoc, canvas.width, canvas.height, seconds * 0.86, 4.0);
 
         gl.drawArrays(gl.TRIANGLES, 0, 3);
         animationFrameId = requestAnimationFrame(render);
