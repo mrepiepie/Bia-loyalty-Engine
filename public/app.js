@@ -8770,3 +8770,70 @@ async function resolveUserReports(userId) {
         showToast('Error', 'Network error', 'error');
     }
 }
+
+// ==========================================
+// HERO BACKGROUND PARALLAX EFFECTS
+// ==========================================
+document.addEventListener("DOMContentLoaded", () => {
+    // Ensure GSAP ScrollTrigger is available
+    if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Scroll Parallax for orbs
+        const orbs = document.querySelectorAll('.parallax-orb');
+        if (orbs.length > 0) {
+            // Orb 1 moves up slower
+            gsap.to('.orb-1', {
+                y: -150,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: ".landing-split-hero",
+                    start: "top top",
+                    end: "bottom top",
+                    scrub: 1.5
+                }
+            });
+
+            // Orb 2 moves down
+            gsap.to('.orb-2', {
+                y: 200,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: ".landing-split-hero",
+                    start: "top top",
+                    end: "bottom top",
+                    scrub: 2
+                }
+            });
+
+            // Orb 3 moves up faster
+            gsap.to('.orb-3', {
+                y: -250,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: ".landing-split-hero",
+                    start: "top top",
+                    end: "bottom top",
+                    scrub: 1
+                }
+            });
+
+            // Mousemove parallax effect
+            const heroSection = document.querySelector('.landing-split-hero');
+            if (heroSection) {
+                heroSection.addEventListener('mousemove', (e) => {
+                    const x = (e.clientX / window.innerWidth - 0.5) * 40;
+                    const y = (e.clientY / window.innerHeight - 0.5) * 40;
+                    
+                    gsap.to('.orb-1', { x: x * 2, y: y * 2, duration: 2, ease: "power2.out", overwrite: "auto" });
+                    gsap.to('.orb-2', { x: -x * 1.5, y: -y * 1.5, duration: 2, ease: "power2.out", overwrite: "auto" });
+                    gsap.to('.orb-3', { x: x, y: -y, duration: 2, ease: "power2.out", overwrite: "auto" });
+                });
+                
+                heroSection.addEventListener('mouseleave', () => {
+                    gsap.to(orbs, { x: 0, y: 0, duration: 2, ease: "power2.out", overwrite: "auto" });
+                });
+            }
+        }
+    }
+});
