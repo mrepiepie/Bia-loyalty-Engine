@@ -8822,16 +8822,17 @@ document.addEventListener("DOMContentLoaded", () => {
             const heroSection = document.querySelector('.landing-split-hero');
             if (heroSection) {
                 heroSection.addEventListener('mousemove', (e) => {
-                    const x = (e.clientX / window.innerWidth - 0.5) * 40;
-                    const y = (e.clientY / window.innerHeight - 0.5) * 40;
+                    // Huge movement multipliers so the massive gradients sweep across the screen
+                    const x = (e.clientX / window.innerWidth - 0.5) * 150;
+                    const y = (e.clientY / window.innerHeight - 0.5) * 150;
                     
-                    gsap.to('.orb-1', { x: x * 2, y: y * 2, duration: 2, ease: "power2.out", overwrite: "auto" });
-                    gsap.to('.orb-2', { x: -x * 1.5, y: -y * 1.5, duration: 2, ease: "power2.out", overwrite: "auto" });
-                    gsap.to('.orb-3', { x: x, y: -y, duration: 2, ease: "power2.out", overwrite: "auto" });
+                    gsap.to('.orb-1', { x: x * 2, y: y * 2, duration: 2.5, ease: "power2.out", overwrite: "auto" });
+                    gsap.to('.orb-2', { x: -x * 1.5, y: -y * 1.5, duration: 2.5, ease: "power2.out", overwrite: "auto" });
+                    gsap.to('.orb-3', { x: x, y: -y, duration: 2.5, ease: "power2.out", overwrite: "auto" });
                 });
                 
                 heroSection.addEventListener('mouseleave', () => {
-                    gsap.to(orbs, { x: 0, y: 0, duration: 2, ease: "power2.out", overwrite: "auto" });
+                    gsap.to(orbs, { x: 0, y: 0, duration: 2.5, ease: "power2.out", overwrite: "auto" });
                 });
             }
         }
