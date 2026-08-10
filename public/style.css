@@ -64,6 +64,7 @@ body.dark-theme {
 html, body {
     margin: 0;
     padding: 0;
+    overflow: hidden !important;
 }
 
 body {
@@ -370,7 +371,7 @@ body.landing-active #pixel-grid-canvas {
     color: var(--text-main);
     display: none;
     z-index: 9000;
-    overflow-y: auto;
+    overflow: hidden !important;
 }
 
 /* Floating Top-Left BIA Logo (Initially there) */
