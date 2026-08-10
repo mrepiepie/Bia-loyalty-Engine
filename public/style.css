@@ -64,7 +64,11 @@ body.dark-theme {
 html, body {
     margin: 0;
     padding: 0;
-    overflow: hidden !important;
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+}
+html::-webkit-scrollbar, body::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
 }
 
 body {
@@ -371,7 +375,12 @@ body.landing-active #pixel-grid-canvas {
     color: var(--text-main);
     display: none;
     z-index: 9000;
-    overflow: hidden !important;
+    overflow-y: auto;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+#login-overlay::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
 }
 
 /* Floating Top-Left BIA Logo (Initially there) */
