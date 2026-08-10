@@ -346,7 +346,7 @@ function initWebGL() {
     }
 
     function render() {
-        if (document.hidden) {
+        if (document.hidden || document.body.classList.contains("dark-theme")) {
             animationFrameId = requestAnimationFrame(render);
             return;
         }
