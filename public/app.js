@@ -8828,10 +8828,15 @@ document.addEventListener("DOMContentLoaded", () => {
                     gsap.to('.orb-1', { x: x * 2, y: y * 2, duration: 2, ease: "power2.out", overwrite: "auto" });
                     gsap.to('.orb-2', { x: -x * 1.5, y: -y * 1.5, duration: 2, ease: "power2.out", overwrite: "auto" });
                     gsap.to('.orb-3', { x: x, y: -y, duration: 2, ease: "power2.out", overwrite: "auto" });
+
+                    // Wireframe subtle 3D tilt
+                    gsap.to('.hero-wireframe-left', { x: x, y: y, rotationY: x, rotationX: -y, duration: 3, ease: "power2.out", overwrite: "auto" });
+                    gsap.to('.hero-wireframe-right', { x: -x, y: -y, rotationY: -x, rotationX: y, duration: 3, ease: "power2.out", overwrite: "auto" });
                 });
                 
                 heroSection.addEventListener('mouseleave', () => {
                     gsap.to(orbs, { x: 0, y: 0, duration: 2, ease: "power2.out", overwrite: "auto" });
+                    gsap.to('.hero-wireframe-left, .hero-wireframe-right', { x: 0, y: 0, rotationY: 0, rotationX: 0, duration: 2, ease: "power2.out", overwrite: "auto" });
                 });
             }
         }
