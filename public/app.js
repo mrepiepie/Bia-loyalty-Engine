@@ -8780,8 +8780,6 @@ document.addEventListener("DOMContentLoaded", () => {
         gsap.registerPlugin(ScrollTrigger);
 
         // Orbs have been replaced by WebGL shader
-    }
-});
         
         // ==========================================
         // HERO CINEMATIC INTRO TIMELINE
