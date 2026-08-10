@@ -9,6 +9,8 @@ document.addEventListener("DOMContentLoaded", () => {
     canvas.style.zIndex = "-1";
     canvas.style.pointerEvents = "none";
     canvas.style.filter = "blur(15px)";
+    canvas.style.webkitMaskImage = "linear-gradient(to bottom, black 65%, transparent 100%)";
+    canvas.style.maskImage = "linear-gradient(to bottom, black 65%, transparent 100%)";
     
     // Insert right before webgl-canvas
     const webglCanvas = document.getElementById("webgl-canvas");
