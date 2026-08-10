@@ -6372,6 +6372,11 @@ body:not(.dark-theme) .logo-item {
     color: #53514a !important;
 }
 
+body:not(.dark-theme) .logo-carousel-col {
+    background: rgba(0, 0, 0, 0.18) !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
 body:not(.dark-theme) .app-container {
     color: var(--text-main) !important;
 }
@@ -7230,10 +7235,7 @@ body:not(.dark-theme) .btn-query-round {
   border-color: rgba(255, 255, 255, 0.1);
 }
 
-body:not(.dark-theme) .logo-carousel-col {
-  background: rgba(0, 0, 0, 0.015) !important;
-  border: 1px solid rgba(0, 0, 0, 0.06) !important;
-}
+body:not(.dark-theme) .logo-carousel-col { background: rgba(0, 0, 0, 0.18) !important; border: 1px solid rgba(0, 0, 0, 0.1) !important; }
 
 /* The single visible slot wrapper */
 .logo-slot {
@@ -7412,4 +7414,5 @@ body.dark-theme #webgl-canvas {
     -webkit-mask-image: linear-gradient(to bottom, black 65%, transparent 100%);
     mask-image: linear-gradient(to bottom, black 65%, transparent 100%);
 }
+
 
