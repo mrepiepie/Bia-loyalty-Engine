@@ -7332,15 +7332,15 @@ body:not(.dark-theme) .modal-close-btn:hover { color: var(--text-main) !importan
 
 
 /* Light mode text contrast enhancements over WebGL Shader */
-body:not(.dark-theme) .hero-subtitle,
-body:not(.dark-theme) .hero-subtitle *,
-body:not(.dark-theme) .hero-body-text,
-body:not(.dark-theme) .hero-body-text *,
-body:not(.dark-theme) .hud-text,
-body:not(.dark-theme) .nav-link-item,
-body:not(.dark-theme) .logo-text,
-body:not(.dark-theme) .logo-text *,
-body:not(.dark-theme) .bottom-subtext {
+#app-body:not(.dark-theme) .hero-subtitle,
+#app-body:not(.dark-theme) .hero-subtitle *,
+#app-body:not(.dark-theme) .hero-body-text,
+#app-body:not(.dark-theme) .hero-body-text *,
+#app-body:not(.dark-theme) .hud-text,
+#app-body:not(.dark-theme) .nav-link-item,
+#app-body:not(.dark-theme) .logo-text,
+#app-body:not(.dark-theme) .logo-text *,
+#app-body:not(.dark-theme) .bottom-subtext {
     color: #000000 !important;
     font-weight: 900 !important;
     opacity: 1 !important;
