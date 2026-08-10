@@ -6487,7 +6487,6 @@ body:not(.dark-theme) .tiers-grid h3 {
 body:not(.dark-theme) :not(.bia-footer-container) > p:not(.humor-card-desc),
 body:not(.dark-theme) :not(.bia-footer-container) > span:not(.humor-card-desc):not(.humor-badge),
 body:not(.dark-theme) .section-desc,
-body:not(.dark-theme) .hero-body-text,
 body:not(.dark-theme) .logo-marquee-track span {
     color: #504f47 !important;
 }
