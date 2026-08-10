@@ -8835,5 +8835,36 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
             }
         }
+        
+        // ==========================================
+        // HERO CINEMATIC INTRO TIMELINE
+        // ==========================================
+        const heroIntroTL = gsap.timeline({ defaults: { ease: "power4.out" } });
+        
+        // Ensure initial states just in case CSS doesn't catch quickly enough
+        gsap.set('.reveal-text', { y: '110%', opacity: 0 });
+        gsap.set('.hero-side-ui-left', { x: -30, opacity: 0 });
+        gsap.set('.hero-side-ui-right', { x: 30, opacity: 0 });
+        gsap.set('.hero-corner-icon', { scale: 0, opacity: 0 });
+        gsap.set('.academic-crest-wrapper', { opacity: 0, scale: 0.9, y: 20 });
+        
+        // Build the sequence
+        heroIntroTL
+            .to('.academic-crest-wrapper', { opacity: 1, scale: 1, y: 0, duration: 1.2 }, 0.2)
+            .to('.reveal-text', { 
+                y: '0%', 
+                opacity: 1, 
+                duration: 1.2, 
+                stagger: 0.15 
+            }, 0.4)
+            .to('.hero-corner-icon', { 
+                scale: 1, 
+                opacity: 0.7, 
+                duration: 0.8, 
+                rotation: 90, 
+                stagger: 0.1 
+            }, 0.8)
+            .to('.hero-side-ui-left', { x: 0, opacity: 1, duration: 1.2 }, 1)
+            .to('.hero-side-ui-right', { x: 0, opacity: 1, duration: 1.2 }, 1.1);
     }
 });

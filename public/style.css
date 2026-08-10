@@ -595,6 +595,69 @@ body:not(.dark-theme) .parallax-orb {
     100% { transform: scale(1.15) translate(30px, -20px); opacity: 0.7; }
 }
 
+/* Cinematic HUD Lower Thirds */
+.hero-side-ui {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    z-index: 20;
+    pointer-events: none;
+    opacity: 0; /* Animated in via GSAP */
+}
+
+.hero-side-ui-left {
+    left: 2rem;
+    flex-direction: column;
+}
+
+.hero-side-ui-right {
+    right: 2rem;
+    flex-direction: column-reverse;
+}
+
+.hud-text {
+    font-family: monospace;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    color: var(--text-main);
+    opacity: 0.4;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    white-space: nowrap;
+}
+
+.hud-line {
+    width: 1px;
+    height: 60px;
+    background-color: var(--text-main);
+    opacity: 0.2;
+}
+
+/* GSAP Title Reveal Masks */
+.reveal-mask {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: top;
+    padding-bottom: 5px; /* Prevent clipping descenders */
+}
+
+.reveal-text {
+    display: inline-block;
+    transform: translateY(110%); /* Hidden initially */
+    opacity: 0;
+}
+
+/* Hide HUD on smaller screens */
+@media screen and (max-width: 1024px) {
+    .hero-side-ui {
+        display: none;
+    }
+}
+
 .hero-left-col {
     display: flex;
     flex-direction: column;

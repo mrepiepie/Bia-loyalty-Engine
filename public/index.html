@@ -187,10 +187,20 @@
 
         <!-- Landing Split Hero (Co Paradiso-Style Centered Hero) -->
         <div class="landing-split-hero" id="about">
+            
+            <!-- Cinematic HUD Lower Thirds -->
+            <div class="hero-side-ui hero-side-ui-left">
+                <span class="hud-text">// SCROLL TO DISCOVER</span>
+                <div class="hud-line"></div>
+            </div>
+            <div class="hero-side-ui hero-side-ui-right">
+                <span class="hud-text">SYS.V2.4 | BIA LOYALTY ENGINE</span>
+                <div class="hud-line"></div>
+            </div>
 
             <div class="hero-left-col" style="position: relative; z-index: 10;">
                 <!-- Academic Crest Line-art Vector Icon -->
-                <div class="academic-crest-wrapper">
+                <div class="academic-crest-wrapper" style="opacity: 0;">
                     <svg class="crest-svg" width="90" height="90" viewBox="0 0 100 100" fill="none" stroke="#E8B838" stroke-width="1.2">
                         <path d="M25,70 C15,60 15,35 25,25 C30,35 30,55 25,70 Z" fill="rgba(232, 184, 56, 0.05)"/>
                         <path d="M75,70 C85,60 85,35 75,25 C70,35 70,55 75,70 Z" fill="rgba(232, 184, 56, 0.05)"/>
@@ -203,20 +213,20 @@
                 <div class="mb-10 mt-4 md:mt-6" style="margin: 0.5rem auto 1.5rem auto; max-width: 820px; width: 100%;">
                     <div class="px-2 landing-hero-boxed-container">
                         <!-- Corner Plus Icons -->
-                        <i class="fa-solid fa-plus" style="position: absolute; left: 8px; top: 8px; font-size: 0.85rem; color: #dfb15b; opacity: 0.7;"></i>
-                        <i class="fa-solid fa-plus" style="position: absolute; left: 8px; bottom: 8px; font-size: 0.85rem; color: #dfb15b; opacity: 0.7;"></i>
-                        <i class="fa-solid fa-plus" style="position: absolute; right: 8px; top: 8px; font-size: 0.85rem; color: #dfb15b; opacity: 0.7;"></i>
-                        <i class="fa-solid fa-plus" style="position: absolute; right: 8px; bottom: 8px; font-size: 0.85rem; color: #dfb15b; opacity: 0.7;"></i>
+                        <i class="fa-solid fa-plus hero-corner-icon" style="position: absolute; left: 8px; top: 8px; font-size: 0.85rem; color: #dfb15b; opacity: 0;"></i>
+                        <i class="fa-solid fa-plus hero-corner-icon" style="position: absolute; left: 8px; bottom: 8px; font-size: 0.85rem; color: #dfb15b; opacity: 0;"></i>
+                        <i class="fa-solid fa-plus hero-corner-icon" style="position: absolute; right: 8px; top: 8px; font-size: 0.85rem; color: #dfb15b; opacity: 0;"></i>
+                        <i class="fa-solid fa-plus hero-corner-icon" style="position: absolute; right: 8px; bottom: 8px; font-size: 0.85rem; color: #dfb15b; opacity: 0;"></i>
 
-                        <h1 class="hero-subtitle split-done tracking-tighter select-none text-center animate-glow" style="display: flex; justify-content: center; align-items: center; gap: 0.35rem; font-weight: 800; font-size: clamp(2.4rem, 5.8vw, 4.5rem); line-height: 1.05; margin: 0; font-family: 'Outfit'; flex-wrap: wrap;">
-                            <span class="gradient-text-item animate-fade-1" style="position: relative;">
-                                <span class="from-gradient-1-start to-gradient-1-end bg-gradient-to-r bg-clip-text text-transparent">Academic.</span>
+                        <h1 class="hero-subtitle select-none text-center animate-glow" style="display: flex; justify-content: center; align-items: center; gap: 0.35rem; font-weight: 800; font-size: clamp(2.4rem, 5.8vw, 4.5rem); line-height: 1.05; margin: 0; font-family: 'Outfit'; flex-wrap: wrap;">
+                            <span class="reveal-mask">
+                                <span class="reveal-text gradient-text-item from-gradient-1-start to-gradient-1-end bg-gradient-to-r bg-clip-text text-transparent block">Academic.</span>
                             </span>
-                            <span class="gradient-text-item animate-fade-2" style="position: relative;">
-                                <span class="from-gradient-2-start to-gradient-2-end bg-gradient-to-r bg-clip-text text-transparent">Dedication.</span>
+                            <span class="reveal-mask">
+                                <span class="reveal-text gradient-text-item from-gradient-2-start to-gradient-2-end bg-gradient-to-r bg-clip-text text-transparent block">Dedication.</span>
                             </span>
-                            <span class="gradient-text-item animate-fade-3" style="position: relative;">
-                                <span class="from-gradient-3-start to-gradient-3-end bg-gradient-to-r bg-clip-text text-transparent">Rewarded.</span>
+                            <span class="reveal-mask">
+                                <span class="reveal-text gradient-text-item from-gradient-3-start to-gradient-3-end bg-gradient-to-r bg-clip-text text-transparent block">Rewarded.</span>
                             </span>
                         </h1>
                     </div>
