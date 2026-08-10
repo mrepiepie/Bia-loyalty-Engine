@@ -8828,12 +8828,25 @@ document.addEventListener("DOMContentLoaded", () => {
                     gsap.to('.orb-1', { x: x * 2, y: y * 2, duration: 2, ease: "power2.out", overwrite: "auto" });
                     gsap.to('.orb-2', { x: -x * 1.5, y: -y * 1.5, duration: 2, ease: "power2.out", overwrite: "auto" });
                     gsap.to('.orb-3', { x: x, y: -y, duration: 2, ease: "power2.out", overwrite: "auto" });
+
+                    // Floating cards parallax
+                    gsap.to('.fc-1', { x: x * 1.5, y: y * 1.5, duration: 3, ease: "power2.out", overwrite: "auto" });
+                    gsap.to('.fc-2', { x: -x, y: -y, duration: 3, ease: "power2.out", overwrite: "auto" });
+                    gsap.to('.fc-3', { x: x * 2, y: -y, duration: 3, ease: "power2.out", overwrite: "auto" });
+                    gsap.to('.fc-4', { x: -x * 1.5, y: y * 1.5, duration: 3, ease: "power2.out", overwrite: "auto" });
                 });
                 
                 heroSection.addEventListener('mouseleave', () => {
                     gsap.to(orbs, { x: 0, y: 0, duration: 2, ease: "power2.out", overwrite: "auto" });
+                    gsap.to('.floating-card', { x: 0, y: 0, duration: 2, ease: "power2.out", overwrite: "auto" });
                 });
             }
+
+            // Scroll Parallax for floating cards
+            gsap.to('.fc-1', { y: -250, ease: "none", scrollTrigger: { trigger: ".landing-split-hero", start: "top top", end: "bottom top", scrub: 1 } });
+            gsap.to('.fc-2', { y: -150, ease: "none", scrollTrigger: { trigger: ".landing-split-hero", start: "top top", end: "bottom top", scrub: 1.5 } });
+            gsap.to('.fc-3', { y: -300, ease: "none", scrollTrigger: { trigger: ".landing-split-hero", start: "top top", end: "bottom top", scrub: 0.8 } });
+            gsap.to('.fc-4', { y: -200, ease: "none", scrollTrigger: { trigger: ".landing-split-hero", start: "top top", end: "bottom top", scrub: 1.2 } });
         }
     }
 });

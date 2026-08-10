@@ -595,22 +595,77 @@ body:not(.dark-theme) .parallax-orb {
     100% { transform: scale(1.15) translate(30px, -20px); opacity: 0.7; }
 }
 
-/* Premium Matte Noise Overlay */
-.hero-matte-overlay {
+/* Floating Reward Cards Background */
+.hero-floating-rewards {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
-    z-index: 1; /* Sits above the orbs, below the text */
+    z-index: 2; /* Above orbs, below text */
     pointer-events: none;
-    /* Create a microscopic grid/noise texture */
-    background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-    background-size: 4px 4px; /* Micro grid */
-    opacity: 0.8;
 }
 
-body:not(.dark-theme) .hero-matte-overlay {
-    background-image: radial-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+.floating-card {
+    position: absolute;
+    width: 160px;
+    height: 100px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.4; /* Subtle enough to not distract */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    /* Basic tumbling animation, GSAP handles the rest */
+    animation: tumble-card 20s infinite linear;
+}
+
+body:not(.dark-theme) .floating-card {
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.fc-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-main);
+}
+
+.fc-inner i {
+    font-size: 1.5rem;
+    color: #dfb15b; /* Brand Gold */
+}
+
+.fc-inner span {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+}
+
+.fc-1 { top: 20%; left: 8%; animation-duration: 25s; animation-direction: reverse; }
+.fc-2 { top: 60%; left: 15%; animation-duration: 35s; }
+.fc-3 { top: 30%; right: 10%; animation-duration: 28s; }
+.fc-4 { top: 70%; right: 5%; animation-duration: 32s; animation-direction: reverse; }
+
+@keyframes tumble-card {
+    0% { transform: rotate3d(1, 1, 0, 0deg) translateY(0); }
+    50% { transform: rotate3d(1, 1, 0, 180deg) translateY(-20px); }
+    100% { transform: rotate3d(1, 1, 0, 360deg) translateY(0); }
+}
+
+/* Hide on smaller screens to prevent clutter */
+@media screen and (max-width: 1024px) {
+    .hero-floating-rewards { opacity: 0.5; }
+    .floating-card { width: 120px; height: 80px; }
+}
+@media screen and (max-width: 768px) {
+    .hero-floating-rewards { display: none; }
 }
 
 .hero-left-col {
