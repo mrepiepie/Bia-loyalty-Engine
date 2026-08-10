@@ -7,9 +7,9 @@
 
 :root {
     /* DEFAULT: Premium Contrasting Light Theme */
-    --bg-dark: #e5e3d8; /* Warm sandstone soft background to prevent eye glare */
-    --bg-overlay: rgba(229, 227, 216, 0.96);
-    --bg-card: #f1efeb; /* Soft cream card base */
+    --bg-dark: #d5d7da; /* Slightly cool grey background */
+    --bg-overlay: rgba(213, 215, 218, 0.96);
+    --bg-card: #e2e4e8; /* Soft grey card base */
     --border-color: rgba(20, 19, 14, 0.12); /* Subtle warm grey divider border */
     --text-main: #1d1c16; /* Deep charcoal warm bronze for contrast */
     --text-muted: #504f47; /* Ash clay readable body text */
