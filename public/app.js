@@ -1134,7 +1134,15 @@ function showPortalDashboard() {
     const badge = document.getElementById('user-role-badge');
     
     badge.textContent = role === 'admin' ? 'Admin console' : 'Student member';
-    badge.className = `badge-subdomain ${role === 'admin' ? 'text-gold' : 'text-blue'}`;
+    badge.className = "badge-subdomain ${role === 'admin' ? 'text-gold' : 'text-blue'}";
+    if (role === 'admin') {
+        if (typeof pollAdminNotifications === 'function') {
+            pollAdminNotifications();
+            if (!adminNotificationsInterval) {
+                adminNotificationsInterval = setInterval(pollAdminNotifications, 5000);
+            }
+        }
+    }
 
     // Hide all tab contents first
     document.querySelectorAll('.tab-content').forEach(el => {
@@ -1212,6 +1220,9 @@ function showPortalDashboard() {
 }
 
 function handleLogout() {
+    if (typeof adminNotificationsInterval !== 'undefined' && adminNotificationsInterval) {
+        clearInterval(adminNotificationsInterval);
+    }
     appState.currentUser = null;
     localStorage.removeItem('token');
     appState.userProfile = null;
@@ -4173,7 +4184,7 @@ function showPointsUndoToast(message, ledgerId, userId) {
     showToast('Points Adjusted! ', message, 'points', 2000, {
         label: 'Undo',
         onClick: async () => {
-            const response = await fetch(`${API_BASE}/admin/adjust-points/${ledgerId}/undo`, { method: 'POST' });
+            const response = await fetch(`${API_BASE}/admin/undo-points/${ledgerId}`, { method: 'DELETE' });
             const data = await response.json();
             if (!response.ok) throw new Error(data.error || 'Failed to undo adjustment.');
 
@@ -8813,3 +8824,47 @@ document.addEventListener("DOMContentLoaded", () => {
             .to('.hero-side-ui-right', { x: 0, opacity: 1, duration: 1.2 }, 1.1);
     }
 });
+
+// --- ADMIN NOTIFICATIONS POLLING ---
+let adminNotificationsInterval;
+async function pollAdminNotifications() {
+    if (!appState.currentUser || appState.currentUser.role !== 'admin') return;
+    try {
+        const res = await fetch(API_BASE + '/admin/notifications/count', {
+            headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+        });
+        if (!res.ok) return;
+        const counts = await res.json();
+        
+        // Update FAQs Badge
+        const faqTab = document.querySelector('.nav-tab[data-target="admin-faqs"]');
+        if (faqTab) updateBadge(faqTab, counts.faqs);
+        
+        // Update Leads Badge
+        const leadsTab = document.querySelector('.nav-tab[data-target="admin-leads"]');
+        if (leadsTab) updateBadge(leadsTab, counts.leads);
+
+        // Community reports is inside community.js, but we can target the sidebar button if it exists
+        const communityTab = document.querySelector('.nav-tab[data-target="community"]');
+        if (communityTab && counts.reports > 0) {
+            // we could show a dot on community, but for now just the other two
+        }
+
+    } catch(e) {
+        // ignore
+    }
+}
+
+function updateBadge(tabEl, count) {
+    let badge = tabEl.querySelector('.nav-tab-badge');
+    if (count > 0) {
+        if (!badge) {
+            badge = document.createElement('span');
+            badge.className = 'nav-tab-badge';
+            tabEl.appendChild(badge);
+        }
+        badge.innerText = count;
+    } else {
+        if (badge) badge.remove();
+    }
+}

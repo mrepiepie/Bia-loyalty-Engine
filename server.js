@@ -403,6 +403,7 @@ async function initializeDatabase() {
             tags TEXT DEFAULT '[]',
             image_url TEXT,
             is_locked INTEGER DEFAULT 0,
+            is_archived INTEGER DEFAULT 0,
             upvotes INTEGER DEFAULT 0,
             downvotes INTEGER DEFAULT 0,
             accepted_answer_id INTEGER,
@@ -410,6 +411,7 @@ async function initializeDatabase() {
             FOREIGN KEY (user_id) REFERENCES users(user_id)
         )`);
         try { await runQuery('ALTER TABLE community_posts ADD COLUMN image_url TEXT'); } catch(e) {}
+        try { await runQuery('ALTER TABLE community_posts ADD COLUMN is_archived INTEGER DEFAULT 0'); } catch(e) {}
         try { await runQuery('ALTER TABLE community_posts ADD COLUMN is_locked INTEGER DEFAULT 0'); } catch(e) {}
         try { await runQuery('ALTER TABLE community_posts ADD COLUMN is_archived INTEGER DEFAULT 0'); } catch(e) {}
 
@@ -2952,3 +2954,21 @@ module.exports = app;
 if (!process.env.VERCEL && !process.env.NOW_BUILDER) {
     app.listen(PORT, () => console.log(`BIA Loyalty Server running at http://localhost:${PORT}`));
 }
+
+// Admin: Notification Counts (FAQs, Leads, Reports)
+app.get('/api/admin/notifications/count', requireAdmin, async (req, res) => {
+    try {
+        const faqs = await getQuery("SELECT COUNT(*) as c FROM faq_submissions WHERE status = 'pending'");
+        const leads = await getQuery("SELECT COUNT(*) as c FROM executive_leads WHERE status = 'Pending'");
+        const reports = await getQuery("SELECT COUNT(*) as c FROM community_reports WHERE status = 'Pending'");
+        
+        res.json({
+            faqs: faqs ? faqs.c : 0,
+            leads: leads ? leads.c : 0,
+            reports: reports ? reports.c : 0,
+            total: (faqs ? faqs.c : 0) + (leads ? leads.c : 0) + (reports ? reports.c : 0)
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
