@@ -544,6 +544,13 @@ body.dark-theme .video-bg-overlay {
     overflow: hidden;
     z-index: 0;
     pointer-events: none;
+    mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+}
+
+body:not(.dark-theme) .parallax-orb {
+    mix-blend-mode: multiply;
+    opacity: 0.4;
 }
 
 .parallax-orb {
