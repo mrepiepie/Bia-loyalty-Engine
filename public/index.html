@@ -146,11 +146,7 @@
         </div>
 
         <!-- Animated Parallax Background (Moved to top level) -->
-        <div class="hero-bg-parallax">
-            <div class="parallax-orb orb-1"></div>
-            <div class="parallax-orb orb-2"></div>
-            <div class="parallax-orb orb-3"></div>
-        </div>
+        <canvas id="webgl-canvas" style="position:absolute; top:0; left:0; width:100%; height:130vh; z-index:0; pointer-events:none;"></canvas>
 
         <!-- Carmowood-style Vertical Slat Lines Background -->
         <div class="landing-background-slats">
@@ -2867,6 +2863,7 @@
     </div>
     
     <script src="community.js?v=1.3.26"></script>
+    <script src="shader.js"></script>
     <script src="app.js?v=1.3.26"></script>
 
     <style>
