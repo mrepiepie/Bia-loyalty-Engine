@@ -7361,4 +7361,8 @@ body:not(.dark-theme) .modal-close-btn:hover { color: var(--text-main) !importan
 #app-body:not(.dark-theme) .logo-text {
     color: #000000 !important;
 }
+#app-body:not(.dark-theme) .logo-text span {
+    color: #504f47 !important;
+    opacity: 0.9 !important;
+}
 
