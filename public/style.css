@@ -6459,7 +6459,7 @@ body:not(.dark-theme) .drawer-close-btn:hover {
 }
 
 body:not(.dark-theme) .ledger-table th {
-    background: rgba(0, 0, 0, 0.03) !important;
+    background: #ffffff !important;
     border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
     color: var(--text-tertiary) !important;
 }
@@ -6656,7 +6656,7 @@ body:not(.dark-theme) .db-voucher-date {
     color: var(--text-tertiary) !important;
 }
 body:not(.dark-theme) .db-voucher-code-row {
-    background: rgba(0, 0, 0, 0.03) !important;
+    background: #ffffff !important;
     border: 1px solid rgba(0, 0, 0, 0.06) !important;
 }
 body:not(.dark-theme) .db-voucher-code-row span {
@@ -6727,7 +6727,7 @@ body:not(.dark-theme) .points-lbl {
     color: var(--text-muted) !important;
 }
 body:not(.dark-theme) .quick-stat-pill {
-    background: rgba(0, 0, 0, 0.03) !important;
+    background: #ffffff !important;
     border: 1px solid rgba(0, 0, 0, 0.06) !important;
     color: var(--text-muted) !important;
 }

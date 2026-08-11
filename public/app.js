@@ -2450,7 +2450,7 @@ async function loadAdminLedger() {
                 <td class="${ptsClass}">${ptsSign}</td>
                 <td>${cleanDate(entry.expires_at)}</td>
                 <td>
-                    <button class="btn btn-danger btn-sm" onclick="deleteLedgerEntryAdmin(this, ${entry.ledger_id})" style="background:#ef4444; border:none; padding:0.25rem 0.45rem; height:auto; font-size:0.75rem;" title="Delete Ledger Entry">
+                    <button class="btn btn-danger btn-sm" onclick="deleteLedgerEntryAdmin(this, ${entry.ledger_id})" style="background:#ef4444; color:#fff; border:none; padding:0.25rem 0.45rem; height:auto; font-size:0.75rem;" title="Delete Ledger Entry">
                         <i class="fa-solid fa-trash"></i>
                     </button>
                 </td>
@@ -4731,7 +4731,7 @@ window.loadAdminReferrals = async function() {
                 <td><span class="badge" style="background: ${isVerified ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 176, 68, 0.2)'}; color: ${isVerified ? '#22c55e' : '#efb044'}; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">${ref.status}</span></td>
                 <td>
                     ${!isVerified ? `<button class="btn btn-success btn-sm" onclick="verifyReferralPayment(${ref.referral_id})" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;"><i class="fa-solid fa-check"></i> Verify</button>` : ''}
-                    <button class="btn btn-danger btn-sm" onclick="deleteReferralAdmin(this, ${ref.referral_id})" style="background:#ef4444; border:none; padding: 0.25rem 0.5rem; font-size: 0.75rem;"><i class="fa-solid fa-trash"></i></button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteReferralAdmin(this, ${ref.referral_id})" style="background:#ef4444; color:#fff; border:none; padding: 0.25rem 0.5rem; font-size: 0.75rem;"><i class="fa-solid fa-trash"></i></button>
                 </td>
             `;
             tableBody.appendChild(tr);
@@ -4789,7 +4789,7 @@ window.loadAdminLeads = async function() {
                     <td>
                         <div style="display: flex; gap: 0.35rem; align-items: center;">
                             ${actionBtn}
-                            <button class="btn btn-danger btn-sm" onclick="deleteLeadAdmin(this, ${l.lead_id})" style="background:#ef4444; border:none; padding:0.35rem 0.5rem; height:auto; font-size:0.68rem;" title="Delete Lead Log">
+                            <button class="btn btn-danger btn-sm" onclick="deleteLeadAdmin(this, ${l.lead_id})" style="background:#ef4444; color:#fff; border:none; padding:0.35rem 0.5rem; height:auto; font-size:0.68rem;" title="Delete Lead Log">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                         </div>
@@ -5050,7 +5050,7 @@ window.showStudentDetailModal = async function(userId) {
                         </div>
                         <div style="display: flex; gap: 0.25rem; align-items: center;">
                             ${actionBtn}
-                            <button class="btn btn-danger btn-sm" onclick="deleteVoucherAdmin(this, ${v.voucher_id}, ${student.user_id})" style="background:#ef4444; border:none; padding:0.25rem 0.45rem; font-size:0.65rem; height:auto;" title="Revoke Voucher">
+                            <button class="btn btn-danger btn-sm" onclick="deleteVoucherAdmin(this, ${v.voucher_id}, ${student.user_id})" style="background:#ef4444; color:#fff; border:none; padding:0.25rem 0.45rem; font-size:0.65rem; height:auto;" title="Revoke Voucher">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                         </div>
