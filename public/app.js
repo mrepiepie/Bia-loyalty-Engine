@@ -2185,7 +2185,7 @@ async function loadAdminVoucherReport() {
     if (!tbody) return;
     tbody.innerHTML = '<tr><td colspan="8" class="no-data"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</td></tr>';
     try {
-        const res = await fetch(`${API_BASE}/admin/vouchers`);
+        const res = await fetch(`${API_BASE}/admin/vouchers`, { cache: 'no-store' });
         if (!res.ok) throw new Error('Failed to load voucher data.');
         const vouchers = await res.json();
         window.cachedAdminVouchers = vouchers;
@@ -4708,7 +4708,7 @@ window.loadAdminReferrals = async function() {
     if (!tableBody) return;
 
     try {
-        const response = await fetch(`${API_BASE}/admin/referrals`);
+        const response = await fetch(`${API_BASE}/admin/referrals`, { cache: 'no-store' });
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'Failed to fetch referrals');
 
@@ -4746,7 +4746,7 @@ window.loadAdminLeads = async function() {
     if (!tableBody) return;
 
     try {
-        const response = await fetch(`${API_BASE}/admin/leads`);
+        const response = await fetch(`${API_BASE}/admin/leads`, { cache: 'no-store' });
         if (!response.ok) throw new Error('Failed to fetch leads');
         const leads = await response.json();
 
@@ -7315,14 +7315,23 @@ document.addEventListener('click', (e) => {
 
         // Voucher Dashboard Polling
         if (target === 'admin-vouchers-mgmt') {
-            if (!window.adminVoucherPollInterval) {
-                window.adminVoucherPollInterval = setInterval(loadAdminVoucherReport, 5000);
-            }
+            if (!window.adminVoucherPollInterval) window.adminVoucherPollInterval = setInterval(loadAdminVoucherReport, 5000);
         } else {
-            if (window.adminVoucherPollInterval) {
-                clearInterval(window.adminVoucherPollInterval);
-                window.adminVoucherPollInterval = null;
-            }
+            if (window.adminVoucherPollInterval) { clearInterval(window.adminVoucherPollInterval); window.adminVoucherPollInterval = null; }
+        }
+
+        // Leads Polling
+        if (target === 'admin-leads') {
+            if (!window.adminLeadsPollInterval) window.adminLeadsPollInterval = setInterval(loadAdminLeads, 5000);
+        } else {
+            if (window.adminLeadsPollInterval) { clearInterval(window.adminLeadsPollInterval); window.adminLeadsPollInterval = null; }
+        }
+
+        // Referrals Polling
+        if (target === 'admin-referrals-mgmt') {
+            if (!window.adminRefsPollInterval) window.adminRefsPollInterval = setInterval(loadAdminReferrals, 5000);
+        } else {
+            if (window.adminRefsPollInterval) { clearInterval(window.adminRefsPollInterval); window.adminRefsPollInterval = null; }
         }
     }
 });
