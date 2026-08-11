@@ -7312,6 +7312,18 @@ document.addEventListener('click', (e) => {
                 healthPollInterval = null;
             }
         }
+
+        // Voucher Dashboard Polling
+        if (target === 'admin-vouchers-mgmt') {
+            if (!window.adminVoucherPollInterval) {
+                window.adminVoucherPollInterval = setInterval(loadAdminVoucherReport, 5000);
+            }
+        } else {
+            if (window.adminVoucherPollInterval) {
+                clearInterval(window.adminVoucherPollInterval);
+                window.adminVoucherPollInterval = null;
+            }
+        }
     }
 });
 
