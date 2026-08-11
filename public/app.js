@@ -1248,6 +1248,26 @@ function handleLogout() {
                 gsap.to("#landing-logo", { opacity: 1, y: 0, duration: 0.5 });
                 gsap.to(".landing-header-wrapper", { opacity: 1, y: 0, duration: 0.5 });
 
+                // Re-trigger subtitle animations
+                if (typeof animateLandingText === 'function') {
+                    // Remove split-done so it can split again if needed, or simply replay
+                    const subtitle = document.querySelector('.hero-subtitle');
+                    if (subtitle) {
+                        subtitle.classList.remove('split-done');
+                        // Re-run the main animations
+                        animateLandingText();
+                    }
+                }
+                
+                // Dispatch resize event to fix WebGL canvas dimensions if it was resized while display: none
+                window.dispatchEvent(new Event('resize'));
+                
+                // Ensure background video is playing
+                const video = document.getElementById('bg-video');
+                if (video && video.paused) {
+                    video.play().catch(e => console.log('Video autoplay prevented', e));
+                }
+
                 gsap.fromTo(overlay, { opacity: 0 }, { 
                     opacity: 1, 
                     duration: 0.5,
