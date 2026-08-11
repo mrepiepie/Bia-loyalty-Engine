@@ -346,7 +346,10 @@ function initWebGL() {
     }
 
     function render() {
-        if (document.hidden || document.body.classList.contains("dark-theme")) {
+        const overlay = document.getElementById('login-overlay');
+        const isOverlayHidden = overlay && overlay.style.display === 'none';
+        
+        if (document.hidden || document.body.classList.contains("dark-theme") || isOverlayHidden) {
             animationFrameId = requestAnimationFrame(render);
             return;
         }

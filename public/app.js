@@ -363,6 +363,10 @@ function setupPixelGridBackground() {
     });
     
     function animate() {
+        if (!canvas.offsetParent) {
+            requestAnimationFrame(animate);
+            return;
+        }
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
         // 1. Draw delicate connection webs between nearby drifting shapes
@@ -647,6 +651,10 @@ function setupLandingParticles() {
     }
     
     function animate() {
+        if (!canvas.offsetParent) {
+            requestAnimationFrame(animate);
+            return;
+        }
         ctx.clearRect(0, 0, width, height);
         
         // Render particles
@@ -3172,6 +3180,10 @@ function setup3DGlobe() {
     const scrollContainer = document.getElementById('login-overlay');
 
     function animate() {
+        if (!canvas.offsetParent) {
+            requestAnimationFrame(animate);
+            return;
+        }
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         const centerX = canvas.width / 2;
         const centerY = canvas.height / 2;
