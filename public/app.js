@@ -1244,13 +1244,14 @@ function handleLogout() {
                 // Ensure the landing page is scrolled to the top so the sticky header is visible
                 overlay.scrollTop = 0;
                 
-                // Reset the entrance animations for the header and logo
-                gsap.to("#landing-logo", { opacity: 1, y: 0, duration: 0.5 });
-                gsap.to(".landing-header-wrapper", { opacity: 1, y: 0, duration: 0.5 });
-
                 // Play the main title cinematic animation
                 if (typeof window.playHeroIntroTL === 'function') {
                     window.playHeroIntroTL();
+                }
+
+                // Play the bouncy entrance for the logo, header, and body text
+                if (typeof animateLandingText === 'function') {
+                    animateLandingText();
                 }
                 
                 // Dispatch resize event to fix WebGL canvas dimensions if it was resized while display: none
@@ -8831,6 +8832,16 @@ async function resolveUserReports(userId) {
 window.playHeroIntroTL = function() {
     if (typeof gsap === 'undefined') return;
     
+    // Clean up any lingering tweens from previous page loads
+    gsap.killTweensOf('.reveal-text');
+    gsap.killTweensOf('.hero-side-ui-left');
+    gsap.killTweensOf('.hero-side-ui-right');
+    gsap.killTweensOf('.hero-corner-icon');
+
+    // Ensure the subtitle parent is completely visible
+    const subtitleParent = document.querySelector('.hero-subtitle');
+    if (subtitleParent) subtitleParent.style.opacity = '1';
+
     const heroIntroTL = gsap.timeline({ defaults: { ease: "power4.out" } });
     
     // Ensure initial states just in case CSS doesn't catch quickly enough
@@ -8838,26 +8849,24 @@ window.playHeroIntroTL = function() {
     gsap.set('.hero-side-ui-left', { x: -30, opacity: 0 });
     gsap.set('.hero-side-ui-right', { x: 30, opacity: 0 });
     gsap.set('.hero-corner-icon', { scale: 0, opacity: 0 });
-    gsap.set('.academic-crest-wrapper', { opacity: 0, scale: 0.9, y: 20 });
     
     // Build the sequence
     heroIntroTL
-        .to('.academic-crest-wrapper', { opacity: 1, scale: 1, y: 0, duration: 1.2 }, 0.2)
         .to('.reveal-text', { 
             y: '0%', 
             opacity: 1, 
             duration: 1.2, 
             stagger: 0.15 
-        }, 0.4)
+        }, 0.2)
         .to('.hero-corner-icon', { 
             scale: 1, 
             opacity: 0.7, 
             duration: 0.8, 
             rotation: 90, 
             stagger: 0.1 
-        }, 0.8)
-        .to('.hero-side-ui-left', { x: 0, opacity: 1, duration: 1.2 }, 1)
-        .to('.hero-side-ui-right', { x: 0, opacity: 1, duration: 1.2 }, 1.1);
+        }, 0.6)
+        .to('.hero-side-ui-left', { x: 0, opacity: 1, duration: 1.2 }, 0.8)
+        .to('.hero-side-ui-right', { x: 0, opacity: 1, duration: 1.2 }, 0.9);
 };
 
 document.addEventListener("DOMContentLoaded", () => {
