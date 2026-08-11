@@ -2164,6 +2164,7 @@ body.login-modal-active #pixel-grid-canvas {
 
 .ledger-table-wrapper {
     overflow-x: auto;
+    overflow-y: auto;
     max-height: 350px;
     margin-top: 0.5rem;
 }
