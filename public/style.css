@@ -90,9 +90,10 @@ body {
     left: 0;
     width: 100vw;
     height: 100vh;
-    z-index: -1;
+    z-index: 9999;
     pointer-events: none;
-    background-color: var(--bg-dark);
+    border: 10px solid red !important;
+    background-color: rgba(0, 255, 0, 0.2) !important;
 }
 
 body.landing-active #pixel-grid-canvas {
@@ -1449,7 +1450,20 @@ body.login-modal-active #pixel-grid-canvas {
 }
 
 /* Container */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    position: relative;
+    z-index: 10;
+}
+
+/* ==========================================================================
+   APP SHELL / LAYOUT CONTAINER
+   ========================================================================== */
 .app-container {
+    position: relative;
+    z-index: 1;
     max-width: 1340px; /* Expanded from 1000px to reduce black gaps on wide screens */
     margin: 0 auto;
     padding: 2.2rem 1.5rem;
@@ -6312,7 +6326,7 @@ textarea:focus {
 
 /* Body default background & text colors */
 body:not(.dark-theme) {
-    background-color: var(--bg-dark);
+    background-color: transparent !important;
     color: var(--text-main);
 }
 
@@ -7397,8 +7411,7 @@ body.dark-theme #beams-canvas, body.dark-theme .beams-overlay {
     transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 body.dark-theme #webgl-canvas {
-    opacity: 0;
-    visibility: hidden;
+    opacity: 0.8;
 }
 
 @keyframes beamsOverlayPulse {
@@ -7411,7 +7424,7 @@ body.dark-theme #webgl-canvas {
     background: rgba(10, 10, 10, 0.05);
     backdrop-filter: blur(50px);
     -webkit-backdrop-filter: blur(50px);
-    z-index: -1;
+    z-index: -2;
     pointer-events: none;
     animation: beamsOverlayPulse 10s ease-in-out infinite;
     -webkit-mask-image: linear-gradient(to bottom, black 65%, transparent 100%);

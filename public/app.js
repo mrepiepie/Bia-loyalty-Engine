@@ -363,10 +363,6 @@ function setupPixelGridBackground() {
     });
     
     function animate() {
-        if (!canvas.offsetParent) {
-            requestAnimationFrame(animate);
-            return;
-        }
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
         // 1. Draw delicate connection webs between nearby drifting shapes
@@ -443,22 +439,8 @@ function setupPixelGridBackground() {
                 else if (p.color === 'rgba(21, 132, 110, ') finalColorPrefix = 'rgba(10, 80, 60, ';   // Dark Pine
             }
             
-            let finalOpacity = activeOpacity;
-            if (!isDark) {
-                // Boost opacity heavily in light mode because the beige background washes out alpha
-                finalOpacity = Math.min(0.9, activeOpacity * 2.0);
-            }
-            
-            ctx.fillStyle = `${finalColorPrefix}${finalOpacity})`;
-            
-            // Draw tiny triangles
-            ctx.beginPath();
-            const sz = p.size * sizeScale;
-            ctx.moveTo(0, -sz);
-            ctx.lineTo(-sz, sz);
-            ctx.lineTo(sz, sz);
-            ctx.closePath();
-            ctx.fill();
+            ctx.fillStyle = 'red';
+            ctx.fillRect(-25, -25, 50, 50);
             
             ctx.restore();
         });
@@ -651,10 +633,6 @@ function setupLandingParticles() {
     }
     
     function animate() {
-        if (!canvas.offsetParent) {
-            requestAnimationFrame(animate);
-            return;
-        }
         ctx.clearRect(0, 0, width, height);
         
         // Render particles
@@ -3180,10 +3158,6 @@ function setup3DGlobe() {
     const scrollContainer = document.getElementById('login-overlay');
 
     function animate() {
-        if (!canvas.offsetParent) {
-            requestAnimationFrame(animate);
-            return;
-        }
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         const centerX = canvas.width / 2;
         const centerY = canvas.height / 2;
