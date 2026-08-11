@@ -8840,33 +8840,35 @@ window.playHeroIntroTL = function() {
 
     // Ensure the subtitle parent is completely visible
     const subtitleParent = document.querySelector('.hero-subtitle');
-    if (subtitleParent) subtitleParent.style.opacity = '1';
+    if (subtitleParent) {
+        subtitleParent.style.opacity = '1';
+        subtitleParent.style.visibility = 'visible';
+    }
 
     const heroIntroTL = gsap.timeline({ defaults: { ease: "power4.out" } });
     
-    // Ensure initial states just in case CSS doesn't catch quickly enough
-    gsap.set('.reveal-text', { y: '110%', opacity: 0 });
-    gsap.set('.hero-side-ui-left', { x: -30, opacity: 0 });
-    gsap.set('.hero-side-ui-right', { x: 30, opacity: 0 });
-    gsap.set('.hero-corner-icon', { scale: 0, opacity: 0 });
-    
-    // Build the sequence
+    // Build the sequence using fromTo to force absolute start/end states
     heroIntroTL
-        .to('.reveal-text', { 
-            y: '0%', 
-            opacity: 1, 
-            duration: 1.2, 
-            stagger: 0.15 
-        }, 0.2)
-        .to('.hero-corner-icon', { 
-            scale: 1, 
-            opacity: 0.7, 
-            duration: 0.8, 
-            rotation: 90, 
-            stagger: 0.1 
-        }, 0.6)
-        .to('.hero-side-ui-left', { x: 0, opacity: 1, duration: 1.2 }, 0.8)
-        .to('.hero-side-ui-right', { x: 0, opacity: 1, duration: 1.2 }, 0.9);
+        .fromTo('.reveal-text', 
+            { y: '110%', opacity: 0 },
+            { y: '0%', opacity: 1, duration: 1.2, stagger: 0.15, immediateRender: true }, 
+            0.2
+        )
+        .fromTo('.hero-corner-icon', 
+            { scale: 0, opacity: 0, rotation: 0 },
+            { scale: 1, opacity: 0.7, duration: 0.8, rotation: 90, stagger: 0.1, immediateRender: true }, 
+            0.6
+        )
+        .fromTo('.hero-side-ui-left', 
+            { x: -30, opacity: 0 },
+            { x: 0, opacity: 1, duration: 1.2, immediateRender: true }, 
+            0.8
+        )
+        .fromTo('.hero-side-ui-right', 
+            { x: 30, opacity: 0 },
+            { x: 0, opacity: 1, duration: 1.2, immediateRender: true }, 
+            0.9
+        );
 };
 
 document.addEventListener("DOMContentLoaded", () => {
