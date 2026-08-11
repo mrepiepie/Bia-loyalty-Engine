@@ -651,6 +651,8 @@ body:not(.dark-theme) .parallax-orb {
     display: inline-block;
     overflow: hidden;
     vertical-align: top;
+    padding-top: 15px; /* Prevent clipping ascenders */
+    margin-top: -15px; /* Compensate for padding */
     padding-bottom: 5px; /* Prevent clipping descenders */
 }
 
