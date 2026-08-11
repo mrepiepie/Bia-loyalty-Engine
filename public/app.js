@@ -1248,15 +1248,9 @@ function handleLogout() {
                 gsap.to("#landing-logo", { opacity: 1, y: 0, duration: 0.5 });
                 gsap.to(".landing-header-wrapper", { opacity: 1, y: 0, duration: 0.5 });
 
-                // Re-trigger subtitle animations
-                if (typeof animateLandingText === 'function') {
-                    // Remove split-done so it can split again if needed, or simply replay
-                    const subtitle = document.querySelector('.hero-subtitle');
-                    if (subtitle) {
-                        subtitle.classList.remove('split-done');
-                        // Re-run the main animations
-                        animateLandingText();
-                    }
+                // Play the main title cinematic animation
+                if (typeof window.playHeroIntroTL === 'function') {
+                    window.playHeroIntroTL();
                 }
                 
                 // Dispatch resize event to fix WebGL canvas dimensions if it was resized while display: none
@@ -8834,43 +8828,45 @@ async function resolveUserReports(userId) {
 // ==========================================
 // HERO BACKGROUND PARALLAX EFFECTS
 // ==========================================
+window.playHeroIntroTL = function() {
+    if (typeof gsap === 'undefined') return;
+    
+    const heroIntroTL = gsap.timeline({ defaults: { ease: "power4.out" } });
+    
+    // Ensure initial states just in case CSS doesn't catch quickly enough
+    gsap.set('.reveal-text', { y: '110%', opacity: 0 });
+    gsap.set('.hero-side-ui-left', { x: -30, opacity: 0 });
+    gsap.set('.hero-side-ui-right', { x: 30, opacity: 0 });
+    gsap.set('.hero-corner-icon', { scale: 0, opacity: 0 });
+    gsap.set('.academic-crest-wrapper', { opacity: 0, scale: 0.9, y: 20 });
+    
+    // Build the sequence
+    heroIntroTL
+        .to('.academic-crest-wrapper', { opacity: 1, scale: 1, y: 0, duration: 1.2 }, 0.2)
+        .to('.reveal-text', { 
+            y: '0%', 
+            opacity: 1, 
+            duration: 1.2, 
+            stagger: 0.15 
+        }, 0.4)
+        .to('.hero-corner-icon', { 
+            scale: 1, 
+            opacity: 0.7, 
+            duration: 0.8, 
+            rotation: 90, 
+            stagger: 0.1 
+        }, 0.8)
+        .to('.hero-side-ui-left', { x: 0, opacity: 1, duration: 1.2 }, 1)
+        .to('.hero-side-ui-right', { x: 0, opacity: 1, duration: 1.2 }, 1.1);
+};
+
 document.addEventListener("DOMContentLoaded", () => {
     // Ensure GSAP ScrollTrigger is available
     if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
         gsap.registerPlugin(ScrollTrigger);
 
-        // Orbs have been replaced by WebGL shader
-        
-        // ==========================================
-        // HERO CINEMATIC INTRO TIMELINE
-        // ==========================================
-        const heroIntroTL = gsap.timeline({ defaults: { ease: "power4.out" } });
-        
-        // Ensure initial states just in case CSS doesn't catch quickly enough
-        gsap.set('.reveal-text', { y: '110%', opacity: 0 });
-        gsap.set('.hero-side-ui-left', { x: -30, opacity: 0 });
-        gsap.set('.hero-side-ui-right', { x: 30, opacity: 0 });
-        gsap.set('.hero-corner-icon', { scale: 0, opacity: 0 });
-        gsap.set('.academic-crest-wrapper', { opacity: 0, scale: 0.9, y: 20 });
-        
-        // Build the sequence
-        heroIntroTL
-            .to('.academic-crest-wrapper', { opacity: 1, scale: 1, y: 0, duration: 1.2 }, 0.2)
-            .to('.reveal-text', { 
-                y: '0%', 
-                opacity: 1, 
-                duration: 1.2, 
-                stagger: 0.15 
-            }, 0.4)
-            .to('.hero-corner-icon', { 
-                scale: 1, 
-                opacity: 0.7, 
-                duration: 0.8, 
-                rotation: 90, 
-                stagger: 0.1 
-            }, 0.8)
-            .to('.hero-side-ui-left', { x: 0, opacity: 1, duration: 1.2 }, 1)
-            .to('.hero-side-ui-right', { x: 0, opacity: 1, duration: 1.2 }, 1.1);
+        // Play the hero intro
+        window.playHeroIntroTL();
     }
 });
 
