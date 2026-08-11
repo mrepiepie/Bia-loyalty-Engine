@@ -782,34 +782,77 @@ app.get('/api/admin/students', async (req, res) => {
 });
 
 app.post('/api/admin/adjust-points', async (req, res) => {
+    let tx;
     try {
         const { user_id, points_change, description } = req.body;
         if (!user_id || points_change === undefined || !description) return res.status(400).json({ error: 'Parameters missing' });
 
-        const user = await getQuery(`SELECT points_balance FROM users WHERE user_id = ? AND role = 'student'`, [user_id]);
-        if (!user) return res.status(404).json({ error: 'Student not found' });
+        tx = await db.transaction('write');
 
+        const userRes = await tx.execute({
+            sql: `SELECT points_balance FROM users WHERE user_id = ? AND role = 'student'`,
+            args: [user_id]
+        });
+        if (userRes.rows.length === 0) {
+            await tx.rollback();
+            return res.status(404).json({ error: 'Student not found' });
+        }
+
+        const user = userRes.rows[0];
         const isDeduction = points_change < 0;
         const absPoints = Math.abs(points_change);
-        if (isDeduction && user.points_balance < absPoints) return res.status(400).json({ error: 'Insufficient points balance.' });
+        
+        if (isDeduction && user.points_balance < absPoints) {
+            await tx.rollback();
+            return res.status(400).json({ error: 'Insufficient points balance.' });
+        }
 
         const expiry = new Date();
         expiry.setFullYear(expiry.getFullYear() + 4);
 
         let ledgerResult;
         if (isDeduction) {
-            await deductPoints(user_id, absPoints);
-            ledgerResult = await runQuery(`INSERT INTO points_ledger (user_id, points_change, event_type, description, points_remaining, expires_at) VALUES (?, ?, 'Adjustment', ?, 0, NULL)`, [user_id, points_change, `Admin Adjustment: ${description}`]);
+            // Inline deduct logic
+            const depositsRes = await tx.execute({
+                sql: `SELECT ledger_id, points_remaining FROM points_ledger WHERE user_id = ? AND points_remaining > 0 ORDER BY ledger_id ASC`,
+                args: [user_id]
+            });
+            let remaining = absPoints;
+            for (const d of depositsRes.rows) {
+                if (remaining <= 0) break;
+                const deduct = Math.min(Number(d.points_remaining), remaining);
+                await tx.execute({
+                    sql: `UPDATE points_ledger SET points_remaining = points_remaining - ? WHERE ledger_id = ?`,
+                    args: [deduct, d.ledger_id]
+                });
+                remaining -= deduct;
+            }
+            ledgerResult = await tx.execute({
+                sql: `INSERT INTO points_ledger (user_id, points_change, event_type, description, points_remaining, expires_at) VALUES (?, ?, 'Adjustment', ?, 0, NULL)`,
+                args: [user_id, points_change, `Admin Adjustment: ${description}`]
+            });
         } else {
-            ledgerResult = await runQuery(`INSERT INTO points_ledger (user_id, points_change, event_type, description, points_remaining, expires_at) VALUES (?, ?, 'Adjustment', ?, ?, ?)`, [user_id, points_change, `Admin Adjustment: ${description}`, points_change, expiry.toISOString()]);
+            ledgerResult = await tx.execute({
+                sql: `INSERT INTO points_ledger (user_id, points_change, event_type, description, points_remaining, expires_at) VALUES (?, ?, 'Adjustment', ?, ?, ?)`,
+                args: [user_id, points_change, `Admin Adjustment: ${description}`, points_change, expiry.toISOString()]
+            });
         }
 
-        await runQuery(`UPDATE users SET points_balance = points_balance + ? WHERE user_id = ?`, [points_change, user_id]);
+        await tx.execute({
+            sql: `UPDATE users SET points_balance = points_balance + ? WHERE user_id = ?`,
+            args: [points_change, user_id]
+        });
+        
+        await tx.commit();
+
         await updateUserTier(user_id);
 
         // Return ledger_id so frontend can offer undo within grace period
-        res.json({ success: true, message: 'Points adjusted successfully', ledger_id: ledgerResult.lastID });
-    } catch (err) { res.status(500).json({ error: err.message }); }
+        res.json({ success: true, message: 'Points adjusted successfully', ledger_id: ledgerResult.lastInsertRowid });
+    } catch (err) { 
+        if (tx && !tx.closed) await tx.rollback();
+        res.status(500).json({ error: err.message }); 
+    }
 });
 
 // ── Undo a points adjustment within the 3-second grace period ────────────────
@@ -1274,29 +1317,56 @@ app.post('/api/admin/leads/:id/contacted', async (req, res) => {
 
 // Admin endpoint: Convert lead (approve & award pathway points)
 app.post('/api/admin/leads/:id/convert', async (req, res) => {
+    let tx;
     try {
         const leadId = req.params.id;
-        const lead = await getQuery(`SELECT * FROM executive_leads WHERE lead_id = ?`, [leadId]);
-        if (!lead) return res.status(404).json({ error: 'Lead not found.' });
-        if (lead.status === 'Converted') return res.status(400).json({ error: 'Lead has already been converted.' });
+        
+        tx = await db.transaction('write');
+        
+        const leadRes = await tx.execute({
+            sql: `SELECT * FROM executive_leads WHERE lead_id = ?`,
+            args: [leadId]
+        });
+        
+        if (leadRes.rows.length === 0) {
+            await tx.rollback();
+            return res.status(404).json({ error: 'Lead not found.' });
+        }
+        
+        const lead = leadRes.rows[0];
+        
+        if (lead.status === 'Converted') {
+            await tx.rollback();
+            return res.status(400).json({ error: 'Lead has already been converted.' });
+        }
 
         // Extract points from details text: "Pathways: ... (Offered: +5000 pts)"
         const match = lead.details.match(/\(Offered:\s*\+(\d+)\s*pts\)/);
         const points = match ? parseInt(match[1]) : 0;
 
         // Start database updates
-        await runQuery(`UPDATE users SET points_balance = points_balance + ? WHERE user_id = ?`, [points, lead.user_id]);
+        await tx.execute({
+            sql: `UPDATE users SET points_balance = points_balance + ? WHERE user_id = ?`,
+            args: [points, lead.user_id]
+        });
         
         const timestamp = new Date().toISOString();
         const expiry = new Date();
         expiry.setFullYear(expiry.getFullYear() + 1); // 1 year validity
 
-        await runQuery(`INSERT INTO points_ledger (user_id, points_change, event_type, description, points_remaining, created_at, expires_at) VALUES (?, ?, 'Pathway Conversion', ?, ?, ?, ?)`,
-            [lead.user_id, points, `Converted Pathway: ${lead.details}`, points, timestamp, expiry.toISOString()]);
+        await tx.execute({
+            sql: `INSERT INTO points_ledger (user_id, points_change, event_type, description, points_remaining, created_at, expires_at) VALUES (?, ?, 'Pathway Conversion', ?, ?, ?, ?)`,
+            args: [lead.user_id, points, `Converted Pathway: ${lead.details}`, points, timestamp, expiry.toISOString()]
+        });
+
+        await tx.execute({
+            sql: `UPDATE executive_leads SET status = 'Converted' WHERE lead_id = ?`,
+            args: [leadId]
+        });
+        
+        await tx.commit();
 
         await updateUserTier(lead.user_id);
-
-        await runQuery(`UPDATE executive_leads SET status = 'Converted' WHERE lead_id = ?`, [leadId]);
 
         // Log to activity log
         const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
@@ -1305,6 +1375,7 @@ app.post('/api/admin/leads/:id/convert', async (req, res) => {
 
         res.json({ success: true, points_awarded: points });
     } catch (err) {
+        if (tx && !tx.closed) await tx.rollback();
         res.status(500).json({ error: err.message });
     }
 });
@@ -1606,18 +1677,35 @@ app.post('/api/referrals', async (req, res) => {
 });
 
 app.post('/api/referrals/:id/verify-payment', async (req, res) => {
+    let tx;
     try {
         const referralId = req.params.id;
         const settings = await getSettings();
 
-        const ref = await getQuery(`SELECT * FROM referrals WHERE referral_id = ?`, [referralId]);
-        if (!ref) return res.status(404).json({ error: 'Referral not found' });
-        if (ref.status === 'Verified') return res.status(400).json({ error: 'Referral already verified' });
+        tx = await db.transaction('write');
+
+        const refRes = await tx.execute({
+            sql: `SELECT * FROM referrals WHERE referral_id = ?`,
+            args: [referralId]
+        });
+        if (refRes.rows.length === 0) {
+            await tx.rollback();
+            return res.status(404).json({ error: 'Referral not found' });
+        }
+        
+        const ref = refRes.rows[0];
+        if (ref.status === 'Verified') {
+            await tx.rollback();
+            return res.status(400).json({ error: 'Referral already verified' });
+        }
 
         const isPremium = ['mba', 'dba', 'doctorate'].includes(ref.program.toLowerCase());
-        await runQuery(`UPDATE referrals SET status = 'Verified' WHERE referral_id = ?`, [referralId]);
-
-        const user = await getQuery(`SELECT * FROM users WHERE user_id = ?`, [ref.referrer_id]);
+        
+        const userRes = await tx.execute({
+            sql: `SELECT * FROM users WHERE user_id = ?`,
+            args: [ref.referrer_id]
+        });
+        const user = userRes.rows[0];
         const newRefCount = user.referral_count + 1;
 
         const referralPoints = newRefCount === 1 ? settings.first_referral_points : settings.subsequent_referral_points;
@@ -1626,18 +1714,37 @@ app.post('/api/referrals/:id/verify-payment', async (req, res) => {
         const expiry = new Date();
         expiry.setFullYear(expiry.getFullYear() + 4);
 
-        await runQuery(`INSERT INTO points_ledger (user_id, points_change, event_type, description, points_remaining, expires_at) VALUES (?, ?, 'Referral', ?, ?, ?)`,
-            [ref.referrer_id, totalAwarded, `Referral: ${ref.referee_name} (${ref.program})`, totalAwarded, expiry.toISOString()]);
+        await tx.execute({
+            sql: `INSERT INTO points_ledger (user_id, points_change, event_type, description, points_remaining, expires_at) VALUES (?, ?, 'Referral', ?, ?, ?)`,
+            args: [ref.referrer_id, totalAwarded, `Referral: ${ref.referee_name} (${ref.program})`, totalAwarded, expiry.toISOString()]
+        });
 
         if ([5, 10, 15].includes(newRefCount)) {
             const desc = newRefCount === 5 ? 'AED 250 Bonus Voucher' : newRefCount === 10 ? 'Free Short Course' : 'VIP Gala Invite';
-            await runQuery(`INSERT INTO points_ledger (user_id, points_change, event_type, description, points_remaining, expires_at) VALUES (?, 0, 'Milestone', ?, 0, NULL)`, [ref.referrer_id, desc]);
+            await tx.execute({
+                sql: `INSERT INTO points_ledger (user_id, points_change, event_type, description, points_remaining, expires_at) VALUES (?, 0, 'Milestone', ?, 0, NULL)`,
+                args: [ref.referrer_id, desc]
+            });
         }
 
-        await runQuery(`UPDATE users SET points_balance = points_balance + ?, referral_count = ? WHERE user_id = ?`, [totalAwarded, newRefCount, ref.referrer_id]);
+        await tx.execute({
+            sql: `UPDATE users SET points_balance = points_balance + ?, referral_count = ? WHERE user_id = ?`,
+            args: [totalAwarded, newRefCount, ref.referrer_id]
+        });
+
+        await tx.execute({
+            sql: `UPDATE referrals SET status = 'Verified' WHERE referral_id = ?`,
+            args: [referralId]
+        });
+
+        await tx.commit();
+
         const finalTier = await updateUserTier(ref.referrer_id);
         res.json({ success: true, awarded: totalAwarded, new_tier: finalTier });
-    } catch (err) { res.status(500).json({ error: err.message }); }
+    } catch (err) { 
+        if (tx && !tx.closed) await tx.rollback();
+        res.status(500).json({ error: err.message }); 
+    }
 });
 
 app.post('/api/lms/complete-course', async (req, res) => {
