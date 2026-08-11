@@ -6322,6 +6322,8 @@ body:not(.dark-theme) .glassmorphic {
     border: 1px solid rgba(0, 0, 0, 0.08) !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04) !important;
     color: var(--text-main) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
 }
 
 body:not(.dark-theme) .spotlight-card::before {
