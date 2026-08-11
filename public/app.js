@@ -2594,6 +2594,7 @@ function bootApplication() {
     setupLogoAnimation();
     setupCustomSelects();
     setupQuickStatsPillsNavigation();
+    setupAnnouncementGSAP();
     initRedemptionModalEvents();
     loadPublicEvents();
     setupAdminEventsManagement();
@@ -3939,13 +3940,59 @@ function closeRedemptionModal() {
     const modal = document.getElementById('redemption-modal');
     if (window.gsap) {
         gsap.to(modal, {
-            opacity: 0, duration: 0.2, onComplete: () => {
+                        opacity: 0, duration: 0.2, onComplete: () => {
                 modal.style.display = 'none';
             }
         });
     } else {
         modal.style.display = 'none';
     }
+    initParticles();
+}
+
+// GSAP Hover Animation for Announcement Cards (Handles dynamic elements)
+function setupAnnouncementGSAP() {
+    if (typeof gsap === 'undefined') return;
+    
+    document.addEventListener('mouseover', (e) => {
+        const card = e.target.closest('.public-ann-card');
+        if (!card) return;
+        
+        if (!card.hasAttribute('data-gsap-bound')) {
+            card.setAttribute('data-gsap-bound', 'true');
+            
+            card.addEventListener('mouseenter', () => {
+                const isDark = document.body.classList.contains('dark-theme');
+                gsap.to(card, {
+                    y: -4,
+                    scale: 1.015,
+                    duration: 0.5,
+                    ease: "elastic.out(1.2, 0.5)",
+                    borderColor: isDark ? "rgba(223, 177, 91, 0.6)" : "rgba(30, 58, 138, 0.3)",
+                    boxShadow: isDark 
+                        ? "0 15px 40px rgba(223, 177, 91, 0.22), 0 0 0 1px rgba(255, 255, 255, 0.08) inset" 
+                        : "0 15px 35px rgba(30, 58, 138, 0.12), 0 0 0 1px rgba(30, 58, 138, 0.05) inset"
+                });
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                const isDark = document.body.classList.contains('dark-theme');
+                gsap.to(card, {
+                    y: 0,
+                    scale: 1,
+                    duration: 0.4,
+                    ease: "power2.out",
+                    borderColor: isDark ? "rgba(223, 177, 91, 0.22)" : "rgba(0, 0, 0, 0.12)",
+                    boxShadow: isDark 
+                        ? "0 8px 32px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.04) inset"
+                        : "0 8px 32px rgba(0, 0, 0, 0.05)"
+                });
+            });
+            
+            // Trigger it for the current mouseover
+            card.dispatchEvent(new Event('mouseenter'));
+        }
+    });
 }
 
 function initRedemptionModalEvents() {
