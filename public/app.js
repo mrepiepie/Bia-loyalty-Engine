@@ -439,8 +439,22 @@ function setupPixelGridBackground() {
                 else if (p.color === 'rgba(21, 132, 110, ') finalColorPrefix = 'rgba(10, 80, 60, ';   // Dark Pine
             }
             
-            ctx.fillStyle = 'red';
-            ctx.fillRect(-25, -25, 50, 50);
+            let finalOpacity = activeOpacity;
+            if (!isDark) {
+                // Boost opacity heavily in light mode because the beige background washes out alpha
+                finalOpacity = Math.min(0.9, activeOpacity * 2.0);
+            }
+            
+            ctx.fillStyle = `${finalColorPrefix}${finalOpacity})`;
+            
+            // Draw tiny triangles
+            ctx.beginPath();
+            const sz = p.size * sizeScale;
+            ctx.moveTo(0, -sz);
+            ctx.lineTo(-sz, sz);
+            ctx.lineTo(sz, sz);
+            ctx.closePath();
+            ctx.fill();
             
             ctx.restore();
         });
