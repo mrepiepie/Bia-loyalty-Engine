@@ -1240,6 +1240,14 @@ function handleLogout() {
                 const overlay = document.getElementById('login-overlay');
                 overlay.style.display = 'block';
                 document.body.classList.add('landing-active');
+                
+                // Ensure the landing page is scrolled to the top so the sticky header is visible
+                overlay.scrollTop = 0;
+                
+                // Reset the entrance animations for the header and logo
+                gsap.to("#landing-logo", { opacity: 1, y: 0, duration: 0.5 });
+                gsap.to(".landing-header-wrapper", { opacity: 1, y: 0, duration: 0.5 });
+
                 gsap.fromTo(overlay, { opacity: 0 }, { 
                     opacity: 1, 
                     duration: 0.5,
