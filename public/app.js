@@ -6944,24 +6944,22 @@ async function loadPublicAnnouncements() {
         
         container.innerHTML = items.map(item => `
             <div class="public-ann-card type-${item.type}" style="opacity: 0; transform: translateY(20px);">
-                <div class="public-ann-glow-layer"></div>
                 <div class="public-ann-icon-wrap">
                     <i class="fa-solid ${typeIcon[item.type]||typeIcon.info}"></i>
-                    <span class="ping-wave"></span>
                 </div>
                 <div class="public-ann-content">
-                    <span class="public-ann-badge">${item.type} BROADCAST</span>
+                    <span class="public-ann-badge">${item.type}</span>
                     <h5>${item.title}</h5>
                     <p>${item.body}</p>
-                    <span class="public-ann-date"><i class="fa-regular fa-clock"></i> Posted ${cleanDate(item.created_at)}</span>
+                    <span class="public-ann-date"><i class="fa-regular fa-clock"></i> ${cleanDate(item.created_at)}</span>
                 </div>
             </div>
         `).join('');
 
         if (window.gsap) {
             gsap.fromTo(container.querySelectorAll('.public-ann-card'), 
-                { opacity: 0, y: 20, scale: 0.97 },
-                { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "power2.out", stagger: 0.1 }
+                { opacity: 0, y: 15, scale: 0.99 },
+                { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "power3.out", stagger: 0.08 }
             );
         } else {
             container.querySelectorAll('.public-ann-card').forEach(el => {
