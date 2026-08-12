@@ -6793,7 +6793,7 @@ body:not(.dark-theme) .to-gradient-1-end {
 
 body:not(.dark-theme) .from-gradient-2-start {
   --tw-gradient-from: #ff073a;
-  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(255, 7, 58, 0)));
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(255, 7, 58, 0));
 }
 body:not(.dark-theme) .to-gradient-2-end {
   --tw-gradient-to: #ff6ec7;
