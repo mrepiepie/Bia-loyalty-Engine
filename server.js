@@ -752,6 +752,10 @@ app.post('/api/admin/create-student', async (req, res) => {
         const { name, email, password, student_id, programme } = req.body;
         if (!name || !email || !password || !student_id) return res.status(400).json({ error: 'Missing parameters' });
         
+        // Explicitly check for existing email
+        const existingEmail = await getQuery(`SELECT user_id FROM users WHERE LOWER(email) = LOWER(?)`, [email.trim()]);
+        if (existingEmail) return res.status(400).json({ error: 'acc already registered through this email' });
+
         const initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
         const referralCode = `${initials}-${Math.floor(1000 + Math.random() * 9000)}`;
         const prog = programme || 'General';
@@ -769,7 +773,7 @@ app.post('/api/admin/create-student', async (req, res) => {
 
         res.json({ success: true, user_id: newUserId, referral_code: referralCode, welcome_points: welcomePoints });
     } catch (err) {
-        if (err.message.includes('UNIQUE')) return res.status(400).json({ error: 'Student ID or Email already exists.' });
+        if (err.message.includes('UNIQUE')) return res.status(400).json({ error: 'Student ID already exists.' });
         res.status(500).json({ error: err.message });
     }
 });
