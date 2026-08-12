@@ -7375,14 +7375,17 @@ body.dark-theme #beams-canvas, body.dark-theme .beams-overlay {
     opacity: 1;
     visibility: visible;
 }
+
 #webgl-canvas {
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-}
-body.dark-theme #webgl-canvas {
-    opacity: 1;
+    opacity: 0.45;
     visibility: visible;
+    filter: invert(1) hue-rotate(180deg) brightness(1.15) contrast(0.9);
+    transition: opacity 0.5s ease, filter 0.5s ease;
+}
+
+body.dark-theme #webgl-canvas {
+    opacity: 0.55;
+    filter: brightness(0.6) saturate(1.4) contrast(1.2);
 }
 
 @keyframes beamsOverlayPulse {
