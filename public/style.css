@@ -6459,7 +6459,7 @@ body:not(.dark-theme) .modal-content {
 }
 
 body:not(.dark-theme) .ann-drawer {
-    background: #ffffff !important;
+    background: var(--bg-dark) !important;
     border-left: 1px solid rgba(0, 0, 0, 0.08) !important;
     box-shadow: -10px 0 40px rgba(0, 0, 0, 0.05) !important;
 }
