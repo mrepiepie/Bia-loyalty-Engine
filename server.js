@@ -1514,7 +1514,8 @@ app.post('/api/admin/system/reset-db', async (req, res) => {
 // Admin endpoint: Delete student account
 app.delete('/api/admin/users/:id', async (req, res) => {
     try {
-        const userId = req.params.id;
+        const userId = parseInt(req.params.id);
+        if (isNaN(userId)) return res.status(400).json({ error: 'Invalid user ID' });
         
         // Delete all related records first to maintain foreign key integrity
         await runQuery(`DELETE FROM points_ledger WHERE user_id = ?`, [userId]);
@@ -1525,8 +1526,20 @@ app.delete('/api/admin/users/:id', async (req, res) => {
         await runQuery(`DELETE FROM event_claims WHERE user_id = ?`, [userId]);
         await runQuery(`DELETE FROM promo_claims WHERE user_id = ?`, [userId]);
         
+        // Also delete community related data if any to be safe
+        await runQuery(`DELETE FROM community_posts WHERE author_id = ?`, [userId]);
+        await runQuery(`DELETE FROM community_comments WHERE author_id = ?`, [userId]);
+        await runQuery(`DELETE FROM community_votes WHERE user_id = ?`, [userId]);
+        await runQuery(`DELETE FROM community_reports WHERE reported_user_id = ? OR reporter_id = ?`, [userId, userId]);
+        await runQuery(`DELETE FROM user_warnings WHERE user_id = ?`, [userId]);
+        await runQuery(`DELETE FROM traffic_logs WHERE user_id = ?`, [userId]);
+
         // Delete the user record
-        await runQuery(`DELETE FROM users WHERE user_id = ?`, [userId]);
+        const delRes = await runQuery(`DELETE FROM users WHERE user_id = ?`, [userId]);
+        
+        if (delRes.changes === 0) {
+             return res.status(404).json({ error: 'User not found or already deleted.' });
+        }
 
         res.json({ success: true });
     } catch (err) {
