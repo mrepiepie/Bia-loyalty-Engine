@@ -1527,8 +1527,8 @@ app.delete('/api/admin/users/:id', async (req, res) => {
         await runQuery(`DELETE FROM promo_claims WHERE user_id = ?`, [userId]);
         
         // Also delete community related data if any to be safe
-        await runQuery(`DELETE FROM community_posts WHERE author_id = ?`, [userId]);
-        await runQuery(`DELETE FROM community_comments WHERE author_id = ?`, [userId]);
+        await runQuery(`DELETE FROM community_posts WHERE user_id = ?`, [userId]);
+        await runQuery(`DELETE FROM community_comments WHERE user_id = ?`, [userId]);
         await runQuery(`DELETE FROM community_votes WHERE user_id = ?`, [userId]);
         await runQuery(`DELETE FROM community_reports WHERE reported_user_id = ? OR reporter_id = ?`, [userId, userId]);
         await runQuery(`DELETE FROM user_warnings WHERE user_id = ?`, [userId]);

@@ -707,13 +707,23 @@ body:not(.dark-theme) .parallax-orb {
 }
 
 .hero-body-text {
-    font-size: 1.38rem;
-    font-weight: 400;
-    color: var(--text-muted);
-    line-height: 1.75;
+    font-size: 1.35rem;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.8;
+    letter-spacing: 0.015em;
     max-width: 860px;
     text-align: center;
     margin: 0 auto;
+    text-shadow: 0 4px 24px rgba(0,0,0,0.4);
+    mix-blend-mode: plus-lighter;
+}
+
+body:not(.dark-theme) .hero-body-text {
+    color: var(--text-muted) !important;
+    font-weight: 400 !important;
+    text-shadow: none !important;
+    mix-blend-mode: normal !important;
 }
 
 
