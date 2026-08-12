@@ -7428,8 +7428,9 @@ body.dark-theme #beams-canvas, body.dark-theme .beams-overlay {
     transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 body.dark-theme #webgl-canvas {
-    opacity: 0;
-    visibility: hidden;
+    opacity: 0.55;
+    filter: brightness(0.6) saturate(1.4) contrast(1.2);
+    visibility: visible;
 }
 
 @keyframes beamsOverlayPulse {
