@@ -6900,18 +6900,6 @@ body:not(.dark-theme) .to-gradient-3-end {
   user-select: none;
 }
 
-.from-gradient-1-start {
-  background-image: linear-gradient(to right, #39ff14, #00ffff) !important;
-}
-
-.from-gradient-2-start {
-  background-image: linear-gradient(to right, #ff073a, #ff6ec7) !important;
-}
-
-.from-gradient-3-start {
-  background-image: linear-gradient(to right, #faff00, #00f0ff) !important;
-}
-
 body:not(.dark-theme) .from-gradient-1-start {
   background-image: linear-gradient(to right, #1e3a8a, #4338ca) !important;
 }
@@ -6924,12 +6912,12 @@ body:not(.dark-theme) .from-gradient-3-start {
   background-image: linear-gradient(to right, #14532d, #047857) !important;
 }
 
-.bg-clip-text {
+body:not(.dark-theme) .bg-clip-text {
   -webkit-background-clip: text !important;
   background-clip: text !important;
 }
 
-.text-transparent {
+body:not(.dark-theme) .text-transparent {
   color: transparent !important;
 }
 
