@@ -495,14 +495,14 @@ body.dark-theme .landing-header {
     pointer-events: none;
     -webkit-mask-image: linear-gradient(to bottom, black 30%, transparent 100%);
     mask-image: linear-gradient(to bottom, black 30%, transparent 100%);
-    opacity: 0;
-    visibility: hidden;
+    opacity: 1;
+    visibility: visible;
     transition: opacity 0.4s ease, visibility 0.4s ease;
 }
 
 body.dark-theme .video-bg-container {
-    opacity: 1;
-    visibility: visible;
+    opacity: 0;
+    visibility: hidden;
 }
 
 .video-bg-element {
@@ -6616,6 +6616,13 @@ body:not(.dark-theme) .public-ann-date {
     font-weight: 600 !important;
 }
 
+/* Light mode specific disclaimer visibility */
+body:not(.dark-theme) .hero-disclaimer {
+    color: #2d3748 !important;
+    opacity: 0.85 !important;
+    font-weight: 500 !important;
+}
+
 /* 4. Voucher cards (coupon vouchers) styling */
 body:not(.dark-theme) .db-voucher-card {
     background: #ffffff !important;
@@ -7369,13 +7376,12 @@ body.dark-theme #beams-canvas, body.dark-theme .beams-overlay {
     visibility: visible;
 }
 #webgl-canvas {
-    opacity: 1;
-    visibility: visible;
+    opacity: 0;
+    visibility: hidden;
     transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 body.dark-theme #webgl-canvas {
-    opacity: 0.55;
-    filter: brightness(0.6) saturate(1.4) contrast(1.2);
+    opacity: 1;
     visibility: visible;
 }
 
