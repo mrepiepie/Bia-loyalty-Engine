@@ -5059,21 +5059,33 @@ window.showStudentDetailModal = async function(userId) {
         showStudentDetailModal(userId);
     };
 
-    // Audit logs deterministic list
-    const auditEvents = [
-        { time: '2 hrs ago', action: 'Daily portal attendance check-in completed (+15 pts)' },
-        { time: 'Yesterday', action: 'Attended BIA Skillshare Event: Advanced UI Coding' },
-        { time: '3 days ago', action: 'Checked out reference book "Clean Architecture" from library' },
-        { time: '5 days ago', action: 'Registered guest referral lead submission' }
-    ];
-
     const logContainer = document.getElementById('sd-activity-log');
-    logContainer.innerHTML = auditEvents.map(e => `
-        <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.25rem;">
-            <span style="color: var(--text-main);">${e.action}</span>
-            <span style="color: #dfb15b; font-size: 0.65rem; white-space: nowrap; margin-left: 0.5rem;">${e.time}</span>
-        </div>
-    `).join('');
+    logContainer.innerHTML = '<div style="color:var(--text-dim); text-align:center; font-size:0.8rem; padding: 1rem;">Loading activity logs...</div>';
+
+    try {
+        const res = await fetch(`${API_BASE}/admin/ledger`);
+        const allLogs = await res.json();
+        const userLogs = allLogs.filter(log => log.user_id === userId).slice(0, 10); // get last 10 activities
+
+        if (userLogs.length === 0) {
+            logContainer.innerHTML = '<div style="color:var(--text-dim); text-align:center; font-size:0.8rem; padding: 1rem;">No recent activity.</div>';
+        } else {
+            logContainer.innerHTML = userLogs.map(e => {
+                const dateObj = new Date(e.created_at);
+                const timeStr = dateObj.toLocaleDateString() + ' ' + dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                const ptsChange = e.points_change > 0 ? `(+${e.points_change} pts)` : (e.points_change < 0 ? `(${e.points_change} pts)` : '');
+                const actionText = `${e.event_type} ${ptsChange}`;
+                return `
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.25rem;">
+                    <span style="color: var(--text-main); font-size: 0.8rem;">${actionText} - <span style="color:var(--text-dim); font-size:0.75rem;">${e.description}</span></span>
+                    <span style="color: #dfb15b; font-size: 0.65rem; white-space: nowrap; margin-left: 0.5rem;">${timeStr}</span>
+                </div>
+                `;
+            }).join('');
+        }
+    } catch (err) {
+        logContainer.innerHTML = '<div style="color:#ef4444; text-align:center; font-size:0.8rem; padding: 1rem;">Failed to load activity logs.</div>';
+    }
 
     // Actions bridge
     document.getElementById('btn-sd-email').href = `mailto:${student.email}`;
