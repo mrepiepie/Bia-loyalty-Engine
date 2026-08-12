@@ -7168,7 +7168,7 @@ window.SplitText = {
                         allChars.push(charSpan);
                     });
                 } else {
-                    wordSpan.textContent = word;
+                    wordSpan.innerHTML = word;
                 }
                 
                 element.appendChild(wordSpan);
