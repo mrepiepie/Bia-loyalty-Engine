@@ -7406,3 +7406,29 @@ body.dark-theme #webgl-canvas {
     height: 20px;
     line-height: 1;
 }
+
+/* 7. Team / Network Section Fixes */
+body:not(.dark-theme) .team-subtitle {
+    color: var(--text-muted) !important;
+}
+body:not(.dark-theme) .member-meta h4 {
+    color: var(--text-main) !important;
+}
+body:not(.dark-theme) .member-meta p {
+    color: var(--text-muted) !important;
+}
+body:not(.dark-theme) .team-member-number {
+    color: rgba(0, 0, 0, 0.06) !important;
+}
+body:not(.dark-theme) .team-member-item {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+body:not(.dark-theme) .member-badge {
+    background: rgba(0, 0, 0, 0.03) !important;
+}
+body:not(.dark-theme) .team-tier-platinum .member-badge { color: var(--platinum) !important; }
+body:not(.dark-theme) .team-tier-gold .member-badge { color: var(--gold) !important; }
+body:not(.dark-theme) .team-tier-silver .member-badge { color: var(--silver) !important; }
+body:not(.dark-theme) .team-tier-bronze .member-badge { color: var(--bronze) !important; }
+
