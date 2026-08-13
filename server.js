@@ -2071,6 +2071,34 @@ app.delete('/api/partners/:id', async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// PUT /api/partners/:id - Edit an existing partner
+app.put('/api/partners/:id', async (req, res) => {
+    try {
+        const targetId = req.params.id;
+        const { name, badge, title, subtitle, disclosure, image, logoColor, rewards } = req.body;
+        
+        if (!name || !title || !subtitle || !rewards || !Array.isArray(rewards) || rewards.length === 0 || rewards.length > 3) {
+            return res.status(400).json({ error: 'Missing or invalid parameters. Must provide 1 to 3 rewards.' });
+        }
+
+        const existing = await getQuery(`SELECT * FROM partners WHERE id = ?`, [targetId]);
+        if (!existing) {
+            return res.status(404).json({ error: 'Partner not found' });
+        }
+
+        // If no new image is provided, keep the existing one
+        const finalImage = image ? image : existing.image;
+        const finalName = name.toUpperCase();
+        
+        await runQuery(
+            `UPDATE partners SET name = ?, badge = ?, title = ?, subtitle = ?, disclosure = ?, image = ?, logoColor = ?, rewards = ? WHERE id = ?`,
+            [finalName, badge || existing.badge, title, subtitle, disclosure || existing.disclosure, finalImage, logoColor || existing.logoColor, JSON.stringify(rewards), targetId]
+        );
+
+        res.json({ success: true, message: 'Partner updated successfully!' });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 app.post('/api/cron/process-expiry', async (req, res) => {
     try {
         const expiredEntries = await allQuery(`SELECT * FROM points_ledger WHERE expires_at <= CURRENT_TIMESTAMP AND points_remaining > 0`);
