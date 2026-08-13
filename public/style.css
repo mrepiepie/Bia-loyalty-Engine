@@ -7432,3 +7432,17 @@ body:not(.dark-theme) .team-tier-gold .member-badge { color: var(--gold) !import
 body:not(.dark-theme) .team-tier-silver .member-badge { color: var(--silver) !important; }
 body:not(.dark-theme) .team-tier-bronze .member-badge { color: var(--bronze) !important; }
 
+
+/* 8. Core Values / Value Card Fixes */
+body:not(.dark-theme) .value-card {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05) !important;
+}
+body:not(.dark-theme) .value-card h4 {
+    color: var(--text-main) !important;
+}
+body:not(.dark-theme) .value-card p {
+    color: var(--text-muted) !important;
+}
+
