@@ -7459,3 +7459,4 @@ body:not(.dark-theme) .hero-stats-row {
     border: 1px solid rgba(0, 0, 0, 0.08) !important;
 }
 
+body:not(.dark-theme) .bottom-headline { color: var(--text-main) !important; }
