@@ -9127,7 +9127,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // Refresh both the admin table and the public homepage cards
                 if (typeof loadAdminPartners === 'function') loadAdminPartners();
-                if (typeof loadPublicPartnerships === 'function') loadPublicPartnerships();
+                if (typeof loadDynamicPartners === 'function') loadDynamicPartners();
                 
             } catch (err) {
                 showToast('Error', err.message, 'error');
