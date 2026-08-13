@@ -2484,7 +2484,7 @@ body.login-modal-active #pixel-grid-canvas {
 .member-num {
     font-family: 'DM Serif Display', serif;
     font-size: 2.2rem;
-    color: rgba(255, 255, 255, 0.08); /* Watermark number style */
+    color: #ffffff; /* Highly contrasting white number for dark mode */
     display: block;
     line-height: 1;
     align-self: flex-start;
@@ -7474,6 +7474,6 @@ body:not(.dark-theme) .student-badge {
 
 /* Team Member Number Watermark Fix */
 body:not(.dark-theme) .team-member-item .member-num {
-    color: rgba(0, 0, 0, 0.04) !important;
+    color: #000000 !important; /* Highly contrasting black number for light mode */
 }
 
