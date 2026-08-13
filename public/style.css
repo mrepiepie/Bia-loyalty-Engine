@@ -7471,3 +7471,9 @@ body:not(.dark-theme) .student-badge {
     border-color: rgba(79, 70, 229, 0.2) !important;
 }
 
+
+/* Team Member Number Watermark Fix */
+body:not(.dark-theme) .team-member-item .member-num {
+    color: rgba(0, 0, 0, 0.04) !important;
+}
+
