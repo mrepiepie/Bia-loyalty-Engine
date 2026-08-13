@@ -7141,6 +7141,17 @@ window.SplitText = {
         const allWords = [];
         
         elements.forEach(element => {
+            if (element.hasAttribute('data-split-text')) {
+                element.querySelectorAll(':scope > span').forEach(span => {
+                    allWords.push(span);
+                    if (config.type && config.type.includes('chars')) {
+                        span.querySelectorAll('span').forEach(charSpan => allChars.push(charSpan));
+                    }
+                });
+                return;
+            }
+            element.setAttribute('data-split-text', 'true');
+            
             const text = element.innerHTML.trim();
             const tokenized = text.replace(/<br\s*\/?>/gi, " __BR__ ");
             const wordsArray = tokenized.split(/\s+/);
