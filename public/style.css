@@ -6471,7 +6471,7 @@ body:not(.dark-theme) .bia-footer-container h4,
 body:not(.dark-theme) .bia-footer-container p,
 body:not(.dark-theme) .bia-footer-container span,
 body:not(.dark-theme) .bia-footer-container a {
-    color: var(--text-main); !important;
+    color: #efece3 !important;
 }
 body:not(.dark-theme) .bia-footer-container .footer-col h4 {
     color: #ffffff !important;
