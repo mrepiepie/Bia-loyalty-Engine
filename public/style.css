@@ -7460,3 +7460,14 @@ body:not(.dark-theme) .hero-stats-row {
 }
 
 body:not(.dark-theme) .bottom-headline { color: var(--text-main) !important; }
+
+/* Student Info Profile Text Fixes */
+body:not(.dark-theme) .student-text span {
+    color: var(--text-muted) !important;
+}
+body:not(.dark-theme) .student-badge {
+    background: rgba(79, 70, 229, 0.1) !important;
+    color: var(--primary) !important;
+    border-color: rgba(79, 70, 229, 0.2) !important;
+}
+
