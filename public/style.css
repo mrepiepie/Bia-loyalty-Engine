@@ -7446,3 +7446,16 @@ body:not(.dark-theme) .value-card p {
     color: var(--text-muted) !important;
 }
 
+
+/* 9. Hero Stats Fixes */
+body:not(.dark-theme) .hero-stat-label {
+    color: var(--text-muted) !important;
+}
+body:not(.dark-theme) .hero-stat-divider {
+    background: rgba(0, 0, 0, 0.1) !important;
+}
+body:not(.dark-theme) .hero-stats-row {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
