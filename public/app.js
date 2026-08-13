@@ -65,7 +65,7 @@ async function loadRecentCommunityPosts() {
         const posts = data.posts || [];
         
         if (posts.length === 0) {
-            container.innerHTML = '<p style="color:rgba(255,255,255,0.4); font-size: 0.85rem;">No recent community posts.</p>';
+            container.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85rem;">No recent community posts.</p>';
             return;
         }
         
@@ -75,12 +75,12 @@ async function loadRecentCommunityPosts() {
         container.innerHTML = recentPosts.map(post => `
             <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 0.85rem;">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.4rem;">
-                    <span style="color: #fff; font-weight: 600; font-size: 0.85rem;">${post.is_anonymous ? 'Anonymous' : post.name}</span>
-                    <span style="color: rgba(255,255,255,0.4); font-size: 0.75rem;">${new Date(post.created_at).toLocaleDateString()}</span>
+                    <span style="color: var(--text-main); font-weight: 600; font-size: 0.85rem;">${post.is_anonymous ? 'Anonymous' : post.name}</span>
+                    <span style="color: var(--text-muted); font-size: 0.75rem;">${new Date(post.created_at).toLocaleDateString()}</span>
                 </div>
                 <div style="color: #dfb15b; font-weight: 700; font-size: 0.9rem; margin-bottom: 0.4rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${post.title}</div>
                 ${post.image_url ? `<div style="font-size: 0.75rem; color: #14b8a6; margin-bottom: 0.3rem;"><i class="fa-solid fa-image"></i> Contains Attachment</div>` : ''}
-                <div style="display: flex; gap: 0.75rem; font-size: 0.75rem; color: rgba(255,255,255,0.5);">
+                <div style="display: flex; gap: 0.75rem; font-size: 0.75rem; color: var(--text-muted);">
                     <span><i class="fa-solid fa-arrow-up"></i> ${post.upvotes - post.downvotes}</span>
                     <span><i class="fa-regular fa-message"></i> ${post.comment_count}</span>
                 </div>
@@ -1867,7 +1867,7 @@ async function loadAdminStudents() {
                 <td>
                     <div class="student-directory-name" onclick="showStudentDetailModal(${s.user_id})" style="font-weight: 600; cursor: pointer; color: #dfb15b; transition: color 0.15s ease;" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='#dfb15b'">${s.name}</div>
                     <div style="font-size: 0.72rem; color: var(--text-muted); word-break: break-all;">${s.email}</div>
-                    <div style="font-size: 0.66rem; color: rgba(255, 255, 255, 0.35); margin-top: 0.15rem;">ID: ${s.student_id}</div>
+                    <div style="font-size: 0.66rem; color: var(--text-muted); margin-top: 0.15rem;">ID: ${s.student_id}</div>
                 </td>
                 <td><span class="tier-badge ${s.current_tier.toLowerCase()}" style="padding: 0.15rem 0.4rem; font-size: 0.7rem;">${s.current_tier}</span></td>
                 <td style="font-weight: 700; font-family: 'Outfit';">${formatNumber(s.points_balance)} pts</td>
@@ -1950,12 +1950,12 @@ async function loadEngagementReport() {
             const dayText = s.days_since_login >= 999 ? 'Never logged in' : `${s.days_since_login}d ago`;
             return `
                 <tr>
-                    <td><strong style="color:#fff;">${s.name}</strong><br><span style="font-size:0.68rem;color:rgba(255,255,255,0.4);">${s.email}</span></td>
+                    <td><strong style="color: var(--text-main);">${s.name}</strong><br><span style="font-size:0.68rem;color: var(--text-muted);">${s.email}</span></td>
                     <td style="font-size:0.78rem;">${s.programme || ''}</td>
                     <td><span class="tier-badge ${(s.current_tier||'Bronze').toLowerCase()}">${s.current_tier || 'Bronze'}</span></td>
                     <td style="font-family:'Outfit'; font-weight:700; color:#dfb15b;">${formatNumber(s.points_balance || 0)}</td>
                     <td style="text-align:center;">${s.referral_count || 0}</td>
-                    <td style="font-size:0.72rem; color:rgba(255,255,255,0.5);">${lastSeen}<br><span style="color:rgba(255,255,255,0.3);">${dayText}</span></td>
+                    <td style="font-size:0.72rem; color: var(--text-muted);">${lastSeen}<br><span style="color: var(--text-muted);">${dayText}</span></td>
                     <td><span style="font-size:0.7rem; font-weight:700; color:${statusColor}; background:${statusColor}18; padding:0.2rem 0.55rem; border-radius:4px; border:1px solid ${statusColor}33;">${statusLabel}</span></td>
                 </tr>`;
         }).join('');
@@ -1971,13 +1971,13 @@ window.loadEngagementReport = loadEngagementReport;
 async function loadProgrammeOverview() {
     const container = document.getElementById('programme-overview-body');
     if (!container) return;
-    container.innerHTML = '<p style="color:rgba(255,255,255,0.4);font-size:0.8rem;"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</p>';
+    container.innerHTML = '<p style="color: var(--text-muted);font-size:0.8rem;"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</p>';
     try {
         const res = await fetch(`${API_BASE}/admin/programmes`);
         if (!res.ok) throw new Error();
         const programmes = await res.json();
         if (programmes.length === 0) {
-            container.innerHTML = '<p style="color:rgba(255,255,255,0.4);font-size:0.8rem;">No programmes found.</p>';
+            container.innerHTML = '<p style="color: var(--text-muted);font-size:0.8rem;">No programmes found.</p>';
             return;
         }
         const maxCount = Math.max(...programmes.map(p => p.student_count), 1);
@@ -2022,7 +2022,7 @@ async function loadProgrammeOverview() {
             `;
         }).join('');
     } catch {
-        container.innerHTML = '<p style="color:rgba(255,255,255,0.4);font-size:0.8rem;">Could not load programme data.</p>';
+        container.innerHTML = '<p style="color: var(--text-muted);font-size:0.8rem;">Could not load programme data.</p>';
     }
 }
 window.loadProgrammeOverview = loadProgrammeOverview;
@@ -2074,7 +2074,7 @@ async function loadAnnouncements() {
         if (!res.ok) throw new Error();
         const items = await res.json();
         if (items.length === 0) {
-            list.innerHTML = '<p style="color:rgba(255,255,255,0.35);font-size:0.82rem;">No active announcements. Post one using the form.</p>';
+            list.innerHTML = '<p style="color: var(--text-muted);font-size:0.82rem;">No active announcements. Post one using the form.</p>';
             return;
         }
         const typeIcon = { info: '', success: '', warning: '' };
@@ -2085,17 +2085,17 @@ async function loadAnnouncements() {
                 <div style="flex:1;">
                     <div style="display:flex; align-items:center; gap:0.4rem; margin-bottom:0.2rem;">
                         <span>${typeIcon[item.type]||typeIcon.info}</span>
-                        <strong style="color:#fff; font-size:0.88rem;">${item.title}</strong>
+                        <strong style="color: var(--text-main); font-size:0.88rem;">${item.title}</strong>
                     </div>
-                    <p style="color:rgba(255,255,255,0.6); font-size:0.78rem; margin:0; line-height:1.4;">${item.body}</p>
-                    <span style="font-size:0.64rem; color:rgba(255,255,255,0.3); margin-top:0.3rem; display:block;">Posted ${cleanDate(item.created_at)}${item.expires_at ? `  Expires ${cleanDate(item.expires_at)}` : ''}</span>
+                    <p style="color: var(--text-muted); font-size:0.78rem; margin:0; line-height:1.4;">${item.body}</p>
+                    <span style="font-size:0.64rem; color: var(--text-muted); margin-top:0.3rem; display:block;">Posted ${cleanDate(item.created_at)}${item.expires_at ? `  Expires ${cleanDate(item.expires_at)}` : ''}</span>
                 </div>
                 <button onclick="deleteAnnouncement(${item.announcement_id})" style="background:none; border:none; color:rgba(239,68,68,0.5); cursor:pointer; font-size:0.9rem; flex-shrink:0; transition:color 0.15s;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='rgba(239,68,68,0.5)'" title="Delete">
                     <i class="fa-solid fa-trash-can"></i>
                 </button>
             </div>`).join('');
     } catch {
-        list.innerHTML = '<p style="color:rgba(255,255,255,0.35);font-size:0.82rem;">Could not load announcements.</p>';
+        list.innerHTML = '<p style="color: var(--text-muted);font-size:0.82rem;">Could not load announcements.</p>';
     }
 }
 
@@ -2153,7 +2153,7 @@ async function loadStudentAnnouncements() {
             banner.innerHTML = `
                 <div class="card glassmorphic spotlight-card" style="padding: 1rem 1.25rem; border-radius: 12px; border: 1px dashed rgba(255,255,255,0.06); background: rgba(255,255,255,0.01); display: flex; align-items: center; justify-content: center; gap: 0.85rem; width: 100%; box-sizing: border-box; margin-bottom: 1.25rem;">
                     <span class="sleepy-coffee-icon" style="font-size: 1.4rem;"></span>
-                    <span style="font-size: 0.8rem; color: rgba(255,255,255,0.45); font-weight: 300; text-align: left;">
+                    <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 300; text-align: left;">
                         <strong>All quiet!</strong> No active announcements today. BIA deans are searching for reading glasses , and professors are busy drinking espresso. Carry on! 
                     </span>
                 </div>
@@ -2176,7 +2176,7 @@ async function loadStudentAnnouncements() {
                 <div class="public-ann-content">
                     <span class="public-ann-badge">${item.type} BROADCAST</span>
                     <h5>${item.title}</h5>
-                    <p style="margin-bottom: 0.35rem; color: rgba(255,255,255,0.72);">${item.body}</p>
+                    <p style="margin-bottom: 0.35rem; color: var(--text-muted);">${item.body}</p>
                     <span class="public-ann-date"><i class="fa-regular fa-clock"></i> Posted ${cleanDate(item.created_at)}</span>
                 </div>
             </div>`).join('');
@@ -2264,9 +2264,9 @@ function filterAdminVouchers() {
             <td style="color:#4ade80; font-weight:700;">${v.discount_aed || 0} AED</td>
             <td style="font-family:'Outfit';">${formatNumber(v.points_deducted || 0)} pts</td>
             <td><span style="font-size:0.7rem; padding:0.2rem 0.5rem; border-radius:4px; background:${v.status === 'Used' ? 'rgba(74,222,128,0.1)' : 'rgba(255,255,255,0.05)'}; border:1px solid ${v.status === 'Used' ? 'rgba(74,222,128,0.2)' : 'rgba(255,255,255,0.1)'}; color:${v.status === 'Used' ? '#4ade80' : 'rgba(255,255,255,0.5)'}; font-weight:700;">${v.status || 'Unused'}</span></td>
-            <td style="font-size:0.72rem; color:rgba(255,255,255,0.5);">${v.created_at ? cleanDate(v.created_at) : ''}</td>
+            <td style="font-size:0.72rem; color: var(--text-muted);">${v.created_at ? cleanDate(v.created_at) : ''}</td>
             <td>
-                ${v.status !== 'Used' ? `<button onclick="adminUseVoucher('${v.voucher_code}')" style="background:rgba(74,222,128,0.1); border:1px solid rgba(74,222,128,0.3); color:#4ade80; padding:0.25rem 0.6rem; border-radius:6px; cursor:pointer; font-size:0.7rem; font-weight:bold; transition:all 0.2s;" onmouseover="this.style.background='rgba(74,222,128,0.2)'" onmouseout="this.style.background='rgba(74,222,128,0.1)'" title="Mark as Used"><i class="fa-solid fa-check"></i> Mark Used</button>` : `<span style="font-size:0.7rem; color:rgba(255,255,255,0.3);"><i class="fa-solid fa-check-double"></i> Claimed</span>`}
+                ${v.status !== 'Used' ? `<button onclick="adminUseVoucher('${v.voucher_code}')" style="background:rgba(74,222,128,0.1); border:1px solid rgba(74,222,128,0.3); color:#4ade80; padding:0.25rem 0.6rem; border-radius:6px; cursor:pointer; font-size:0.7rem; font-weight:bold; transition:all 0.2s;" onmouseover="this.style.background='rgba(74,222,128,0.2)'" onmouseout="this.style.background='rgba(74,222,128,0.1)'" title="Mark as Used"><i class="fa-solid fa-check"></i> Mark Used</button>` : `<span style="font-size:0.7rem; color: var(--text-muted);"><i class="fa-solid fa-check-double"></i> Claimed</span>`}
             </td>
             <td>
                 <button onclick="adminDeleteVoucher(${v.voucher_id})" style="background:none; border:none; color:rgba(239,68,68,0.4); cursor:pointer; font-size:0.8rem; transition:color 0.15s;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='rgba(239,68,68,0.4)'" title="Delete voucher">
@@ -2473,7 +2473,7 @@ async function loadAdminLedger() {
                 <td class="${ptsClass}">${ptsSign}</td>
                 <td>${cleanDate(entry.expires_at)}</td>
                 <td>
-                    <button class="btn btn-danger btn-sm" onclick="deleteLedgerEntryAdmin(this, ${entry.ledger_id})" style="background:#ef4444; color:#fff; border:none; padding:0.25rem 0.45rem; height:auto; font-size:0.75rem;" title="Delete Ledger Entry">
+                    <button class="btn btn-danger btn-sm" onclick="deleteLedgerEntryAdmin(this, ${entry.ledger_id})" style="background:#ef4444; color: var(--text-main); border:none; padding:0.25rem 0.45rem; height:auto; font-size:0.75rem;" title="Delete Ledger Entry">
                         <i class="fa-solid fa-trash"></i>
                     </button>
                 </td>
@@ -3728,7 +3728,7 @@ async function loadDynamicPartners() {
                         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
                     }
                     .dark-theme .partner-clean-card {
-                        border-color: rgba(255, 255, 255, 0.08);
+                        border-color: var(--text-muted);
                         background: var(--bg-card, #1c1c1e);
                     }
                     .dark-theme .partner-clean-card:hover {
@@ -3772,7 +3772,7 @@ async function loadDynamicPartners() {
                     }
                     .dark-theme .partner-reward-item {
                         background: rgba(255, 255, 255, 0.03);
-                        border-color: rgba(255, 255, 255, 0.05);
+                        border-color: var(--text-muted);
                     }
                 `;
                 document.head.appendChild(style);
@@ -3787,7 +3787,7 @@ async function loadDynamicPartners() {
                     <!-- Top Banner Image Wrapper -->
                     <div class="partner-image-wrapper">
                         <img src="${partner.image}" alt="${partner.name}" class="partner-image-banner">
-                        <span style="position:absolute; top:1rem; right:1rem; font-size:0.75rem; background:${pColor}; color:#fff; padding: 4px 12px; border-radius: 20px; font-weight: 600; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 10;">${partner.badge || 'PARTNER'}</span>
+                        <span style="position:absolute; top:1rem; right:1rem; font-size:0.75rem; background:${pColor}; color: var(--text-main); padding: 4px 12px; border-radius: 20px; font-weight: 600; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 10;">${partner.badge || 'PARTNER'}</span>
                     </div>
                     
                     <!-- Content Area (Fully Visible Always) -->
@@ -4801,7 +4801,7 @@ window.loadAdminReferrals = async function() {
                 <td><span class="badge" style="background: ${isVerified ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 176, 68, 0.2)'}; color: ${isVerified ? '#22c55e' : '#efb044'}; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">${ref.status}</span></td>
                 <td>
                     ${!isVerified ? `<button class="btn btn-success btn-sm" onclick="verifyReferralPayment(${ref.referral_id})" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;"><i class="fa-solid fa-check"></i> Verify</button>` : ''}
-                    <button class="btn btn-danger btn-sm" onclick="deleteReferralAdmin(this, ${ref.referral_id})" style="background:#ef4444; color:#fff; border:none; padding: 0.25rem 0.5rem; font-size: 0.75rem;"><i class="fa-solid fa-trash"></i></button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteReferralAdmin(this, ${ref.referral_id})" style="background:#ef4444; color: var(--text-main); border:none; padding: 0.25rem 0.5rem; font-size: 0.75rem;"><i class="fa-solid fa-trash"></i></button>
                 </td>
             `;
             tableBody.appendChild(tr);
@@ -4843,7 +4843,7 @@ window.loadAdminLeads = async function() {
                 if (l.type === 'Pathway Enquire') {
                     actionBtn = `<button class="btn btn-primary btn-sm" onclick="convertLeadAdmin(this, ${l.lead_id})" style="font-size: 0.68rem; padding: 0.35rem 0.65rem; height: auto; background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important; border-color: #10b981 !important;"><i class="fa-solid fa-circle-check"></i> Convert & Award</button>`;
                 } else {
-                    actionBtn = `<span style="color: rgba(255, 255, 255, 0.35); font-size: 0.72rem; display: inline-block; margin-right: 0.5rem;"><i class="fa-solid fa-check-double"></i> Handled</span>`;
+                    actionBtn = `<span style="color: var(--text-muted); font-size: 0.72rem; display: inline-block; margin-right: 0.5rem;"><i class="fa-solid fa-check-double"></i> Handled</span>`;
                 }
             } else if (l.status === 'Converted') {
                 actionBtn = `<span style="color: #10b981; font-size: 0.72rem; display: inline-block; margin-right: 0.5rem; font-weight: 700;"><i class="fa-solid fa-trophy"></i> Converted & Awarded</span>`;
@@ -4851,15 +4851,15 @@ window.loadAdminLeads = async function() {
 
             return `
                 <tr>
-                    <td style="font-size: 0.72rem; color: rgba(255,255,255,0.6);">${dateStr}</td>
+                    <td style="font-size: 0.72rem; color: var(--text-muted);">${dateStr}</td>
                     <td><strong class="clickable-student-name" onclick="showStudentDetailModal(${l.user_id})" style="color: var(--text-main); cursor: pointer; text-decoration: underline;">${l.student_name}</strong></td>
-                    <td style="font-size: 0.72rem; color: rgba(255,255,255,0.6);">${l.student_id}<br><span style="color: rgba(255, 255, 255, 0.4);">${l.student_email}</span></td>
+                    <td style="font-size: 0.72rem; color: var(--text-muted);">${l.student_id}<br><span style="color: var(--text-muted);">${l.student_email}</span></td>
                     <td style="font-size: 0.76rem; color: #dfb15b; font-weight: 600;">${l.details}</td>
                     <td><span class="badge ${statusClass}">${l.status.toUpperCase()}</span></td>
                     <td>
                         <div style="display: flex; gap: 0.35rem; align-items: center;">
                             ${actionBtn}
-                            <button class="btn btn-danger btn-sm" onclick="deleteLeadAdmin(this, ${l.lead_id})" style="background:#ef4444; color:#fff; border:none; padding:0.35rem 0.5rem; height:auto; font-size:0.68rem;" title="Delete Lead Log">
+                            <button class="btn btn-danger btn-sm" onclick="deleteLeadAdmin(this, ${l.lead_id})" style="background:#ef4444; color: var(--text-main); border:none; padding:0.35rem 0.5rem; height:auto; font-size:0.68rem;" title="Delete Lead Log">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                         </div>
@@ -5097,13 +5097,13 @@ window.showStudentDetailModal = async function(userId) {
     // Render presets dynamically
     const presetsContainer = document.getElementById('sd-presets-container');
     presetsContainer.innerHTML = `
-        <button class="btn btn-secondary btn-sm" onclick="adjustPointsQuick(${student.user_id}, 50, 'Daily Class Attendance Bonus')" style="font-size: 0.72rem; text-align: left; justify-content: flex-start; padding: 0.45rem 0.75rem; border-color: rgba(255,255,255,0.1); width: 100%; display: inline-flex; align-items: center; gap: 0.5rem;">
+        <button class="btn btn-secondary btn-sm" onclick="adjustPointsQuick(${student.user_id}, 50, 'Daily Class Attendance Bonus')" style="font-size: 0.72rem; text-align: left; justify-content: flex-start; padding: 0.45rem 0.75rem; border-color: var(--text-muted); width: 100%; display: inline-flex; align-items: center; gap: 0.5rem;">
             <i class="fa-solid fa-plus" style="color: #4ade80;"></i> +50 pts (Attendance)
         </button>
-        <button class="btn btn-secondary btn-sm" onclick="adjustPointsQuick(${student.user_id}, 150, 'Workshop Presentation Bonus')" style="font-size: 0.72rem; text-align: left; justify-content: flex-start; padding: 0.45rem 0.75rem; border-color: rgba(255,255,255,0.1); width: 100%; display: inline-flex; align-items: center; gap: 0.5rem;">
+        <button class="btn btn-secondary btn-sm" onclick="adjustPointsQuick(${student.user_id}, 150, 'Workshop Presentation Bonus')" style="font-size: 0.72rem; text-align: left; justify-content: flex-start; padding: 0.45rem 0.75rem; border-color: var(--text-muted); width: 100%; display: inline-flex; align-items: center; gap: 0.5rem;">
             <i class="fa-solid fa-plus" style="color: #4ade80;"></i> +150 pts (Workshop)
         </button>
-        <button class="btn btn-secondary btn-sm" onclick="adjustPointsQuick(${student.user_id}, 500, 'Term Graduation Milestone')" style="font-size: 0.72rem; text-align: left; justify-content: flex-start; padding: 0.45rem 0.75rem; border-color: rgba(255,255,255,0.1); width: 100%; display: inline-flex; align-items: center; gap: 0.5rem;">
+        <button class="btn btn-secondary btn-sm" onclick="adjustPointsQuick(${student.user_id}, 500, 'Term Graduation Milestone')" style="font-size: 0.72rem; text-align: left; justify-content: flex-start; padding: 0.45rem 0.75rem; border-color: var(--text-muted); width: 100%; display: inline-flex; align-items: center; gap: 0.5rem;">
             <i class="fa-solid fa-plus" style="color: #4ade80;"></i> +500 pts (Graduation)
         </button>
     `;
@@ -5132,7 +5132,7 @@ window.showStudentDetailModal = async function(userId) {
                         </div>
                         <div style="display: flex; gap: 0.25rem; align-items: center;">
                             ${actionBtn}
-                            <button class="btn btn-danger btn-sm" onclick="deleteVoucherAdmin(this, ${v.voucher_id}, ${student.user_id})" style="background:#ef4444; color:#fff; border:none; padding:0.25rem 0.45rem; font-size:0.65rem; height:auto;" title="Revoke Voucher">
+                            <button class="btn btn-danger btn-sm" onclick="deleteVoucherAdmin(this, ${v.voucher_id}, ${student.user_id})" style="background:#ef4444; color: var(--text-main); border:none; padding:0.25rem 0.45rem; font-size:0.65rem; height:auto;" title="Revoke Voucher">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                         </div>
@@ -5325,17 +5325,17 @@ function showUndoToast(ledgerId, change, description, userId) {
         <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.55rem;">
             <span style="font-size:1.1rem;"></span>
             <div style="flex:1;min-width:0;">
-                <div style="font-weight:700;font-size:0.82rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                <div style="font-weight:700;font-size:0.82rem;color: var(--text-main);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
                     ${sign}${change} pts applied
                 </div>
-                <div style="font-size:0.7rem;color:rgba(255,255,255,0.55);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                <div style="font-size:0.7rem;color: var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
                     ${description}
                 </div>
             </div>
             <button id="bia-undo-btn" style="
                 background: rgba(255,255,255,0.12);
                 border: 1px solid rgba(255,255,255,0.2);
-                color: #fff;
+                color: var(--text-main);
                 font-size: 0.72rem;
                 font-weight: 800;
                 letter-spacing: 0.06em;
@@ -6042,9 +6042,9 @@ function tbodyRenderTrafficLogs(logs) {
         const isAdmin = log.role === 'admin';
         return `
             <tr class="traffic-log-row" data-idx="${idx}" onclick="showLogDetail(${idx})" style="cursor:pointer;">
-                <td style="font-size: 0.72rem; color: rgba(255,255,255,0.6);">${dateStr}</td>
+                <td style="font-size: 0.72rem; color: var(--text-muted);">${dateStr}</td>
                 <td>
-                    <strong style="color:#fff;">${name}</strong>
+                    <strong style="color: var(--text-main);">${name}</strong>
                     ${isAdmin ? '<span style="font-size:0.58rem; background:rgba(223,177,91,0.12); color:#dfb15b; border:1px solid rgba(223,177,91,0.2); border-radius:3px; padding:0.05rem 0.3rem; margin-left:0.3rem; font-weight:700;">ADMIN</span>' : ''}
                 </td>
                 <td style="font-family:\'Outfit\'; font-size:0.75rem; color:#dfb15b;">
@@ -6055,8 +6055,8 @@ function tbodyRenderTrafficLogs(logs) {
                         </button>
                     ` : ''}
                 </td>
-                <td style="font-size:0.75rem; color:rgba(255,255,255,0.75);">${log.activity || 'Unknown'}</td>
-                <td style="font-size:0.7rem; color:rgba(255,255,255,0.4);" title="${uaStr}">${shortUa}</td>
+                <td style="font-size:0.75rem; color: var(--text-muted);">${log.activity || 'Unknown'}</td>
+                <td style="font-size:0.7rem; color: var(--text-muted);" title="${uaStr}">${shortUa}</td>
             </tr>
         `;
     }).join('');
@@ -6133,13 +6133,13 @@ function showLogDetail(idx) {
             </div>
             <div style="flex:1; min-width:0;">
                 <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
-                    <h3 style="margin:0; color:#fff; font-family:'Outfit'; font-size:1.1rem; font-weight:700;">${name}</h3>
+                    <h3 style="margin:0; color: var(--text-main); font-family:'Outfit'; font-size:1.1rem; font-weight:700;">${name}</h3>
                     <span style="font-size:0.62rem; background:${isAdmin ? 'rgba(223,177,91,0.12)' : 'rgba(255,255,255,0.06)'}; color:${isAdmin ? '#dfb15b' : 'rgba(255,255,255,0.5)'}; border:1px solid ${isAdmin ? 'rgba(223,177,91,0.2)' : 'rgba(255,255,255,0.1)'}; border-radius:4px; padding:0.1rem 0.4rem; font-weight:700;">${role}</span>
                 </div>
-                <p style="margin:0.2rem 0 0 0; color:rgba(255,255,255,0.4); font-size:0.75rem;">${email}</p>
-                <p style="margin:0.35rem 0 0 0; font-size:0.7rem; color:rgba(255,255,255,0.35);">Log ID #${log.log_id || ''} &nbsp;&nbsp; ${cleanDate(log.created_at)}</p>
+                <p style="margin:0.2rem 0 0 0; color: var(--text-muted); font-size:0.75rem;">${email}</p>
+                <p style="margin:0.35rem 0 0 0; font-size:0.7rem; color: var(--text-muted);">Log ID #${log.log_id || ''} &nbsp;&nbsp; ${cleanDate(log.created_at)}</p>
             </div>
-            <button onclick="event.stopPropagation(); closeLogDetail()" style="background:none; border:none; color:rgba(255,255,255,0.35); cursor:pointer; font-size:1.1rem; flex-shrink:0; padding:0; transition:color 0.15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.35)'">
+            <button onclick="event.stopPropagation(); closeLogDetail()" style="background:none; border:none; color: var(--text-muted); cursor:pointer; font-size:1.1rem; flex-shrink:0; padding:0; transition:color 0.15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.35)'">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
@@ -6147,22 +6147,22 @@ function showLogDetail(idx) {
         <!-- KPI row -->
         <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:0.75rem; margin-bottom:1.25rem;">
             <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:8px; padding:0.75rem; text-align:center;">
-                <span style="font-size:0.6rem; color:rgba(255,255,255,0.35); text-transform:uppercase; display:block;">IP Address</span>
+                <span style="font-size:0.6rem; color: var(--text-muted); text-transform:uppercase; display:block;">IP Address</span>
                 <span style="font-family:'Outfit'; font-size:0.88rem; font-weight:700; color:#dfb15b;">${log.ip_address || ''}</span>
             </div>
             <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:8px; padding:0.75rem; text-align:center;">
-                <span style="font-size:0.6rem; color:rgba(255,255,255,0.35); text-transform:uppercase; display:block;">Device</span>
-                <span style="font-family:'Outfit'; font-size:0.82rem; font-weight:600; color:#fff;">${ua.device}</span>
+                <span style="font-size:0.6rem; color: var(--text-muted); text-transform:uppercase; display:block;">Device</span>
+                <span style="font-family:'Outfit'; font-size:0.82rem; font-weight:600; color: var(--text-main);">${ua.device}</span>
             </div>
             <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:8px; padding:0.75rem; text-align:center;">
-                <span style="font-size:0.6rem; color:rgba(255,255,255,0.35); text-transform:uppercase; display:block;">Threat Score</span>
+                <span style="font-size:0.6rem; color: var(--text-muted); text-transform:uppercase; display:block;">Threat Score</span>
                 <span style="font-family:'Outfit'; font-size:0.88rem; font-weight:700; color:${threatColor};">${threatScore}/100  ${threatLabel}</span>
             </div>
         </div>
 
         <!-- Threat bar -->
         <div style="margin-bottom:1.25rem;">
-            <div style="display:flex; justify-content:space-between; font-size:0.68rem; color:rgba(255,255,255,0.4); margin-bottom:0.3rem;">
+            <div style="display:flex; justify-content:space-between; font-size:0.68rem; color: var(--text-muted); margin-bottom:0.3rem;">
                 <span>Threat Level Indicator</span><span style="color:${threatColor};">${threatScore}%</span>
             </div>
             <div style="background:rgba(255,255,255,0.05); height:6px; border-radius:4px; overflow:hidden;">
@@ -6175,36 +6175,36 @@ function showLogDetail(idx) {
             <div style="display:flex; gap:0.75rem;">
                 <i class="fa-solid fa-bolt" style="color:#dfb15b; font-size:0.75rem; margin-top:0.1rem; flex-shrink:0;"></i>
                 <div>
-                    <span style="font-size:0.62rem; color:rgba(255,255,255,0.35); text-transform:uppercase; display:block;">Activity</span>
-                    <span style="font-size:0.82rem; color:#fff; font-weight:600;">${log.activity || 'Unknown'}</span>
+                    <span style="font-size:0.62rem; color: var(--text-muted); text-transform:uppercase; display:block;">Activity</span>
+                    <span style="font-size:0.82rem; color: var(--text-main); font-weight:600;">${log.activity || 'Unknown'}</span>
                 </div>
             </div>
             <div style="display:flex; gap:0.75rem;">
-                <i class="fa-brands fa-chrome" style="color:rgba(255,255,255,0.3); font-size:0.75rem; margin-top:0.1rem; flex-shrink:0;"></i>
+                <i class="fa-brands fa-chrome" style="color: var(--text-muted); font-size:0.75rem; margin-top:0.1rem; flex-shrink:0;"></i>
                 <div>
-                    <span style="font-size:0.62rem; color:rgba(255,255,255,0.35); text-transform:uppercase; display:block;">Browser</span>
-                    <span style="font-size:0.8rem; color:rgba(255,255,255,0.7);">${ua.browser}</span>
+                    <span style="font-size:0.62rem; color: var(--text-muted); text-transform:uppercase; display:block;">Browser</span>
+                    <span style="font-size:0.8rem; color: var(--text-muted);">${ua.browser}</span>
                 </div>
             </div>
             <div style="display:flex; gap:0.75rem;">
-                <i class="fa-brands fa-windows" style="color:rgba(255,255,255,0.3); font-size:0.75rem; margin-top:0.1rem; flex-shrink:0;"></i>
+                <i class="fa-brands fa-windows" style="color: var(--text-muted); font-size:0.75rem; margin-top:0.1rem; flex-shrink:0;"></i>
                 <div>
-                    <span style="font-size:0.62rem; color:rgba(255,255,255,0.35); text-transform:uppercase; display:block;">Operating System</span>
-                    <span style="font-size:0.8rem; color:rgba(255,255,255,0.7);">${ua.os}</span>
+                    <span style="font-size:0.62rem; color: var(--text-muted); text-transform:uppercase; display:block;">Operating System</span>
+                    <span style="font-size:0.8rem; color: var(--text-muted);">${ua.os}</span>
                 </div>
             </div>
             <div style="display:flex; gap:0.75rem; padding-top:0.45rem; border-top:1px solid rgba(255,255,255,0.04);">
-                <i class="fa-solid fa-code" style="color:rgba(255,255,255,0.2); font-size:0.65rem; margin-top:0.1rem; flex-shrink:0;"></i>
+                <i class="fa-solid fa-code" style="color: var(--text-muted); font-size:0.65rem; margin-top:0.1rem; flex-shrink:0;"></i>
                 <div>
-                    <span style="font-size:0.62rem; color:rgba(255,255,255,0.3); text-transform:uppercase; display:block;">Full User-Agent</span>
-                    <span style="font-size:0.65rem; color:rgba(255,255,255,0.35); line-height:1.4; word-break:break-all;">${ua.raw}</span>
+                    <span style="font-size:0.62rem; color: var(--text-muted); text-transform:uppercase; display:block;">Full User-Agent</span>
+                    <span style="font-size:0.65rem; color: var(--text-muted); line-height:1.4; word-break:break-all;">${ua.raw}</span>
                 </div>
             </div>
         </div>
 
         <!-- Admin actions -->
         <div style="display:flex; flex-direction:column; gap:0.5rem;">
-            <span style="font-size:0.62rem; color:rgba(255,255,255,0.3); text-transform:uppercase; font-weight:700;">Admin Actions</span>
+            <span style="font-size:0.62rem; color: var(--text-muted); text-transform:uppercase; font-weight:700;">Admin Actions</span>
             <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
                 ${log.ip_address && log.ip_address !== 'Unknown' ? `
                 <button onclick="event.stopPropagation(); closeLogDetail(); blockIp('${log.ip_address}', 'Flagged from log detail panel')" style="display:flex; align-items:center; gap:0.35rem; padding:0.45rem 0.85rem; background:rgba(239,68,68,0.06); border:1px solid rgba(239,68,68,0.2); color:#ef4444; border-radius:6px; font-size:0.72rem; font-weight:700; cursor:pointer; font-family:inherit; transition:background 0.15s;" onmouseover="this.style.background='rgba(239,68,68,0.14)'" onmouseout="this.style.background='rgba(239,68,68,0.06)'">
@@ -6216,7 +6216,7 @@ function showLogDetail(idx) {
                     <i class="fa-solid fa-user-magnifying-glass"></i> View Student Profile
                 </button>
                 ` : ''}
-                <button onclick="event.stopPropagation(); navigator.clipboard.writeText(JSON.stringify(${JSON.stringify(JSON.stringify(log))})); showToast('Copied', 'Log entry copied to clipboard', 'success');" style="display:flex; align-items:center; gap:0.35rem; padding:0.45rem 0.85rem; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); color:rgba(255,255,255,0.5); border-radius:6px; font-size:0.72rem; font-weight:700; cursor:pointer; font-family:inherit; transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.07)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'">
+                <button onclick="event.stopPropagation(); navigator.clipboard.writeText(JSON.stringify(${JSON.stringify(JSON.stringify(log))})); showToast('Copied', 'Log entry copied to clipboard', 'success');" style="display:flex; align-items:center; gap:0.35rem; padding:0.45rem 0.85rem; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); color: var(--text-muted); border-radius:6px; font-size:0.72rem; font-weight:700; cursor:pointer; font-family:inherit; transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.07)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'">
                     <i class="fa-solid fa-clipboard"></i> Copy Log Entry
                 </button>
             </div>
@@ -6257,7 +6257,7 @@ async function loadBlacklist() {
             return `
                 <tr>
                     <td style="font-family:'Outfit'; font-weight:700; color:#ef4444;">${item.ip_address}</td>
-                    <td style="color:rgba(255,255,255,0.6); font-size:0.7rem;">${item.reason}</td>
+                    <td style="color: var(--text-muted); font-size:0.7rem;">${item.reason}</td>
                     <td style="text-align: right;">
                         <button class="btn btn-secondary btn-sm" onclick="unblockIp('${item.ip_address}')" style="padding: 0.15rem 0.45rem; font-size: 0.65rem; border-color: rgba(74, 222, 128, 0.2); color: #4ade80; background: rgba(74, 222, 128, 0.03);">
                             <i class="fa-solid fa-unlock"></i> Unblock
@@ -6484,7 +6484,7 @@ async function showFeatureInsights(type) {
     content.innerHTML = `
         <div style="text-align:center; padding: 2rem;">
             <i class="fa-solid fa-spinner fa-spin" style="font-size: 2rem; color: #dfb15b;"></i>
-            <p style="margin-top:0.75rem; color: rgba(255,255,255,0.6);">Compiling feature insights...</p>
+            <p style="margin-top:0.75rem; color: var(--text-muted);">Compiling feature insights...</p>
         </div>
     `;
     
@@ -6511,17 +6511,17 @@ async function showFeatureInsights(type) {
             <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem;">
                 <i class="fa-solid fa-earth-americas" style="font-size: 2rem; color: #dfb15b;"></i>
                 <div>
-                    <h3 style="margin: 0; color: #fff; font-family: 'Outfit'; font-size: 1.25rem;">GCC Geofencing Insights</h3>
-                    <p style="margin: 0; color: rgba(255,255,255,0.4); font-size: 0.75rem;">Simulate Middle East regional border traffic control</p>
+                    <h3 style="margin: 0; color: var(--text-main); font-family: 'Outfit'; font-size: 1.25rem;">GCC Geofencing Insights</h3>
+                    <p style="margin: 0; color: var(--text-muted); font-size: 0.75rem;">Simulate Middle East regional border traffic control</p>
                 </div>
             </div>
             
             <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: 8px; padding: 1rem; margin-bottom: 1.25rem;">
                 <div style="display:flex; justify-content:space-between; margin-bottom: 0.75rem; font-size:0.8rem;">
-                    <span style="color: rgba(255,255,255,0.6);">Status:</span>
+                    <span style="color: var(--text-muted);">Status:</span>
                     <span style="font-weight: 700; color: ${isGeofenceOn ? '#dfb15b' : '#999'};">${isGeofenceOn ? 'ENABLED (GCC ONLY)' : 'DISABLED (GLOBAL ACCESS)'}</span>
                 </div>
-                <p style="font-size: 0.75rem; color: rgba(255,255,255,0.5); line-height: 1.4; margin: 0;">
+                <p style="font-size: 0.75rem; color: var(--text-muted); line-height: 1.4; margin: 0;">
                     Geofencing restricts access strictly to IPs registered under Gulf Cooperation Council member states (UAE, Saudi Arabia, Qatar, Kuwait, Bahrain, Oman).
                 </p>
             </div>
@@ -6530,7 +6530,7 @@ async function showFeatureInsights(type) {
                 <h5 style="color: #dfb15b; font-size: 0.75rem; text-transform: uppercase; margin: 0 0 0.5rem 0; font-weight: 700;">Simulated Traffic Origin</h5>
                 <div style="display: flex; flex-direction: column; gap: 0.5rem;">
                     <div>
-                        <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:rgba(255,255,255,0.7); margin-bottom:0.15rem;">
+                        <div style="display:flex; justify-content:space-between; font-size:0.7rem; color: var(--text-muted); margin-bottom:0.15rem;">
                             <span>UAE (Dubai / Abu Dhabi)</span>
                             <span>74%</span>
                         </div>
@@ -6539,7 +6539,7 @@ async function showFeatureInsights(type) {
                         </div>
                     </div>
                     <div>
-                        <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:rgba(255,255,255,0.7); margin-bottom:0.15rem;">
+                        <div style="display:flex; justify-content:space-between; font-size:0.7rem; color: var(--text-muted); margin-bottom:0.15rem;">
                             <span>Saudi Arabia (Riyadh)</span>
                             <span>15%</span>
                         </div>
@@ -6548,7 +6548,7 @@ async function showFeatureInsights(type) {
                         </div>
                     </div>
                     <div>
-                        <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:rgba(255,255,255,0.7); margin-bottom:0.15rem;">
+                        <div style="display:flex; justify-content:space-between; font-size:0.7rem; color: var(--text-muted); margin-bottom:0.15rem;">
                             <span>Qatar & Kuwait</span>
                             <span>6%</span>
                         </div>
@@ -6557,7 +6557,7 @@ async function showFeatureInsights(type) {
                         </div>
                     </div>
                     <div>
-                        <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:rgba(255,255,255,0.7); margin-bottom:0.15rem;">
+                        <div style="display:flex; justify-content:space-between; font-size:0.7rem; color: var(--text-muted); margin-bottom:0.15rem;">
                             <span>Rest of the World (US, Europe, Asia)</span>
                             <span style="color: ${isGeofenceOn ? '#ef4444' : 'rgba(255,255,255,0.7)'};">${isGeofenceOn ? '5% (Blocked)' : '5%'}</span>
                         </div>
@@ -6608,7 +6608,7 @@ async function showFeatureInsights(type) {
                 <div style="display:flex; align-items:center; gap:0.4rem; color: #dfb15b; font-size:0.75rem; font-weight:700; margin-bottom:0.25rem;">
                     <i class="fa-solid fa-wand-magic-sparkles"></i> AI Security Advisor Recommendation
                 </div>
-                <p style="font-size:0.7rem; color:rgba(255,255,255,0.6); margin:0; line-height: 1.4;">
+                <p style="font-size:0.7rem; color: var(--text-muted); margin:0; line-height: 1.4;">
                     <strong>Security Level: ${isGeofenceOn ? 'HIGH' : 'NORMAL'}</strong><br>
                     Keep Regional Geofencing <strong>disabled</strong> under standard conditions. Enable immediately if database logging identifies brute-force patterns originating from foreign subnets.
                 </p>
@@ -6619,18 +6619,18 @@ async function showFeatureInsights(type) {
             <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem;">
                 <i class="fa-solid fa-gauge-high" style="font-size: 2rem; color: #dfb15b;"></i>
                 <div>
-                    <h3 style="margin: 0; color: #fff; font-family: 'Outfit'; font-size: 1.25rem;">Rate Limiting Insights</h3>
-                    <p style="margin: 0; color: rgba(255,255,255,0.4); font-size: 0.75rem;">Prevent script-based spam and denial-of-service abuse</p>
+                    <h3 style="margin: 0; color: var(--text-main); font-family: 'Outfit'; font-size: 1.25rem;">Rate Limiting Insights</h3>
+                    <p style="margin: 0; color: var(--text-muted); font-size: 0.75rem;">Prevent script-based spam and denial-of-service abuse</p>
                 </div>
             </div>
             
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem; margin-bottom: 1.25rem;">
                 <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: 8px; padding: 0.75rem;">
-                    <span style="font-size:0.65rem; color:rgba(255,255,255,0.4); text-transform:uppercase;">Current Limit</span>
-                    <h4 style="margin:0.2rem 0 0 0; color:#fff; font-size:1.1rem; font-family:'Outfit';">${currentRateLimit} req/min</h4>
+                    <span style="font-size:0.65rem; color: var(--text-muted); text-transform:uppercase;">Current Limit</span>
+                    <h4 style="margin:0.2rem 0 0 0; color: var(--text-main); font-size:1.1rem; font-family:'Outfit';">${currentRateLimit} req/min</h4>
                 </div>
                 <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: 8px; padding: 0.75rem;">
-                    <span style="font-size:0.65rem; color:rgba(255,255,255,0.4); text-transform:uppercase;">Avg. Latency</span>
+                    <span style="font-size:0.65rem; color: var(--text-muted); text-transform:uppercase;">Avg. Latency</span>
                     <h4 style="margin:0.2rem 0 0 0; color:#4ade80; font-size:1.1rem; font-family:'Outfit';">32.4 ms</h4>
                 </div>
             </div>
@@ -6640,27 +6640,27 @@ async function showFeatureInsights(type) {
                 <div style="display:flex; justify-content:space-between; align-items:flex-end; height:70px; padding: 0 0.5rem; background:rgba(255,255,255,0.01); border-radius:6px; border:1px solid rgba(255,255,255,0.03); box-sizing:border-box;">
                     <div style="display:flex; flex-direction:column; align-items:center; width:12%;">
                         <div style="background:rgba(223,177,91,0.3); width:100%; height:32px; border-radius:2px 2px 0 0;"></div>
-                        <span style="font-size:0.55rem; color:rgba(255,255,255,0.4); margin-top:0.2rem;">09:00</span>
+                        <span style="font-size:0.55rem; color: var(--text-muted); margin-top:0.2rem;">09:00</span>
                     </div>
                     <div style="display:flex; flex-direction:column; align-items:center; width:12%;">
                         <div style="background:rgba(223,177,91,0.5); width:100%; height:48px; border-radius:2px 2px 0 0;"></div>
-                        <span style="font-size:0.55rem; color:rgba(255,255,255,0.4); margin-top:0.2rem;">10:00</span>
+                        <span style="font-size:0.55rem; color: var(--text-muted); margin-top:0.2rem;">10:00</span>
                     </div>
                     <div style="display:flex; flex-direction:column; align-items:center; width:12%;">
                         <div style="background:#dfb15b; width:100%; height:62px; border-radius:2px 2px 0 0;"></div>
-                        <span style="font-size:0.55rem; color:rgba(255,255,255,0.4); margin-top:0.2rem;">11:00</span>
+                        <span style="font-size:0.55rem; color: var(--text-muted); margin-top:0.2rem;">11:00</span>
                     </div>
                     <div style="display:flex; flex-direction:column; align-items:center; width:12%;">
                         <div style="background:rgba(223,177,91,0.7); width:100%; height:55px; border-radius:2px 2px 0 0;"></div>
-                        <span style="font-size:0.55rem; color:rgba(255,255,255,0.4); margin-top:0.2rem;">12:00</span>
+                        <span style="font-size:0.55rem; color: var(--text-muted); margin-top:0.2rem;">12:00</span>
                     </div>
                     <div style="display:flex; flex-direction:column; align-items:center; width:12%;">
                         <div style="background:rgba(223,177,91,0.4); width:100%; height:40px; border-radius:2px 2px 0 0;"></div>
-                        <span style="font-size:0.55rem; color:rgba(255,255,255,0.4); margin-top:0.2rem;">13:00</span>
+                        <span style="font-size:0.55rem; color: var(--text-muted); margin-top:0.2rem;">13:00</span>
                     </div>
                     <div style="display:flex; flex-direction:column; align-items:center; width:12%;">
                         <div style="background:rgba(223,177,91,0.3); width:100%; height:25px; border-radius:2px 2px 0 0;"></div>
-                        <span style="font-size:0.55rem; color:rgba(255,255,255,0.4); margin-top:0.2rem;">14:00</span>
+                        <span style="font-size:0.55rem; color: var(--text-muted); margin-top:0.2rem;">14:00</span>
                     </div>
                 </div>
             </div>
@@ -6699,7 +6699,7 @@ async function showFeatureInsights(type) {
                 <div style="display:flex; align-items:center; gap:0.4rem; color: #dfb15b; font-size:0.75rem; font-weight:700; margin-bottom:0.25rem;">
                     <i class="fa-solid fa-wand-magic-sparkles"></i> AI Security Advisor Recommendation
                 </div>
-                <p style="font-size:0.7rem; color:rgba(255,255,255,0.6); margin:0; line-height: 1.4;">
+                <p style="font-size:0.7rem; color: var(--text-muted); margin:0; line-height: 1.4;">
                     Your rate limiting is currently configured to <strong>${currentRateLimit} requests/min</strong>. If you detect rapid login failure cycles or points adjustments anomalies, drag the policy down to <strong>90 requests/min</strong> to force attacker script containment.
                 </p>
             </div>
@@ -6707,7 +6707,7 @@ async function showFeatureInsights(type) {
     } else if (type === 'maintenance') {
         let timerDetails = 'Inactive (System is Live)';
         let timerColor = '#4ade80';
-        let countdownHtml = '<p style="color: rgba(255,255,255,0.5); font-size:0.75rem; margin:0.25rem 0 0 0;">No active scheduled maintenance windows.</p>';
+        let countdownHtml = '<p style="color: var(--text-muted); font-size:0.75rem; margin:0.25rem 0 0 0;">No active scheduled maintenance windows.</p>';
         
         if (isMaintenanceOn) {
             timerDetails = 'ACTIVE (Student portal locked)';
@@ -6730,14 +6730,14 @@ async function showFeatureInsights(type) {
             <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem;">
                 <i class="fa-solid fa-screwdriver-wrench" style="font-size: 2rem; color: #dfb15b;"></i>
                 <div>
-                    <h3 style="margin: 0; color: #fff; font-family: 'Outfit'; font-size: 1.25rem;">Scheduled Maintenance Mode Insights</h3>
-                    <p style="margin: 0; color: rgba(255,255,255,0.4); font-size: 0.75rem;">Announce updates, lock db commits, and secure APIs</p>
+                    <h3 style="margin: 0; color: var(--text-main); font-family: 'Outfit'; font-size: 1.25rem;">Scheduled Maintenance Mode Insights</h3>
+                    <p style="margin: 0; color: var(--text-muted); font-size: 0.75rem;">Announce updates, lock db commits, and secure APIs</p>
                 </div>
             </div>
             
             <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: 8px; padding: 1rem; margin-bottom: 1.25rem;">
                 <div style="display:flex; justify-content:space-between; margin-bottom: 0.5rem; font-size:0.8rem;">
-                    <span style="color: rgba(255,255,255,0.6);">Maintenance Lockout status:</span>
+                    <span style="color: var(--text-muted);">Maintenance Lockout status:</span>
                     <span style="font-weight: 700; color: ${timerColor};">${timerDetails}</span>
                 </div>
                 ${countdownHtml}
@@ -6745,7 +6745,7 @@ async function showFeatureInsights(type) {
             
             <div style="margin-bottom: 1.25rem;">
                 <h5 style="color: #dfb15b; font-size: 0.75rem; text-transform: uppercase; margin: 0 0 0.5rem 0; font-weight: 700;">Downtime Safeguards</h5>
-                <ul style="margin: 0; padding-left: 1.1rem; font-size: 0.75rem; color: rgba(255,255,255,0.6); display: flex; flex-direction: column; gap: 0.4rem;">
+                <ul style="margin: 0; padding-left: 1.1rem; font-size: 0.75rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 0.4rem;">
                     <li><strong>Locked Ledger Actions:</strong> Points transfers, voucher claims, and referral registration APIs reject all requests from non-admins.</li>
                     <li><strong>Opaque Status screen:</strong> Non-admin student accounts are blocked by a fullscreen glassmorphic screen showing your countdown.</li>
                     <li><strong>Secure Session Isolation:</strong> Any active student requests are deferred, protecting in-memory DB integrity.</li>
@@ -6756,7 +6756,7 @@ async function showFeatureInsights(type) {
                 <div style="display:flex; align-items:center; gap:0.4rem; color: #dfb15b; font-size:0.75rem; font-weight:700; margin-bottom:0.25rem;">
                     <i class="fa-solid fa-wand-magic-sparkles"></i> AI Security Advisor Recommendation
                 </div>
-                <p style="font-size:0.7rem; color:rgba(255,255,255,0.6); margin:0; line-height: 1.4;">
+                <p style="font-size:0.7rem; color: var(--text-muted); margin:0; line-height: 1.4;">
                     Schedule maintenance during off-peak student hours (e.g., 2 AM - 5 AM). Always announce updates beforehand. Use the <strong>Auto-Restore Timer</strong> to automatically release the site and prevent admin lockout memory slips.
                 </p>
             </div>
@@ -6769,18 +6769,18 @@ async function showFeatureInsights(type) {
             <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem;">
                 <i class="fa-solid fa-user-shield" style="font-size: 2rem; color: #ef4444;"></i>
                 <div>
-                    <h3 style="margin: 0; color: #fff; font-family: 'Outfit'; font-size: 1.25rem;">IP Firewall Blacklist Insights</h3>
-                    <p style="margin: 0; color: rgba(255,255,255,0.4); font-size: 0.75rem;">Manage active bans and monitor firewall blocks</p>
+                    <h3 style="margin: 0; color: var(--text-main); font-family: 'Outfit'; font-size: 1.25rem;">IP Firewall Blacklist Insights</h3>
+                    <p style="margin: 0; color: var(--text-muted); font-size: 0.75rem;">Manage active bans and monitor firewall blocks</p>
                 </div>
             </div>
             
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem; margin-bottom: 1.25rem;">
                 <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: 8px; padding: 0.75rem;">
-                    <span style="font-size:0.65rem; color:rgba(255,255,255,0.4); text-transform:uppercase;">Active Banned IPs</span>
-                    <h4 style="margin:0.2rem 0 0 0; color:#fff; font-size:1.1rem; font-family:'Outfit';">${totalBanned} nodes</h4>
+                    <span style="font-size:0.65rem; color: var(--text-muted); text-transform:uppercase;">Active Banned IPs</span>
+                    <h4 style="margin:0.2rem 0 0 0; color: var(--text-main); font-size:1.1rem; font-family:'Outfit';">${totalBanned} nodes</h4>
                 </div>
                 <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: 8px; padding: 0.75rem;">
-                    <span style="font-size:0.65rem; color:rgba(255,255,255,0.4); text-transform:uppercase;">Firewall Threat Level</span>
+                    <span style="font-size:0.65rem; color: var(--text-muted); text-transform:uppercase;">Firewall Threat Level</span>
                     <h4 style="margin:0.2rem 0 0 0; color:${threatColor}; font-size:1.1rem; font-family:'Outfit'; font-weight:700;">${threatLevel}</h4>
                 </div>
             </div>
@@ -6819,7 +6819,7 @@ async function showFeatureInsights(type) {
                 <div style="display:flex; align-items:center; gap:0.4rem; color: #ef4444; font-size:0.75rem; font-weight:700; margin-bottom:0.25rem;">
                     <i class="fa-solid fa-circle-exclamation"></i> Firewall Integrity Advisory
                 </div>
-                <p style="font-size:0.7rem; color:rgba(255,255,255,0.6); margin:0; line-height: 1.4;">
+                <p style="font-size:0.7rem; color: var(--text-muted); margin:0; line-height: 1.4;">
                     If you identify suspicious logins from a subnet (e.g. repeated student credentials checks), block that specific IP immediately. Use the live logs tab to catch automated agents before they scrape points or transfer balances.
                 </p>
             </div>
@@ -6921,7 +6921,7 @@ async function loadPublicAnnouncements() {
                         <span class="sleepy-coffee-icon"></span>
                     </div>
                     <h4 style="margin: 0; color: #dfb15b; font-family: 'Outfit'; font-size: 0.95rem; letter-spacing: 0.05em; text-transform: uppercase;">All Quiet</h4>
-                    <p style="margin: 0; font-size: 0.8rem; color: rgba(255,255,255,0.5); line-height: 1.45; font-weight: 300;">
+                    <p style="margin: 0; font-size: 0.8rem; color: var(--text-muted); line-height: 1.45; font-weight: 300;">
                         No active announcements today. The BIA servers are purring, and the student portal is completely peaceful. 
                     </p>
                 </div>
@@ -6968,7 +6968,7 @@ async function loadPublicAnnouncements() {
             });
         }
     } catch {
-        container.innerHTML = `<p style="color:rgba(255,255,255,0.3); font-size:0.75rem;">Could not load announcements.</p>`;
+        container.innerHTML = `<p style="color: var(--text-muted); font-size:0.75rem;">Could not load announcements.</p>`;
     }
 }
 window.loadPublicAnnouncements = loadPublicAnnouncements;
@@ -7508,14 +7508,14 @@ function renderAdminCommunityFeed(items) {
         const isLocked = item.is_locked ? '<i class="fa-solid fa-lock" style="color:#ef4444;" title="Locked"></i>' : '<i class="fa-solid fa-unlock text-emerald" title="Unlocked"></i>';
         
         const lockActionBtn = item.type === 'post' 
-            ? `<button class="btn btn-sm" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#fff; padding: 4px 8px; font-size: 0.75rem;" onclick="adminLockPost(${item.id}, ${item.is_locked ? 'false' : 'true'})">${item.is_locked ? 'Unlock' : 'Lock'}</button>`
+            ? `<button class="btn btn-sm" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color: var(--text-main); padding: 4px 8px; font-size: 0.75rem;" onclick="adminLockPost(${item.id}, ${item.is_locked ? 'false' : 'true'})">${item.is_locked ? 'Unlock' : 'Lock'}</button>`
             : '';
             
         return `
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
                 <td style="padding: 0.75rem;">${dateStr}</td>
                 <td style="padding: 0.75rem;">${typeBadge}</td>
-                <td style="padding: 0.75rem;"><strong style="color:rgba(255,255,255,0.9);">#${item.user_id}</strong></td>
+                <td style="padding: 0.75rem;"><strong style="color: var(--text-muted);">#${item.user_id}</strong></td>
                 <td style="padding: 0.75rem;"><div style="max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${item.snippet.replace(/"/g, '&quot;')}">${item.snippet}</div></td>
                 <td style="padding: 0.75rem;">${item.type === 'post' ? isLocked : '-'}</td>
                 <td style="padding: 0.75rem;">
@@ -7636,7 +7636,7 @@ function renderAdminPromos(promos) {
     });
 
     if (activePromos.length === 0) {
-        adminPromosList.innerHTML = '<tr><td colspan="5" style="text-align: center; color: rgba(255,255,255,0.5);">No active promo codes found</td></tr>';
+        adminPromosList.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No active promo codes found</td></tr>';
     } else {
         adminPromosList.innerHTML = activePromos.map(p => `
             <tr>
@@ -7659,7 +7659,7 @@ function renderAdminPromos(promos) {
     const expiredList = document.getElementById('admin-expired-promos-list');
     if (expiredList) {
         if (inactivePromos.length === 0) {
-            expiredList.innerHTML = '<tr><td colspan="5" style="text-align: center; color: rgba(255,255,255,0.5);">No used or expired promo codes in the last 60 days</td></tr>';
+            expiredList.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No used or expired promo codes in the last 60 days</td></tr>';
         } else {
             expiredList.innerHTML = inactivePromos.map(p => `
                 <tr style="opacity: 0.6;">
@@ -7812,7 +7812,7 @@ async function loadStudentPromoHistory(userId, isAdminModal = false) {
         if (!targetList) return;
         
         if (!data.history || data.history.length === 0) {
-            targetList.innerHTML = '<tr><td colspan="3" style="text-align: center; color: rgba(255,255,255,0.4);">No promo codes redeemed yet.</td></tr>';
+            targetList.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--text-muted);">No promo codes redeemed yet.</td></tr>';
             return;
         }
         
@@ -7822,7 +7822,7 @@ async function loadStudentPromoHistory(userId, isAdminModal = false) {
                 <tr>
                     <td><strong style="color: var(--bia-gold);">${h.code}</strong></td>
                     <td>+${h.points_reward}</td>
-                    <td style="color: rgba(255,255,255,0.5);">${dateStr}</td>
+                    <td style="color: var(--text-muted);">${dateStr}</td>
                 </tr>
             `;
         }).join('');
@@ -7857,7 +7857,7 @@ window.filterPromoHistory = function(query, listId) {
     if (visibleCount === 0 && rows.length > 0 && rows[0].cells.length > 1) {
         const emptyRow = document.createElement('tr');
         emptyRow.className = 'empty-search-row';
-        emptyRow.innerHTML = `<td colspan="3" style="text-align: center; color: rgba(255,255,255,0.4); padding: 1rem 0;">No matching codes found.</td>`;
+        emptyRow.innerHTML = `<td colspan="3" style="text-align: center; color: var(--text-muted); padding: 1rem 0;">No matching codes found.</td>`;
         list.appendChild(emptyRow);
     }
 };
@@ -8109,7 +8109,7 @@ async function initAdminFAQs() {
         
         faqsBody.innerHTML = '';
         if (submissions.length === 0) {
-            faqsBody.innerHTML = '<tr><td colspan="5" class="no-data" style="text-align: center; color: rgba(255,255,255,0.4); padding: 2rem;">No questions have been submitted yet.</td></tr>';
+            faqsBody.innerHTML = '<tr><td colspan="5" class="no-data" style="text-align: center; color: var(--text-muted); padding: 2rem;">No questions have been submitted yet.</td></tr>';
             return;
         }
         
@@ -8125,13 +8125,13 @@ async function initAdminFAQs() {
             const tr = document.createElement('tr');
             tr.style = bgStyle;
             tr.innerHTML = `
-                <td style="color: rgba(255,255,255,0.6); font-size: 0.8rem;">${dateStr}</td>
-                <td style="font-weight: 600; color: #fff;">
+                <td style="color: var(--text-muted); font-size: 0.8rem;">${dateStr}</td>
+                <td style="font-weight: 600; color: var(--text-main);">
                     ${escapeHTML(sub.student_name || sub.studentName || 'Unknown')}<br>
-                    <span style="font-size: 0.75rem; color: rgba(255,255,255,0.5); font-weight: normal;">${escapeHTML(sub.email && sub.email !== 'N/A' ? sub.email : 'No email provided')}</span>
+                    <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal;">${escapeHTML(sub.email && sub.email !== 'N/A' ? sub.email : 'No email provided')}</span>
                 </td>
                 <td style="color: #dfb15b; font-family: monospace;">${escapeHTML(sub.student_id || sub.studentId || 'N/A')}</td>
-                <td style="color: rgba(255,255,255,0.85); max-width: 300px; word-wrap: break-word;">
+                <td style="color: var(--text-muted); max-width: 300px; word-wrap: break-word;">
                     ${escapeHTML(sub.question)}
                     ${sub.answer ? `<div style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.1); color: #dfb15b; font-size: 0.8rem;"><i class="fa-solid fa-reply"></i> ${escapeHTML(sub.answer)} ${sub.is_public ? '<span class="status-pill status-enrolled" style="font-size: 0.6rem; padding: 0.1rem 0.3rem;">PUBLIC</span>' : ''}</div>` : ''}
                 </td>
@@ -8142,7 +8142,7 @@ async function initAdminFAQs() {
                         data-answer="${escapeHTML(sub.answer || '')}" 
                         data-public="${sub.is_public || 0}"
                         onclick="openAnswerFaqModal(this.getAttribute('data-id'), this.getAttribute('data-question'), this.getAttribute('data-answer'), parseInt(this.getAttribute('data-public')))" 
-                        title="Answer question" style="font-size: 0.8rem; padding: 0.4rem 0.6rem; border-color: rgba(255, 255, 255, 0.3); color: #fff;">
+                        title="Answer question" style="font-size: 0.8rem; padding: 0.4rem 0.6rem; border-color: var(--text-muted); color: var(--text-main);">
                         <i class="fa-solid fa-reply"></i>
                     </button>
                     ${sub.is_public ? `
@@ -8477,14 +8477,14 @@ async function loadPublicFAQs() {
         const data = await response.json();
         
         if (!data.faqs || data.faqs.length === 0) {
-            container.innerHTML = '<div style="text-align: center; color: rgba(255,255,255,0.4); padding: 2rem;">More FAQs coming soon!</div>';
+            container.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 2rem;">More FAQs coming soon!</div>';
             return;
         }
         
         container.innerHTML = data.faqs.map((faq, index) => `
             <div class="gsap-faq-item" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 1.5rem;">
                 <strong style="color: #dfb15b; font-size: 1.1rem; font-weight: 600; display: block; margin-bottom: 0.75rem;">${escapeHTML(faq.question)}</strong>
-                <div style="color: rgba(255,255,255,0.85); font-size: 0.95rem; line-height: 1.6;">
+                <div style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;">
                     ${escapeHTML(faq.answer).replace(/\\n/g, '<br>')}
                 </div>
             </div>
@@ -8504,7 +8504,7 @@ async function loadPublicFAQs() {
         */
     } catch (err) {
         console.error('Error loading public FAQs:', err);
-        container.innerHTML = '<div style="text-align: center; color: rgba(255,255,255,0.4); padding: 2rem;">Failed to load FAQs. Please try again later.</div>';
+        container.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 2rem;">Failed to load FAQs. Please try again later.</div>';
     }
 }
 
@@ -8546,7 +8546,7 @@ async function loadCommunityPosts() {
         if (!response.ok) throw new Error(data.error);
         
         if (!data.posts || data.posts.length === 0) {
-            container.innerHTML = '<div style="text-align: center; color: rgba(255,255,255,0.4); padding: 2rem;">No posts yet. Be the first to start a discussion!</div>';
+            container.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 2rem;">No posts yet. Be the first to start a discussion!</div>';
             return;
         }
         
@@ -8555,19 +8555,19 @@ async function loadCommunityPosts() {
                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                     <div>
                         <h4 style="margin: 0 0 0.5rem 0; color: #dfb15b; font-size: 1.1rem;">${escapeHTML(post.title)}</h4>
-                        <div style="font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-bottom: 1rem;">
-                            By <strong style="color: #fff;">${escapeHTML(post.name)}</strong> (${escapeHTML(post.programme)})  ${new Date(post.created_at).toLocaleDateString()}
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;">
+                            By <strong style="color: var(--text-main);">${escapeHTML(post.name)}</strong> (${escapeHTML(post.programme)})  ${new Date(post.created_at).toLocaleDateString()}
                         </div>
                     </div>
                     <button onclick="upvotePost(${post.post_id})" style="background: none; border: 1px solid ${post.user_has_upvoted ? '#dfb15b' : 'rgba(255,255,255,0.2)'}; color: ${post.user_has_upvoted ? '#dfb15b' : '#fff'}; border-radius: 4px; padding: 0.3rem 0.6rem; cursor: pointer; transition: 0.2s;">
                         <i class="fa-solid fa-arrow-up"></i> ${post.upvotes}
                     </button>
                 </div>
-                <div style="color: rgba(255,255,255,0.85); line-height: 1.6; font-size: 0.95rem; margin-bottom: 1rem;">
+                <div style="color: var(--text-muted); line-height: 1.6; font-size: 0.95rem; margin-bottom: 1rem;">
                     ${escapeHTML(post.content).replace(/\n/g, '<br>')}
                 </div>
                 <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 0.75rem;">
-                    <button onclick="toggleComments(${post.post_id})" style="background: none; border: none; color: rgba(255,255,255,0.6); cursor: pointer; font-family: inherit;">
+                    <button onclick="toggleComments(${post.post_id})" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-family: inherit;">
                         <i class="fa-regular fa-comment"></i> ${post.comment_count} Comments
                     </button>
                     <div id="comments-section-${post.post_id}" style="display: none; margin-top: 1rem; border-left: 2px solid rgba(223,177,91,0.3); padding-left: 1rem;">
@@ -8623,7 +8623,7 @@ async function loadComments(postId) {
         const data = await response.json();
         
         if (!data.comments || data.comments.length === 0) {
-            container.innerHTML = '<span style="color:rgba(255,255,255,0.4); font-size: 0.85rem;">No comments yet.</span>';
+            container.innerHTML = '<span style="color: var(--text-muted); font-size: 0.85rem;">No comments yet.</span>';
             return;
         }
         
@@ -8631,7 +8631,7 @@ async function loadComments(postId) {
             <div style="margin-bottom: 0.75rem; background: rgba(0,0,0,0.1); padding: 0.75rem; border-radius: 6px;">
                 <div style="display: flex; justify-content: space-between;">
                     <strong style="color: #dfb15b; font-size: 0.85rem;">${escapeHTML(c.name)}</strong>
-                    <span style="font-size: 0.75rem; color: rgba(255,255,255,0.4);">${new Date(c.created_at).toLocaleDateString()}</span>
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">${new Date(c.created_at).toLocaleDateString()}</span>
                 </div>
                 <div style="font-size: 0.9rem; margin-top: 0.25rem;">${escapeHTML(c.content)}</div>
             </div>
@@ -8768,7 +8768,7 @@ async function loadAdminReports() {
     const container = document.getElementById('admin-reports-container');
     if (!container) return;
     
-    container.innerHTML = '<div style="color: rgba(255,255,255,0.5);">Loading reports...</div>';
+    container.innerHTML = '<div style="color: var(--text-muted);">Loading reports...</div>';
     
     try {
         const res = await fetch('/api/admin/reports', {
@@ -8779,7 +8779,7 @@ async function loadAdminReports() {
         if (!res.ok) throw new Error(data.error || 'Failed to load reports');
         
         if (data.length === 0) {
-            container.innerHTML = '<div style="color: rgba(255,255,255,0.5);">No pending reports.</div>';
+            container.innerHTML = '<div style="color: var(--text-muted);">No pending reports.</div>';
             return;
         }
         
@@ -8787,8 +8787,8 @@ async function loadAdminReports() {
             <div class="card" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px; margin-bottom: 1rem; ${!userStats.has_pending ? 'opacity: 0.6;' : ''}">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
                     <div>
-                        <h4 style="margin: 0 0 0.2rem 0; color: #fff;">${escapeHTML(userStats.reported_user_name)} <span style="font-size: 0.75rem; color: #ef4444; background: rgba(239, 68, 68, 0.1); padding: 0.2rem 0.5rem; border-radius: 12px; margin-left: 0.5rem;">${userStats.total_reports} Reports</span></h4>
-                        <div style="font-size: 0.8rem; color: rgba(255,255,255,0.5);">${escapeHTML(userStats.reported_user_email)}</div>
+                        <h4 style="margin: 0 0 0.2rem 0; color: var(--text-main);">${escapeHTML(userStats.reported_user_name)} <span style="font-size: 0.75rem; color: #ef4444; background: rgba(239, 68, 68, 0.1); padding: 0.2rem 0.5rem; border-radius: 12px; margin-left: 0.5rem;">${userStats.total_reports} Reports</span></h4>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">${escapeHTML(userStats.reported_user_email)}</div>
                     </div>
                     <div style="display: flex; gap: 0.5rem;">
                         <button onclick="warnUser(${userStats.reported_user_id})" class="btn btn-secondary btn-sm" style="font-size: 0.75rem;"><i class="fa-solid fa-triangle-exclamation"></i> Warn</button>
@@ -8799,11 +8799,11 @@ async function loadAdminReports() {
                 </div>
                 
                 <div style="background: rgba(0,0,0,0.3); border-radius: 6px; padding: 0.8rem; max-height: 200px; overflow-y: auto;">
-                    <h5 style="margin: 0 0 0.5rem 0; font-size: 0.8rem; color: rgba(255,255,255,0.6);">Report Details:</h5>
+                    <h5 style="margin: 0 0 0.5rem 0; font-size: 0.8rem; color: var(--text-muted);">Report Details:</h5>
                     ${userStats.reports.map(r => `
-                        <div style="font-size: 0.8rem; color: rgba(255,255,255,0.8); margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
                             <span style="color: #dfb15b;">[${escapeHTML(r.category)}]</span>: ${escapeHTML(r.reason || 'No reason provided')} 
-                            <br><span style="font-size: 0.7rem; color: rgba(255,255,255,0.4);">Reported by ${escapeHTML(r.reporter_name)} on ${new Date(r.created_at).toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                            <br><span style="font-size: 0.7rem; color: var(--text-muted);">Reported by ${escapeHTML(r.reporter_name)} on ${new Date(r.created_at).toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                         </div>
                     `).join('')}
                 </div>
