@@ -4018,7 +4018,7 @@ textarea:focus {
 .hero-stat-num {
     font-family: 'DM Serif Display', serif;
     font-size: 1.85rem;
-    color: #EFECE3;
+    color: var(--text-main);
     line-height: 1;
 }
 
@@ -4135,7 +4135,7 @@ textarea:focus {
 }
 
 .quick-stat-pill strong {
-    color: #EFECE3;
+    color: var(--text-main);
     font-weight: 700;
 }
 
@@ -4212,7 +4212,7 @@ textarea:focus {
 
 .quest-meta strong {
     font-size: 0.85rem;
-    color: #EFECE3;
+    color: var(--text-main);
     font-weight: 600;
 }
 
@@ -4326,7 +4326,7 @@ textarea:focus {
 .bia-toast-title {
     font-size: 0.85rem;
     font-weight: 700;
-    color: #EFECE3;
+    color: var(--text-main);
 }
 
 .bia-toast-msg {
@@ -4451,7 +4451,7 @@ textarea:focus {
     border: 1px solid rgba(255, 255, 255, 0.08);
     font-size: 0.65rem;
     font-weight: 700;
-    color: #EFECE3;
+    color: var(--text-main);
     letter-spacing: 0.05em;
     text-transform: uppercase;
 }
@@ -4477,7 +4477,7 @@ textarea:focus {
 .reward-card-title {
     font-size: 0.95rem;
     font-weight: 700;
-    color: #EFECE3;
+    color: var(--text-main);
     line-height: 1.3;
 }
 
@@ -4575,7 +4575,7 @@ textarea:focus {
 
 .modal-close-btn:hover {
     background: rgba(255, 255, 255, 0.07);
-    color: #EFECE3;
+    color: var(--text-main);
     border-color: rgba(255, 255, 255, 0.15);
 }
 
@@ -4602,7 +4602,7 @@ textarea:focus {
 .modal-header h3 {
     font-size: 1.2rem;
     font-weight: 700;
-    color: #EFECE3;
+    color: var(--text-main);
 }
 
 .redemption-summary-box {
@@ -4627,7 +4627,7 @@ textarea:focus {
 }
 
 .summary-row strong {
-    color: #EFECE3;
+    color: var(--text-main);
     font-weight: 600;
 }
 
@@ -4716,7 +4716,7 @@ textarea:focus {
 
 .btn-copy-code:hover {
     background: rgba(255, 255, 255, 0.08);
-    color: #EFECE3;
+    color: var(--text-main);
 }
 
 .voucher-instructions {
@@ -4893,14 +4893,14 @@ textarea:focus {
     font-family: 'Outfit', sans-serif;
     font-size: 1.2rem;
     font-weight: 700;
-    color: #EFECE3;
+    color: var(--text-main);
     margin-bottom: 0.8rem;
 }
 
 .hiw-step-card p {
     font-size: 0.85rem;
     line-height: 1.55;
-    color: rgba(239, 236, 227, 0.6);
+    color: var(--text-muted);
 }
 
 /* Moving coins path connectors in CSS */
@@ -5012,7 +5012,7 @@ textarea:focus {
 .event-card-title {
     font-family: 'DM Serif Display', serif;
     font-size: 1.7rem;
-    color: #EFECE3;
+    color: var(--text-main);
     margin-bottom: 0.6rem;
     line-height: 1.25;
 }
@@ -5086,7 +5086,7 @@ textarea:focus {
 .humor-card-title {
     font-family: 'DM Serif Display', serif;
     font-size: 1.8rem;
-    color: #EFECE3;
+    color: var(--text-main);
     margin-bottom: 0.8rem;
 }
 
@@ -5113,7 +5113,7 @@ textarea:focus {
 .admin-event-details h5 {
     font-size: 0.95rem;
     font-weight: 700;
-    color: #EFECE3;
+    color: var(--text-main);
     margin-bottom: 0.25rem;
 }
 
@@ -5433,7 +5433,7 @@ textarea:focus {
    ══════════════════════════════════════════ */
 .bia-footer-container {
     background-color: #050609; /* Matches landing deep velvet black */
-    color: #efece3;
+    color: var(--text-main);
     font-family: 'Outfit', sans-serif;
     width: 100%;
     margin: 0;
@@ -5514,7 +5514,7 @@ textarea:focus {
     padding: 0.7rem 0.95rem;
     font-size: 0.85rem;
     font-weight: 700;
-    color: rgba(239, 236, 227, 0.8);
+    color: var(--text-muted);
 }
 
 #sms-phone-input {
@@ -6459,8 +6459,6 @@ body:not(.dark-theme) .tiers-grid h3 {
     color: #1d1c16 !important;
 }
 
-body:not(.dark-theme) :not(.bia-footer-container) > p:not(.humor-card-desc),
-body:not(.dark-theme) :not(.bia-footer-container) > span:not(.humor-card-desc):not(.humor-badge),
 body:not(.dark-theme) .section-desc,
 body:not(.dark-theme) .logo-marquee-track span {
     color: #504f47 !important;
@@ -6473,7 +6471,7 @@ body:not(.dark-theme) .bia-footer-container h4,
 body:not(.dark-theme) .bia-footer-container p,
 body:not(.dark-theme) .bia-footer-container span,
 body:not(.dark-theme) .bia-footer-container a {
-    color: #efece3 !important;
+    color: var(--text-main); !important;
 }
 body:not(.dark-theme) .bia-footer-container .footer-col h4 {
     color: #ffffff !important;
