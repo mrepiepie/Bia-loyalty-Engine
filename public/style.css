@@ -4915,24 +4915,7 @@ textarea:focus {
     transform: translateY(-50%);
     pointer-events: none;
 }
-
-.hiw-connector-path::before {
-    content: '\f51e';
-    font-family: 'Font Awesome 6 Free';
-    font-weight: 900;
-    position: absolute;
-    left: 0;
-    top: -10px;
-    color: #ffb829;
-    font-size: 0.85rem;
-    animation: slideCoin 9s linear infinite;
-    text-shadow: 0 0 8px rgba(255, 184, 41, 0.5);
-}
-
-@keyframes slideCoin {
-    0% { left: 0%; transform: rotate(0deg); }
-    100% { left: 100%; transform: rotate(360deg); }
-}
+/* Moving coins path connectors removed for minimalism */
 
 @media (max-width: 768px) {
     .hiw-connector-path {
