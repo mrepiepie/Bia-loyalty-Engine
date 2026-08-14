@@ -2366,6 +2366,7 @@ document.querySelectorAll('.nav-tab').forEach(btn => {
         const target = btn.dataset.target;
         if (target === 'admin-engagement') loadEngagementReport();
         if (target === 'admin-announcements') { loadAnnouncements(); }
+        if (target === 'admin-mailing-list') loadNewsletterSubscribersAdmin();
         if (target === 'admin-vouchers-mgmt') loadAdminVoucherReport();
         if (target === 'admin-students') loadProgrammeOverview();
         if (target === 'overview') loadStudentAnnouncements();
