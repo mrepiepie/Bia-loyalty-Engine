@@ -9138,3 +9138,51 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+// Footer 3D Card GSAP Interactive
+document.addEventListener('DOMContentLoaded', () => {
+    const footerCard = document.getElementById('footer-3d-card');
+    const footerGlare = document.getElementById('footer-card-glare');
+    if (footerCard && footerGlare && window.gsap) {
+        footerCard.addEventListener('mousemove', (e) => {
+            const rect = footerCard.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            const rotateX = ((y - centerY) / centerY) * -15; // Max 15 deg tilt
+            const rotateY = ((x - centerX) / centerX) * 15;
+            
+            gsap.to(footerCard, {
+                rotationX: rotateX,
+                rotationY: rotateY,
+                duration: 0.5,
+                ease: "power2.out"
+            });
+            
+            // Move glare tracking mouse
+            gsap.to(footerGlare, {
+                x: x - rect.width,
+                y: y - rect.height,
+                opacity: 1,
+                duration: 0.5,
+                ease: "power2.out"
+            });
+        });
+        
+        footerCard.addEventListener('mouseleave', () => {
+            gsap.to(footerCard, {
+                rotationX: 0,
+                rotationY: 0,
+                duration: 0.8,
+                ease: "elastic.out(1, 0.3)"
+            });
+            gsap.to(footerGlare, {
+                opacity: 0,
+                duration: 0.5
+            });
+        });
+    }
+});
