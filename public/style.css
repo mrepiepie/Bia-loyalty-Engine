@@ -7518,3 +7518,34 @@ body:not(.dark-theme) input#promo-redeem-code::placeholder {
 body:not(.dark-theme) .btn-primary {
     color: #ffffff !important;
 }
+
+/* ========================================================= */
+/* EXTENDED LIGHT MODE TEXT VISIBILITY HOTFIXES              */
+/* ========================================================= */
+body:not(.dark-theme) .form-group label,
+body:not(.dark-theme) .modal-content h2,
+body:not(.dark-theme) .modal-content h3,
+body:not(.dark-theme) .modal-content h4,
+body:not(.dark-theme) .modal-content p,
+body:not(.dark-theme) .stat-value,
+body:not(.dark-theme) .activity-details p strong {
+    color: var(--text-main) !important;
+}
+
+body:not(.dark-theme) .form-group input,
+body:not(.dark-theme) .form-group select,
+body:not(.dark-theme) .form-group textarea,
+body:not(.dark-theme) .admin-content-area textarea,
+body:not(.dark-theme) .admin-content-area input[type='text'],
+body:not(.dark-theme) .admin-content-area input[type='number'] {
+    background: #f0f0f0 !important;
+    color: var(--text-main) !important;
+    border: 1px solid #d1d1d1 !important;
+}
+
+body:not(.dark-theme) .form-group input::placeholder,
+body:not(.dark-theme) .form-group textarea::placeholder,
+body:not(.dark-theme) .admin-content-area input::placeholder,
+body:not(.dark-theme) .admin-content-area textarea::placeholder {
+    color: rgba(0, 0, 0, 0.4) !important;
+}
