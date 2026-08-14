@@ -480,7 +480,7 @@ async function initializeDatabase() {
         }
 
         const defaultSettings = [
-            ['point_aed_value', '0.25', 'Cash equivalent value of 1 point in AED'],
+            ['point_aed_value', '0.10', 'Cash equivalent value of 1 point in AED'],
             ['first_referral_points', '1000', 'Points awarded for the first successful referral'],
             ['subsequent_referral_points', '250', 'Points awarded for referrals after the first one'],
             ['new_joiner_points', '200', 'Welcome points awarded to the referred student'],

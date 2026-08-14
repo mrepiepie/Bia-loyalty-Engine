@@ -5010,7 +5010,7 @@ window.showStudentDetailModal = async function(userId) {
 
     // Wallet details
     document.getElementById('sd-points-balance').textContent = `${formatNumber(student.points_balance)} pts`;
-    const val = student.points_balance * (appState.settings.point_aed_value || 0.25);
+    const val = student.points_balance * (appState.settings.point_aed_value || 0.10);
     document.getElementById('sd-points-value').textContent = `AED ${formatNumber(val)}`;
 
     // Tier Multiplier
@@ -7318,7 +7318,7 @@ window.loadAdminMetrics = async function() {
         const revEl = document.getElementById('metric-revenue-estimate');
 
         if (liabilityEl) liabilityEl.textContent = `${formatNumber(data.points_liability)} pts`;
-        if (redeemedEl) redeemedEl.textContent = `AED ${formatNumber(data.points_redeemed * (appState.settings.point_aed_value || 0.25))}`;
+        if (redeemedEl) redeemedEl.textContent = `AED ${formatNumber(data.points_redeemed * (appState.settings.point_aed_value || 0.10))}`;
         if (convEl) convEl.textContent = data.conversion_rate;
         if (revEl) revEl.textContent = `AED ${formatNumber(data.estimated_revenue_aed)} est. revenue`;
     } catch (err) {
