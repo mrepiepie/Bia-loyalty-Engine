@@ -1016,6 +1016,7 @@
                 
                 <!-- Admin Navigation -->
                 <button class="nav-tab admin-only" data-target="admin-faqs" style="color: #dfb15b;"><i class="fa-solid fa-circle-question"></i> FAQs (Inbox)</button>
+                <button class="nav-tab admin-only" data-target="admin-mailing-list"><i class="fa-solid fa-envelope" style="color: #dfb15b;"></i> Mailing List</button>
                 <button class="nav-tab admin-only" data-target="admin-students"><i class="fa-solid fa-users"></i> Students Directory</button>
                 <button class="nav-tab admin-only" data-target="admin-settings"><i class="fa-solid fa-sliders"></i> Database Rules</button>
                 <button class="nav-tab admin-only" data-target="admin-referrals-mgmt"><i class="fa-solid fa-user-plus" style="color: #dfb15b;"></i> Referrals Mgmt</button>
@@ -1524,6 +1525,28 @@
                     <div class="vouchers-grid-list" id="student-vouchers-list">
                         <!-- Injected dynamically via app.js -->
                         <p class="no-data">Loading vouchers...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="admin-mailing-list" class="tab-content admin-only">
+                <div class="content-header">
+                    <h2>Mailing List Subscribers</h2>
+                    <p style="font-size: 0.8rem; color: var(--text-muted);">Users who subscribed via the footer newsletter form.</p>
+                </div>
+                <div class="content-body" style="padding-top: 1rem;">
+                    <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden;">
+                        <table class="bia-table" style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr>
+                                    <th style="padding: 1rem; text-align: left; font-size: 0.75rem; color: var(--text-muted); border-bottom: 1px solid var(--border-color);">EMAIL</th>
+                                    <th style="padding: 1rem; text-align: left; font-size: 0.75rem; color: var(--text-muted); border-bottom: 1px solid var(--border-color);">DATE SUBSCRIBED</th>
+                                </tr>
+                            </thead>
+                            <tbody id="mailing-list-tbody">
+                                <!-- Injected via JS -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>

@@ -139,6 +139,8 @@ document.querySelectorAll('.nav-tab').forEach(btn => {
             window.loadAdminMetrics();
         } else if (targetId === 'admin-referrals-mgmt') {
             window.loadAdminReferrals();
+        } else if (targetId === 'admin-mailing-list') {
+            loadNewsletterSubscribersAdmin();
         } else if (targetId === 'admin-students') {
             loadAdminStudents();
         } else if (targetId === 'admin-ledger') {
@@ -4972,14 +4974,73 @@ const setupFooterListeners = () => {
 
     const newsletterForm = document.getElementById('footer-newsletter-form');
     if (newsletterForm) {
-        newsletterForm.addEventListener('submit', (e) => {
+        newsletterForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('newsletter-email-input').value.trim();
-            showToast('Subscribed! ', `You have successfully joined the BIA Loyalty mailing list.`, 'success');
-            newsletterForm.reset();
+            if (!email) return;
+            
+            const btn = newsletterForm.querySelector('button[type="submit"]');
+            const originalText = btn.textContent;
+            btn.textContent = '...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/newsletter/subscribe', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                
+                if (res.ok) {
+                    showToast('Subscribed!', `You have successfully joined the BIA Loyalty mailing list.`, 'success');
+                    newsletterForm.reset();
+                } else {
+                    showToast('Error', 'Could not subscribe. Please try again.', 'error');
+                }
+            } catch (err) {
+                showToast('Error', 'Network error. Please try again.', 'error');
+            } finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
         });
     }
 };
+
+// 
+// NEWSLETTER ADMIN
+//
+async function loadNewsletterSubscribersAdmin() {
+    try {
+        const res = await fetch('/api/admin/newsletter-subscribers', {
+            headers: { 'Authorization': `Bearer ${appState.token}` }
+        });
+        if (!res.ok) throw new Error('Failed to load subscribers');
+        const data = await res.json();
+        
+        const tbody = document.getElementById('mailing-list-tbody');
+        if (!tbody) return;
+        
+        if (data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="2" style="padding: 2rem; text-align: center; color: var(--text-muted); font-size: 0.85rem;">No subscribers yet.</td></tr>`;
+            return;
+        }
+        
+        tbody.innerHTML = data.map(sub => `
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.03);">
+                <td style="padding: 1rem; font-size: 0.85rem; color: var(--text-main); font-weight: 500;">
+                    <i class="fa-solid fa-envelope" style="color: #dfb15b; margin-right: 0.5rem; font-size: 0.75rem;"></i>
+                    ${escapeHTML(sub.email)}
+                </td>
+                <td style="padding: 1rem; font-size: 0.8rem; color: var(--text-muted);">
+                    ${new Date(sub.subscribed_at).toLocaleString()}
+                </td>
+            </tr>
+        `).join('');
+    } catch (err) {
+        console.error('Error loading subscribers:', err);
+    }
+}
 
 // 
 // STUDENT SPOTLIGHT DETAIL SYSTEM & ADMIN CONTROLS

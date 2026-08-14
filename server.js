@@ -463,6 +463,12 @@ async function initializeDatabase() {
             FOREIGN KEY (admin_id) REFERENCES users(user_id)
         )`);
 
+        await runQuery(`CREATE TABLE IF NOT EXISTS newsletter_subscribers (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT UNIQUE NOT NULL,
+            subscribed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )`);
+
         // Seed partners from partners.json if table is empty
         const { count: partnerCount } = await getQuery(`SELECT COUNT(*) as count FROM partners`);
         if (partnerCount === 0 && fs.existsSync(PARTNERS_FILE)) {
@@ -3096,6 +3102,35 @@ app.get('/api/test-posts', async (req, res) => {
         res.json({ success: true, posts, stats });
     } catch (e) {
         res.status(500).json({ error: e.message });
+    }
+});
+
+// -------------------------------------------------------------
+// NEWSLETTER API
+// -------------------------------------------------------------
+
+// Public endpoint to subscribe
+app.post('/api/newsletter/subscribe', async (req, res) => {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'Email is required' });
+    try {
+        await runQuery('INSERT INTO newsletter_subscribers (email) VALUES (?)', [email]);
+        res.json({ message: 'Subscribed successfully' });
+    } catch (err) {
+        if (err.message.includes('UNIQUE constraint failed')) {
+            return res.json({ message: 'Already subscribed' }); // Pretend success for privacy
+        }
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+// Admin endpoint to view subscribers
+app.get('/api/admin/newsletter-subscribers', authenticateToken, requireAdmin, async (req, res) => {
+    try {
+        const rows = await runQuery('SELECT * FROM newsletter_subscribers ORDER BY subscribed_at DESC');
+        res.json(rows);
+    } catch (err) {
+        res.status(500).json({ error: 'Database error' });
     }
 });
 
