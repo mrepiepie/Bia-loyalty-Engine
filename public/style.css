@@ -7477,3 +7477,44 @@ body:not(.dark-theme) .team-member-item .member-num {
     color: #000000 !important; /* Highly contrasting black number for light mode */
 }
 
+
+/* ========================================================= */
+/* LIGHT MODE TEXT VISIBILITY HOTFIXES                       */
+/* ========================================================= */
+
+body:not(.dark-theme) .section-desc,
+body:not(.dark-theme) .widget-desc,
+body:not(.dark-theme) .streak-label {
+    color: var(--text-muted) !important;
+}
+
+body:not(.dark-theme) .streak-value {
+    color: #b57a00 !important; /* Darker gold for light mode */
+}
+
+body:not(.dark-theme) .settings-input-group label,
+body:not(.dark-theme) .settings-input-group p,
+body:not(.dark-theme) .student-widget-card h3,
+body:not(.dark-theme) .student-widget-card h4,
+body:not(.dark-theme) .admin-content-area h3,
+body:not(.dark-theme) .admin-content-area h4 {
+    color: var(--text-main) !important;
+}
+
+body:not(.dark-theme) .settings-input-group input,
+body:not(.dark-theme) input#promo-redeem-code {
+    background: #f0f0f0 !important;
+    color: var(--text-main) !important;
+    border: 1px solid #d1d1d1 !important;
+}
+
+body:not(.dark-theme) input::placeholder,
+body:not(.dark-theme) .settings-input-group input::placeholder,
+body:not(.dark-theme) input#promo-redeem-code::placeholder {
+    color: rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Force btn-primary text to pure white in light mode */
+body:not(.dark-theme) .btn-primary {
+    color: #ffffff !important;
+}
