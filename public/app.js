@@ -5043,6 +5043,48 @@ async function loadNewsletterSubscribersAdmin() {
     }
 }
 
+// Attach listener to broadcast form
+document.addEventListener('DOMContentLoaded', () => {
+    const broadcastForm = document.getElementById('admin-broadcast-form');
+    if (broadcastForm) {
+        broadcastForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const subject = document.getElementById('broadcast-subject').value.trim();
+            const message = document.getElementById('broadcast-message').value.trim();
+            if (!subject || !message) return;
+            
+            const btn = broadcastForm.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="margin-right: 0.5rem;"></i> Sending...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/admin/newsletter-broadcast', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${appState.token}`
+                    },
+                    body: JSON.stringify({ subject, message })
+                });
+                
+                const data = await res.json();
+                if (res.ok) {
+                    showToast('Broadcast Sent!', `Message successfully sent to ${data.recipients} subscribers.`, 'success');
+                    broadcastForm.reset();
+                } else {
+                    showToast('Broadcast Failed', data.error || 'Please try again.', 'error');
+                }
+            } catch (err) {
+                showToast('Error', 'Network error while broadcasting.', 'error');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        });
+    }
+});
+
 // 
 // STUDENT SPOTLIGHT DETAIL SYSTEM & ADMIN CONTROLS
 // 

@@ -469,6 +469,14 @@ async function initializeDatabase() {
             subscribed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
 
+        await runQuery(`CREATE TABLE IF NOT EXISTS broadcast_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            subject TEXT NOT NULL,
+            message TEXT NOT NULL,
+            recipients_count INTEGER NOT NULL,
+            sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )`);
+
         // Seed partners from partners.json if table is empty
         const { count: partnerCount } = await getQuery(`SELECT COUNT(*) as count FROM partners`);
         if (partnerCount === 0 && fs.existsSync(PARTNERS_FILE)) {
@@ -3131,6 +3139,32 @@ app.get('/api/admin/newsletter-subscribers', requireAdmin, async (req, res) => {
         res.json(rows);
     } catch (err) {
         res.status(500).json({ error: 'Database error' });
+    }
+});
+
+// Admin endpoint to broadcast email to subscribers
+app.post('/api/admin/newsletter-broadcast', requireAdmin, async (req, res) => {
+    const { subject, message } = req.body;
+    if (!subject || !message) return res.status(400).json({ error: 'Subject and message are required' });
+
+    try {
+        const subscribers = await runQuery('SELECT email FROM newsletter_subscribers');
+        if (subscribers.length === 0) {
+            return res.status(400).json({ error: 'No subscribers found in the mailing list' });
+        }
+
+        // SIMULATION: In a production environment, this is where you would hook up nodemailer, SendGrid, etc.
+        // For example: await sendGrid.sendMultiple({ to: subscribers.map(s => s.email), from: '...', subject, text: message })
+        
+        console.log(`[BROADCAST SIMULATION] Sending to ${subscribers.length} recipients...`);
+        console.log(`[BROADCAST SIMULATION] Subject: ${subject}`);
+        console.log(`[BROADCAST SIMULATION] Message: ${message}`);
+
+        await runQuery('INSERT INTO broadcast_history (subject, message, recipients_count) VALUES (?, ?, ?)', [subject, message, subscribers.length]);
+        
+        res.json({ message: 'Broadcast sent successfully', recipients: subscribers.length });
+    } catch (err) {
+        res.status(500).json({ error: 'Database error while broadcasting' });
     }
 });
 
