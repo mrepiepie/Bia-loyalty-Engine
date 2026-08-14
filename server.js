@@ -3125,7 +3125,7 @@ app.post('/api/newsletter/subscribe', async (req, res) => {
 });
 
 // Admin endpoint to view subscribers
-app.get('/api/admin/newsletter-subscribers', authenticateToken, requireAdmin, async (req, res) => {
+app.get('/api/admin/newsletter-subscribers', requireAdmin, async (req, res) => {
     try {
         const rows = await runQuery('SELECT * FROM newsletter_subscribers ORDER BY subscribed_at DESC');
         res.json(rows);
