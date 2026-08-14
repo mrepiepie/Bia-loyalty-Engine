@@ -1739,8 +1739,10 @@ app.post('/api/referrals/:id/verify-payment', async (req, res) => {
         const user = userRes.rows[0];
         const newRefCount = user.referral_count + 1;
 
-        const referralPoints = newRefCount === 1 ? settings.first_referral_points : settings.subsequent_referral_points;
-        const totalAwarded = referralPoints + (isPremium ? settings.premium_program_bonus : 0);
+        const refPointsStr = newRefCount === 1 ? settings.first_referral_points : settings.subsequent_referral_points;
+        const referralPoints = parseInt(refPointsStr) || 0;
+        const premiumBonus = isPremium ? (parseInt(settings.premium_program_bonus) || 0) : 0;
+        const totalAwarded = referralPoints + premiumBonus;
 
         const expiry = new Date();
         expiry.setFullYear(expiry.getFullYear() + 4);
@@ -1788,9 +1790,9 @@ app.post('/api/lms/complete-course', async (req, res) => {
         if (!user) return res.status(404).json({ error: 'User not found' });
 
         let multiplier = 1.0;
-        if (user.current_tier === 'Silver') multiplier = settings.silver_multiplier;
-        else if (user.current_tier === 'Gold') multiplier = settings.gold_multiplier;
-        else if (user.current_tier === 'Platinum') multiplier = settings.platinum_multiplier;
+        if (user.current_tier === 'Silver') multiplier = parseFloat(settings.silver_multiplier || "1.1");
+        else if (user.current_tier === 'Gold') multiplier = parseFloat(settings.gold_multiplier || "1.2");
+        else if (user.current_tier === 'Platinum') multiplier = parseFloat(settings.platinum_multiplier || "1.3");
 
         const totalEarned = Math.round(base_points * multiplier);
         const expiry = new Date();
@@ -1813,16 +1815,16 @@ app.post('/api/redeem/calculate', async (req, res) => {
         const user = await getQuery(`SELECT * FROM users WHERE user_id = ?`, [user_id]);
         if (!user) return res.status(404).json({ error: 'User not found' });
 
-        let cap = settings.bronze_cap;
-        if (user.current_tier === 'Silver') cap = settings.silver_cap;
-        else if (user.current_tier === 'Gold') cap = settings.gold_cap;
-        else if (user.current_tier === 'Platinum') cap = settings.platinum_cap;
+        let cap = parseFloat(settings.bronze_cap || "0.02");
+        if (user.current_tier === 'Silver') cap = parseFloat(settings.silver_cap || "0.03");
+        else if (user.current_tier === 'Gold') cap = parseFloat(settings.gold_cap || "0.04");
+        else if (user.current_tier === 'Platinum') cap = parseFloat(settings.platinum_cap || "0.05");
 
         const maxDiscountAED = course_fee * cap;
-        const maxPointsRedeemable = Math.floor(maxDiscountAED / settings.point_aed_value);
-        const pointsApplied = Math.min(points_requested, user.points_balance, maxPointsRedeemable);
-
-        const discountAED = pointsApplied * settings.point_aed_value;
+        const pointAedValue = parseFloat(settings.point_aed_value || "0.05");
+        const maxPointsRedeemable = Math.floor(maxDiscountAED / pointAedValue);
+        const pointsApplied = Math.min(points_requested, user.points_balance || 0, maxPointsRedeemable);
+        const discountAED = pointsApplied * pointAedValue;
         res.json({
             cap_percent: cap * 100,
             max_discount_aed: maxDiscountAED,
@@ -2235,7 +2237,7 @@ app.post('/api/events/claim', async (req, res) => {
 
         // 3. Award points & record claim
         const settings = await getSettings();
-        const validityMonths = settings.points_validity_months || 12;
+        const validityMonths = parseInt(settings.points_validity_months) || 12;
         const expiresAt = new Date();
         expiresAt.setMonth(expiresAt.getMonth() + validityMonths);
 
@@ -2476,7 +2478,7 @@ app.post('/api/promos/redeem', async (req, res) => {
         if (existingClaim) return res.status(400).json({ error: 'You have already redeemed this promo code!' });
 
         const settings = await getSettings();
-        const validityMonths = settings.points_validity_months || 12;
+        const validityMonths = parseInt(settings.points_validity_months) || 12;
         const expiresAt = new Date();
         expiresAt.setMonth(expiresAt.getMonth() + validityMonths);
 
