@@ -1122,9 +1122,10 @@ body.login-modal-active #pixel-grid-canvas {
 /* Login Split Grid layout resembling two side-by-side boxes */
 .login-split-grid {
     display: grid;
-    grid-template-columns: 1.05fr 0.95fr;
+    grid-template-columns: 1fr;
+    margin: 0 auto;
     gap: 1.5rem;
-    max-width: 860px;
+    max-width: 440px;
     width: 100%;
     position: relative;
     z-index: 10005;
