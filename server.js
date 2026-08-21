@@ -2237,7 +2237,7 @@ app.post('/api/events/claim', async (req, res) => {
 
         // 3. Award points & record claim
         const settings = await getSettings();
-        const validityMonths = parseInt(settings.points_validity_months) || 12;
+        const validityMonths = parseInt(settings.points_validity_months) || 6;
         const expiresAt = new Date();
         expiresAt.setMonth(expiresAt.getMonth() + validityMonths);
 
@@ -2478,7 +2478,7 @@ app.post('/api/promos/redeem', async (req, res) => {
         if (existingClaim) return res.status(400).json({ error: 'You have already redeemed this promo code!' });
 
         const settings = await getSettings();
-        const validityMonths = parseInt(settings.points_validity_months) || 12;
+        const validityMonths = parseInt(settings.points_validity_months) || 6;
         const expiresAt = new Date();
         expiresAt.setMonth(expiresAt.getMonth() + validityMonths);
 
