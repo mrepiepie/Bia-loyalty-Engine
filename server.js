@@ -1472,16 +1472,29 @@ app.get('/api/admin/system/metrics', async (req, res) => {
 app.post('/api/admin/system/reset-db', async (req, res) => {
     try {
         const tables = [
-            'settings',
-            'users',
-            'announcements',
-            'referrals',
-            'points_ledger',
-            'campus_events',
-            'tuition_vouchers',
-            'executive_leads',
+            'broadcast_history',
+            'newsletter_subscribers',
+            'user_warnings',
+            'community_reports',
+            'community_votes',
+            'community_comments',
+            'community_posts',
+            'partners',
+            'ip_blacklist',
+            'faq_submissions',
             'traffic_logs',
-            'ip_blacklist'
+            'executive_leads',
+            'tuition_vouchers',
+            'promo_claims',
+            'promo_codes',
+            'event_claims',
+            'campus_events',
+            'points_ledger',
+            'password_resets',
+            'referrals',
+            'announcements',
+            'users',
+            'settings'
         ];
 
         for (const table of tables) {
