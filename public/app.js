@@ -3699,10 +3699,14 @@ async function loadDynamicPartners() {
         appPartners = data;
 
         const grid = document.getElementById('landing-partners-grid');
+        const section = document.getElementById('partners-network');
+        
         if (grid) {
             if (!data || data.length === 0) {
-                grid.innerHTML = '<div style="text-align: center; color: var(--text-muted); grid-column: 1 / -1; padding: 2rem;">No partners available at the moment.</div>';
+                if (section) section.style.display = 'none';
                 return;
+            } else {
+                if (section) section.style.display = 'block';
             }
             
             // Clean, theme-aware static CSS with elegant image zoom (No ugly popouts!)
